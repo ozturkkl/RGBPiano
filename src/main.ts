@@ -1,16 +1,10 @@
 import { connect } from "./util/connection";
+import WebSocket from "ws";
 
 (async () => {
-  const ws = await connect();
-  // console.log(ws);
+  const ws = (await connect()) as WebSocket.WebSocket;
 
-  //   ws.on("message", (message) => {
-  //     console.log(`Message received: ${message}`);
-  //   });
-
-  //   ws.on("close", () => {
-  //     console.log("Disconnected");
-  //   });
-
-  //   ws.send("Hello, world!");
+  ws.on("message", (message) => {
+    console.log(`Message received: ${message}`);
+  });
 })();
