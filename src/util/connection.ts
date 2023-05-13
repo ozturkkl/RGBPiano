@@ -23,6 +23,10 @@ export async function connect() {
         console.log("Connected");
       });
 
+      ws.on("midi", (message: any) => {
+        console.log(`Message received: ${message}`);
+      });
+
       return ws;
     } else {
       console.error(`No WebSocket servers with port ${PORT} found, creating one...`);
@@ -44,6 +48,10 @@ function createWebSocketServer() {
   wss.on("connection", (ws) => {
     console.log("Client connected");
   });
+
+  setInterval(() => {
+    wss.emit("midi", { message: "Hello, world!" });
+  }, 1000);
 
   // Advertise the WebSocket server via SSDP
   const ssdpServer = new ssdp.Server({

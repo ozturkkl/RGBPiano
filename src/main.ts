@@ -2,13 +2,14 @@ import { connect } from "./util/connection";
 import WebSocket from "ws";
 
 (async () => {
-  const ws = (await connect()) as WebSocket.WebSocket;
+  const ws = await connect();
 
-  ws.on("midi", (message) => {
-    console.log(`Message received: ${message}`);
-  });
+  // ws.on("midi", (message: any) => {
+  //   console.log(`Message received: ${message}`);
+  // });
 
   // setInterval(() => {
-  //   ws.emit("midi", "Hello, world!");
+  //   console.log("Sending message");
+  //   ws.emit("midi", { message: "Hello, world!" });
   // }, 1000);
 })();
