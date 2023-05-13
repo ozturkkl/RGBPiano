@@ -24,12 +24,12 @@
   "homepage": "https://github.com/ozturkkl/RGBPiano#readme",
   "dependencies": {
     "node-ssdp": "^4.0.1",
-    "upnp-device-client": "^1.0.2",
     "ws": "^8.13.0"
   },
   "devDependencies": {
     "@types/node-ssdp": "^4.0.1",
     "@types/ws": "^8.5.4",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
   }
 }

@@ -1,23 +1,21 @@
-import * as WebSocket from "ws";
-import * as ssdp from "node-ssdp";
-import { searchDevices } from "./ssdpSearch";
-import {PORT} from "../config";
+import WebSocket from "ws";
+import ssdp from "node-ssdp";
+import { PORT } from "../config";
 
 export async function connect() {
   try {
-    const devices = await searchDevices("urn:schemas-upnp-org:service:WebSocket:1");
+    const devices = await searchDevices(
+      "urn:schemas-upnp-org:service:WebSocket:1"
+    );
     console.log(`Found ${devices.length} WebSocket servers`);
-    console.log(`Devices: ${JSON.stringify(devices, null, 2)}`);
 
     // Find the first device that has a WebSocket service with the correct port
     const device = devices.find((device: any) => {
-      return device.services?.WebSocket?.controlUrl?.port === PORT;
+      return device.LOCATION.includes(`:${PORT}/`);
     });
 
     if (device) {
-      console.log(`Connecting to ${device.friendlyName}`);
-      const service = device.services.WebSocket;
-      const url = `ws://${device.host}:${service.controlUrl.port}${service.controlUrl.path}`;
+      const url = `ws://${device.LOCATION.split("//")[1]}`;
       console.log(`Connecting to ${url}`);
       const ws = new WebSocket(url);
 
@@ -27,7 +25,7 @@ export async function connect() {
 
       return ws;
     } else {
-      console.error("No WebSocket servers found, creating one...");
+      console.error(`No WebSocket servers with port ${PORT} found, creating one...`);
 
       // If no WebSocket servers were found, create one
       return createWebSocketServer();
@@ -60,4 +58,22 @@ function createWebSocketServer() {
   console.log("WebSocket server created");
 
   return wss;
+}
+
+function searchDevices(searchTarget: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const client = new ssdp.Client();
+    const devices: any[] = [];
+
+    client.on("response", (headers: any) => {
+      devices.push(headers);
+    });
+
+    client.search(searchTarget);
+
+    setTimeout(() => {
+      client.stop();
+      resolve(devices);
+    }, 1000);
+  });
 }
