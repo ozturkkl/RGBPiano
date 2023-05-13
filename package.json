@@ -1,0 +1,35 @@
+{
+  "name": "rgbpiano",
+  "version": "1.0.0",
+  "description": "Piano RGB LED controller. Will light up LED strip when keys are pressed.",
+  "scripts": {
+    "start": "ts-node src/main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ozturkkl/RGBPiano.git"
+  },
+  "keywords": [
+    "piano",
+    "rgb",
+    "led",
+    "controller",
+    "addressible"
+  ],
+  "author": "Kemal Ozturk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ozturkkl/RGBPiano/issues"
+  },
+  "homepage": "https://github.com/ozturkkl/RGBPiano#readme",
+  "dependencies": {
+    "node-ssdp": "^4.0.1",
+    "upnp-device-client": "^1.0.2",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node-ssdp": "^4.0.1",
+    "@types/ws": "^8.5.4",
+    "ts-node": "^10.9.1"
+  }
+}
