@@ -5,7 +5,8 @@ import { Connection } from "./util/websocket";
   await connection.connect();
 
   try {
-    const midi = new (await import("./util/midi")).Midi(connection);
+    const midiModule = await import("./util/midi");
+    const midi = new midiModule.Midi(connection);
     await midi.openInput();
   } catch (e) {
     console.error("Failed to open midi input:", e);
