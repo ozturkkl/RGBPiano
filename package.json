@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Piano RGB LED controller. Will light up LED strip when keys are pressed.",
   "scripts": {
-    "start": "ts-node src/main.ts"
+    "start": "node dist/main.js",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
