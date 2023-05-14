@@ -14,30 +14,70 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Midi = void 0;
 const midi_1 = __importDefault(require("@julusian/midi"));
+const readline_1 = __importDefault(require("readline"));
 class Midi {
     constructor(connection) {
         this.devices = [];
-        this.input = null;
-        this.output = null;
-        this.setup();
-        // this.devices = this.getDevices();
-        // this.input.on("message", (deltaTime, message) => {
-        //   connection.send({
-        //     type: "midi",
-        //     data: {
-        //       deltaTime,
-        //       message,
-        //     },
-        //   });
-        // });
+        this.input = new midi_1.default.Input();
+        this.output = new midi_1.default.Output();
+        this.devices = this.getDevices();
+        this.input.on("message", (deltaTime, message) => {
+            connection.send({
+                type: "midi",
+                data: {
+                    deltaTime,
+                    message,
+                },
+            });
+        });
     }
-    setup() {
+    getDevices() {
+        const devices = [];
+        for (let i = 0; i < this.input.getPortCount(); i++) {
+            devices.push(this.input.getPortName(i));
+        }
+        return devices;
+    }
+    openInput(device) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                this.input = new midi_1.default.Input();
+            if (device) {
+                this.getDevices().forEach((d, i) => {
+                    if (d === device) {
+                        try {
+                            if (this.input.isPortOpen())
+                                this.input.closePort();
+                            this.input.openPort(i);
+                            console.log(`Opened port ${d}`);
+                        }
+                        catch (e) {
+                            console.error(`Failed to open port ${d}: ${e}`);
+                        }
+                    }
+                });
             }
-            catch (e) {
-                console.log(e);
+            else {
+                const rl = readline_1.default.createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                });
+                const devices = this.getDevices();
+                console.log("Available devices:");
+                devices.forEach((d, i) => {
+                    console.log(`${i}: ${d}`);
+                });
+                console.log("Which device would you like to use?");
+                const answer = yield new Promise((resolve) => {
+                    rl.question("Device: ", (answer) => {
+                        resolve(answer);
+                    });
+                });
+                rl.close();
+                try {
+                    this.openInput(devices[parseInt(answer)]);
+                }
+                catch (e) {
+                    console.error(`Failed to open port ${this.devices[parseInt(answer)]}: ${e}`);
+                }
             }
         });
     }
