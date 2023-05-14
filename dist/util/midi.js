@@ -15,16 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Midi = void 0;
 const midi_1 = __importDefault(require("@julusian/midi"));
 const readline_1 = __importDefault(require("readline"));
-const child_process_1 = require("child_process");
 class Midi {
     constructor(connection) {
         this.devices = [];
-        console.log("midi constructor");
-        const armv6l = (0, child_process_1.execSync)("uname -a").toString().includes("armv6l");
-        console.log("armv6l", armv6l);
-        if (armv6l) {
-            throw new Error("Midi is not supported on armv6l");
-        }
         this.input = new midi_1.default.Input();
         this.output = new midi_1.default.Output();
         this.devices = this.getDevices();
