@@ -15,7 +15,7 @@ export class Connection {
     this.delinquentServerCloseTimeout = null;
   }
 
-  async connect(type?: "client" | "server") {
+  async connect() {
     if (this.connectingPromise) {
       return await this.connectingPromise;
     }
@@ -25,11 +25,9 @@ export class Connection {
       this.server = null;
 
       try {
-        const device =
-          type !== "server" &&
-          (await this.searchForServer(
-            "urn:schemas-upnp-org:service:WebSocket:1"
-          ));
+        const device = await this.searchForServer(
+          "urn:schemas-upnp-org:service:WebSocket:1"
+        );
 
         if (device) {
           const url = `ws://${device.LOCATION.split("//")[1]}`;
@@ -49,21 +47,9 @@ export class Connection {
           });
 
           ws.on("close", async () => {
-            console.log("Connection closed, trying to reconnect...");
+            console.log("Client closed");
             resolve();
-            this.connect("client");
           });
-          return;
-        }
-
-        if (type === "client") {
-          console.log(
-            `No WebSocket servers with port ${PORT} found, retrying...`
-          );
-
-          // If no WebSocket servers were found, try again
-          resolve();
-          await this.connect("client");
           return;
         }
 
@@ -143,7 +129,7 @@ export class Connection {
 
       this.server.on("close", async () => {
         console.log("WebSocket server closed, trying to reconnect...");
-        await this.connect("server");
+        await this.connect();
         this.listen(callback);
       });
     } else if (this.client) {
