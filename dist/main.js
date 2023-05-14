@@ -32,13 +32,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const websocket_1 = require("./util/websocket");
-process.on("unhandledRejection", (reason, promise) => {
+process.on("uncaughtException", (reason, promise) => {
     console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    const connection = new websocket_1.Connection();
-    yield connection.connect();
+    // const connection = new Connection();
+    // await connection.connect();
     try {
         const midiModule = yield Promise.resolve().then(() => __importStar(require("./util/midi")));
         // const midi = new midiModule.Midi(connection);
@@ -47,7 +46,7 @@ process.on("unhandledRejection", (reason, promise) => {
     catch (e) {
         console.error("Failed to open midi input:", e);
     }
-    connection.listen((message) => {
-        console.log(message);
-    });
+    // connection.listen((message) => {
+    //   console.log(message);
+    // });
 }))();

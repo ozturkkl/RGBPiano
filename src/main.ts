@@ -1,12 +1,12 @@
 import { Connection } from "./util/websocket";
 
-process.on("unhandledRejection", (reason, promise) => {
+process.on("uncaughtException", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
 (async () => {
-  const connection = new Connection();
-  await connection.connect();
+  // const connection = new Connection();
+  // await connection.connect();
 
   try {
     const midiModule = await import("./util/midi");
@@ -16,7 +16,7 @@ process.on("unhandledRejection", (reason, promise) => {
     console.error("Failed to open midi input:", e);
   }
 
-  connection.listen((message) => {
-    console.log(message);
-  });
+  // connection.listen((message) => {
+  //   console.log(message);
+  // });
 })();
