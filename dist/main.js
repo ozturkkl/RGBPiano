@@ -37,7 +37,11 @@ const websocket_1 = require("./util/websocket");
     const connection = new websocket_1.Connection();
     yield connection.connect();
     try {
-        const midi = new (yield Promise.resolve().then(() => __importStar(require("./util/midi")))).Midi(connection);
+        console.log("trying to import midi");
+        const midiImport = yield Promise.resolve().then(() => __importStar(require("./util/midi")));
+        console.log("midi imported");
+        const midi = new midiImport.Midi(connection);
+        console.log("midi created");
         yield midi.openInput();
     }
     catch (e) {

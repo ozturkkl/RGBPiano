@@ -6,12 +6,15 @@ import { execSync } from "child_process";
   const connection = new Connection();
   await connection.connect();
 
-  try{
-    const midi = new (await import("./util/midi")).Midi(connection)
+  try {
+    console.log("trying to import midi");
+    const midiImport = await import("./util/midi");
+    console.log("midi imported");
+    const midi = new midiImport.Midi(connection);
+    console.log("midi created");
     await midi.openInput();
-  }
-  catch(e){
-    console.error("Failed to open midi input:", e)
+  } catch (e) {
+    console.error("Failed to open midi input:", e);
   }
 
   connection.listen((message) => {

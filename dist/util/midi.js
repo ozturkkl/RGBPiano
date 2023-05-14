@@ -19,7 +19,9 @@ const child_process_1 = require("child_process");
 class Midi {
     constructor(connection) {
         this.devices = [];
+        console.log("midi constructor");
         const armv6l = (0, child_process_1.execSync)("uname -a").toString().includes("armv6l");
+        console.log("armv6l", armv6l);
         if (armv6l) {
             throw new Error("Midi is not supported on armv6l");
         }
