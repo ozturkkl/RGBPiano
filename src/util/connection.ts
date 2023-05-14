@@ -23,13 +23,15 @@ export async function connect() {
         console.log("Connected");
       });
 
-      ws.on("midi", (message: any) => {
-        console.log(`Message received: ${message}`);
+      ws.on("message", (data) => {
+        console.log(`Message received: ${data}`);
       });
 
       return ws;
     } else {
-      console.error(`No WebSocket servers with port ${PORT} found, creating one...`);
+      console.error(
+        `No WebSocket servers with port ${PORT} found, creating one...`
+      );
 
       // If no WebSocket servers were found, create one
       return createWebSocketServer();
@@ -50,8 +52,17 @@ function createWebSocketServer() {
   });
 
   setInterval(() => {
-    wss.emit("midi", { message: "Hello, world!" });
-  }, 1000);
+    console.log("Sending message");
+    console.log("clients: ", wss.clients.size);
+
+    wss.emit("message", "Hello from the server");
+
+    console.log("Message sent");
+  }, 2000);
+
+  wss.on("error", (err) => {
+    console.error(`WebSocket server error: ${err}`);
+  });
 
   // Advertise the WebSocket server via SSDP
   const ssdpServer = new ssdp.Server({
@@ -69,6 +80,7 @@ function createWebSocketServer() {
 }
 
 function searchDevices(searchTarget: string): Promise<any[]> {
+  console.log(`Searching for devices...`);
   return new Promise((resolve, reject) => {
     const client = new ssdp.Client();
     const devices: any[] = [];
@@ -82,6 +94,6 @@ function searchDevices(searchTarget: string): Promise<any[]> {
     setTimeout(() => {
       client.stop();
       resolve(devices);
-    }, 1000);
+    }, 5000);
   });
 }
