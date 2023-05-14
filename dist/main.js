@@ -33,6 +33,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const websocket_1 = require("./util/websocket");
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const connection = new websocket_1.Connection();
     yield connection.connect();

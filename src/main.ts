@@ -1,5 +1,9 @@
 import { Connection } from "./util/websocket";
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
 (async () => {
   const connection = new Connection();
   await connection.connect();
