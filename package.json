@@ -23,7 +23,9 @@
   },
   "homepage": "https://github.com/ozturkkl/RGBPiano#readme",
   "dependencies": {
+    "@julusian/midi": "^3.0.1",
     "node-ssdp": "^4.0.1",
+    "readline": "^1.3.0",
     "ws": "^8.13.0"
   },
   "devDependencies": {
