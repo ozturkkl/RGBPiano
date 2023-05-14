@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,32 +31,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const os_1 = __importDefault(require("os"));
+const websocket_1 = require("./util/websocket");
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    // const connection = new Connection();
-    // await connection.connect();
-    const arch = os_1.default.arch();
-    console.log(`Running on ${arch}`);
-    const cpus = os_1.default.cpus();
-    console.log(`CPU count: ${cpus.length}`);
-    const platform = os_1.default.platform();
-    console.log(`Platform: ${platform}`);
-    const machine = os_1.default.machine();
-    console.log(`Machine: ${machine}`);
-    const x = os_1.default.type();
-    console.log(`Type: ${x}`);
-    // try{
-    //   const midi = new (await import("./util/midi")).Midi(connection)
-    //   await midi.openInput();
-    // }
-    // catch(e){
-    //   console.error("Failed to open midi input:", e)
-    // }
-    // connection.listen((message) => {
-    //   console.log(message);
-    // });
+    const connection = new websocket_1.Connection();
+    yield connection.connect();
+    try {
+        const midi = new (yield Promise.resolve().then(() => __importStar(require("./util/midi")))).Midi(connection);
+        yield midi.openInput();
+    }
+    catch (e) {
+        console.error("Failed to open midi input:", e);
+    }
+    connection.listen((message) => {
+        console.log(message);
+    });
 }))();

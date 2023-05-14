@@ -1,6 +1,7 @@
 import midi from "@julusian/midi";
 import readline from "readline";
 import { Connection } from "./websocket";
+import { execSync } from "child_process";
 
 export class Midi {
   devices: string[] = [];
@@ -9,6 +10,11 @@ export class Midi {
   output: midi.Output;
 
   constructor(connection: Connection) {
+    const armv6l = execSync("uname -a").toString().includes("armv6l");
+    if (armv6l) {
+      throw new Error("Midi is not supported on armv6l");
+    }
+
     this.input = new midi.Input();
     this.output = new midi.Output();
     this.devices = this.getDevices();
