@@ -1,5 +1,5 @@
 import { Connection } from "./util/websocket";
-import { initializeMidi } from "./util/initializeMidi";
+import { initializeMidi } from "./util/midi";
 
 (async () => {
   const connection = new Connection();

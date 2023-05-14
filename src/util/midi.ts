@@ -1,6 +1,7 @@
 import midi from "@julusian/midi";
 import readline from "readline";
 import { Connection } from "./websocket";
+import { execSync } from "child_process";
 
 export class Midi {
   devices: string[] = [];
@@ -72,5 +73,16 @@ export class Midi {
         );
       }
     }
+  }
+}
+
+export async function initializeMidi(connection: Connection) {
+  const armv6l = execSync("uname -a").toString().includes("armv6l");
+  if (!armv6l) {
+    const midi = new (await import("./midi")).Midi(connection);
+    return midi;
+  } else {
+    console.log("Cannot open MIDI input on armv6l");
+    return null;
   }
 }
