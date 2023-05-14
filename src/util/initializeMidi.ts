@@ -7,7 +7,7 @@ export async function initializeMidi(connection: Connection) {
     const midi = new (await import("./midi")).Midi(connection);
     return midi;
   } else {
-    console.log("Cannot open MIDI input on armv6l");
+    console.log("Cannot initialize MIDI on armv6l");
     return null;
   }
 }
