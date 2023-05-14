@@ -5,12 +5,12 @@ import { Connection } from "./websocket";
 export class Midi {
   devices: string[] = [];
 
-  // input: midi.Input;
-  // output: midi.Output;
+  input: midi.Input | null = null;
+  output: midi.Output | null = null;
 
   constructor(connection: Connection) {
-    // this.input = new midi.Input();
-    // this.output = new midi.Output();
+    this.input = new midi.Input();
+    this.output = new midi.Output();
     // this.devices = this.getDevices();
 
     // this.input.on("message", (deltaTime, message) => {
