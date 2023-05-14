@@ -18,32 +18,23 @@ const readline_1 = __importDefault(require("readline"));
 class Midi {
     constructor(connection) {
         this.devices = [];
-        try {
-            this.input = new midi_1.default.Input();
-            this.output = new midi_1.default.Output();
-            this.devices = this.getDevices();
-            this.input.on("message", (deltaTime, message) => {
-                connection.send({
-                    type: "midi",
-                    data: {
-                        deltaTime,
-                        message,
-                    },
-                });
-            });
-        }
-        catch (e) {
-            console.error("Failed to initialize midi:", e);
-        }
+        this.input = new midi_1.default.Input();
+        this.output = new midi_1.default.Output();
+        // this.devices = this.getDevices();
+        // this.input.on("message", (deltaTime, message) => {
+        //   connection.send({
+        //     type: "midi",
+        //     data: {
+        //       deltaTime,
+        //       message,
+        //     },
+        //   });
+        // });
     }
     getDevices() {
-        var _a, _b, _c;
         const devices = [];
-        const count = (_b = (_a = this.input) === null || _a === void 0 ? void 0 : _a.getPortCount()) !== null && _b !== void 0 ? _b : 0;
-        for (let i = 0; i < count; i++) {
-            const name = (_c = this.input) === null || _c === void 0 ? void 0 : _c.getPortName(i);
-            if (name)
-                devices.push(name);
+        for (let i = 0; i < this.input.getPortCount(); i++) {
+            devices.push(this.input.getPortName(i));
         }
         return devices;
     }
@@ -51,12 +42,11 @@ class Midi {
         return __awaiter(this, void 0, void 0, function* () {
             if (device) {
                 this.getDevices().forEach((d, i) => {
-                    var _a, _b;
                     if (d === device) {
                         try {
-                            if ((_a = this.input) === null || _a === void 0 ? void 0 : _a.isPortOpen())
+                            if (this.input.isPortOpen())
                                 this.input.closePort();
-                            (_b = this.input) === null || _b === void 0 ? void 0 : _b.openPort(i);
+                            this.input.openPort(i);
                             console.log(`Opened port ${d}`);
                         }
                         catch (e) {
