@@ -9,8 +9,7 @@ export class Midi {
   output: midi.Output | null = null;
 
   constructor(connection: Connection) {
-    this.input = new midi.Input();
-    this.output = new midi.Output();
+    this.setup();
     // this.devices = this.getDevices();
 
     // this.input.on("message", (deltaTime, message) => {
@@ -22,6 +21,15 @@ export class Midi {
     //     },
     //   });
     // });
+  }
+
+  async setup() {
+    try{
+      this.input = new midi.Input()
+    }
+    catch(e){
+      console.log(e)
+    }
   }
 
   // getDevices() {
