@@ -1,19 +1,22 @@
 import { Connection } from "./util/websocket";
+import os from "os";
 
 (async () => {
-  const connection = new Connection();
-  await connection.connect();
+  // const connection = new Connection();
+  // await connection.connect();
 
-  try{
-    const midi = new (await import("./util/midi")).Midi(connection)
-    await midi.openInput();
-  }
-  catch(e){
-    console.error("Failed to open midi input:", e)
-  }
+  const arch = os.arch();
+  console.log(`Running on ${arch}`);
 
-  connection.listen((message) => {
-    console.log(message);
-  }
-  );
+  // try{
+  //   const midi = new (await import("./util/midi")).Midi(connection)
+  //   await midi.openInput();
+  // }
+  // catch(e){
+  //   console.error("Failed to open midi input:", e)
+  // }
+
+  // connection.listen((message) => {
+  //   console.log(message);
+  // });
 })();
