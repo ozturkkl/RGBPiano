@@ -23,24 +23,33 @@ export async function connect() {
         console.log("Connected");
       });
 
-      ws.on("message", (data) => {
-        console.log(`Message received: ${data}`);
+      ws.on("error", (err) => {
+        console.error(`WebSocket error: ${err}`);
       });
 
-      return ws;
+      return {
+        server: null,
+        client: ws
+      };
     } else {
       console.error(
         `No WebSocket servers with port ${PORT} found, creating one...`
       );
 
       // If no WebSocket servers were found, create one
-      return createWebSocketServer();
+      return {
+        server: createWebSocketServer(),
+        client: null
+      };
     }
   } catch (err) {
     console.error(`Error searching for WebSocket servers: ${err}`);
 
     // If an error occurred, create a WebSocket server
-    return createWebSocketServer();
+    return {
+      server: createWebSocketServer(),
+      client: null
+    };
   }
 }
 
@@ -50,15 +59,6 @@ function createWebSocketServer() {
   wss.on("connection", (ws) => {
     console.log("Client connected");
   });
-
-  setInterval(() => {
-    console.log("Sending message");
-    console.log("clients: ", wss.clients.size);
-
-    wss.emit("message", "Hello from the server");
-
-    console.log("Message sent");
-  }, 2000);
 
   wss.on("error", (err) => {
     console.error(`WebSocket server error: ${err}`);
@@ -86,6 +86,7 @@ function searchDevices(searchTarget: string): Promise<any[]> {
     const devices: any[] = [];
 
     client.on("response", (headers: any) => {
+      console.log(`Found device: ${headers.LOCATION}`);
       devices.push(headers);
     });
 
