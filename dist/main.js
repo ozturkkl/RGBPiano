@@ -18,6 +18,14 @@ const os_1 = __importDefault(require("os"));
     // await connection.connect();
     const arch = os_1.default.arch();
     console.log(`Running on ${arch}`);
+    const cpus = os_1.default.cpus();
+    console.log(`CPU count: ${cpus.length}`);
+    const platform = os_1.default.platform();
+    console.log(`Platform: ${platform}`);
+    const machine = os_1.default.machine();
+    console.log(`Machine: ${machine}`);
+    const x = os_1.default.type();
+    console.log(`Type: ${x}`);
     // try{
     //   const midi = new (await import("./util/midi")).Midi(connection)
     //   await midi.openInput();
