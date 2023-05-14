@@ -5,29 +5,35 @@ import { Connection } from "./websocket";
 export class Midi {
   devices: string[] = [];
 
-  input: midi.Input;
-  output: midi.Output;
+  input?: midi.Input;
+  output?: midi.Output;
 
   constructor(connection: Connection) {
-    this.input = new midi.Input();
-    this.output = new midi.Output();
-    this.devices = this.getDevices();
+    try {
+      this.input = new midi.Input();
+      this.output = new midi.Output();
+      this.devices = this.getDevices();
 
-    this.input.on("message", (deltaTime, message) => {
-      connection.send({
-        type: "midi",
-        data: {
-          deltaTime,
-          message,
-        },
+      this.input.on("message", (deltaTime, message) => {
+        connection.send({
+          type: "midi",
+          data: {
+            deltaTime,
+            message,
+          },
+        });
       });
-    });
+    } catch (e) {
+      console.error("Failed to initialize midi:", e);
+    }
   }
 
   getDevices() {
     const devices = [];
-    for (let i = 0; i < this.input.getPortCount(); i++) {
-      devices.push(this.input.getPortName(i));
+    const count = this.input?.getPortCount() ?? 0;
+    for (let i = 0; i < count; i++) {
+      const name = this.input?.getPortName(i);
+      if (name) devices.push(name);
     }
     return devices;
   }
@@ -37,8 +43,8 @@ export class Midi {
       this.getDevices().forEach((d, i) => {
         if (d === device) {
           try {
-            if (this.input.isPortOpen()) this.input.closePort();
-            this.input.openPort(i);
+            if (this.input?.isPortOpen()) this.input.closePort();
+            this.input?.openPort(i);
             console.log(`Opened port ${d}`);
           } catch (e) {
             console.error(`Failed to open port ${d}: ${e}`);
