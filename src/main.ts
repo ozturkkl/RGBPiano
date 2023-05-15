@@ -34,7 +34,7 @@ const COLOR = [0, 255, 255];
       // pedal
       if (midiChannel === 176) {
         rgbStrip.setBackgroundColor(
-          ...BACKGROUND_COLOR.map((c) => c * (noteVelocityRatio === 0 ? 2 : 1))
+          ...BACKGROUND_COLOR.map((c) => c * (noteVelocityRatio === 1 ? 2 : 1))
         );
       }
     }
