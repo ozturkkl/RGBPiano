@@ -1,4 +1,4 @@
-import midi from "@julusian/midi";
+import midi from "midi";
 import readline from "readline";
 import { Connection } from "./websocket";
 
@@ -37,7 +37,7 @@ export class Midi {
       this.getDevices().forEach((d, i) => {
         if (d === device) {
           try {
-            if (this.input.isPortOpen()) this.input.closePort();
+            this.input.closePort();
             this.input.openPort(i);
             console.log(`Opened port ${d}`);
           } catch (e) {

@@ -6,8 +6,8 @@ import { RgbStrip } from "./util/rbgStrip";
   const connection = new Connection();
   await connection.connect();
 
-  const midi = await initializeMidi(connection);
-  midi?.openInput();
+  const midi = new (await import("./util/midi")).Midi(connection);
+  midi.openInput();
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);

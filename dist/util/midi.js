@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Midi = void 0;
-const midi_1 = __importDefault(require("@julusian/midi"));
+const midi_1 = __importDefault(require("midi"));
 const readline_1 = __importDefault(require("readline"));
 class Midi {
     constructor(connection) {
@@ -44,8 +44,7 @@ class Midi {
                 this.getDevices().forEach((d, i) => {
                     if (d === device) {
                         try {
-                            if (this.input.isPortOpen())
-                                this.input.closePort();
+                            this.input.closePort();
                             this.input.openPort(i);
                             console.log(`Opened port ${d}`);
                         }
