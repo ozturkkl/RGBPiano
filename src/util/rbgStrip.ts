@@ -1,4 +1,5 @@
 import ws281x from "rpi-ws281x-native";
+import color from "color";
 
 export class RgbStrip {
   NUM_LEDS = 177; // Number of LEDs in the strip
@@ -23,7 +24,7 @@ export class RgbStrip {
 
   setPixelColor(
     pixelPositionPercent: number,
-    colorSaturationPercent: number,
+    velocityPercent: number,
     red = 255,
     green = 255,
     blue = 255
@@ -32,25 +33,23 @@ export class RgbStrip {
       console.error("No pixel position provided for setPixelColor()");
       return;
     }
-    const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
-    // color to set will be a blend of the background color and the provided color depending on the saturation
-    const colorToSet =
-      ((this.backgroundColor[0] * (100 - colorSaturationPercent)) / 100 +
-        (red * colorSaturationPercent) / 100) *
-        65536 +
-      ((this.backgroundColor[1] * (100 - colorSaturationPercent)) / 100 +
-        (green * colorSaturationPercent) / 100) *
-        256 +
-      ((this.backgroundColor[2] * (100 - colorSaturationPercent)) / 100 +
-        (blue * colorSaturationPercent) / 100);
+    const pixelPosition = Math.round(
+      (this.NUM_LEDS - 2) * (pixelPositionPercent / 100)
+    ) + 1;
 
-    this.colors[pixel] = colorToSet;
+    const blendedColor = color.rgb(
+      Math.round((red * velocityPercent) / 100) + this.backgroundColor[0],
+      Math.round((green * velocityPercent) / 100) + this.backgroundColor[1],
+      Math.round((blue * velocityPercent) / 100) + this.backgroundColor[2],
+    )
+    
+    this.colors[pixelPosition] = blendedColor.rgbNumber();
     ws281x.render();
   }
 
   setBackgroundColor(red = 0, green = 0, blue = 0) {
-    this.colors.fill((red << 16) | (green << 8) | blue);
     this.backgroundColor = [red, green, blue];
+    this.colors.fill(color.rgb(red, green, blue).rgbNumber());
     ws281x.render();
   }
 
