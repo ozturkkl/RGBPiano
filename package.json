@@ -34,7 +34,6 @@
     "@types/node-ssdp": "^4.0.1",
     "@types/rpi-ws281x-native": "^1.0.0",
     "@types/ws": "^8.5.4",
-    "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   }
 }
