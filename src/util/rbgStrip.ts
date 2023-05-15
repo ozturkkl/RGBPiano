@@ -1,7 +1,7 @@
 import ws281x from "rpi-ws281x-native";
 
 export class RgbStrip {
-  NUM_LEDS = 177; // Number of LEDs in the strip
+  NUM_LEDS = 175; // Number of LEDs in the strip
   BRIGHTNESS = 128; // The brightness level of the LEDs (0-255)
   DATA_PIN = 18; // The GPIO pin that the strip is connected to
 

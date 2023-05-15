@@ -41,7 +41,7 @@ const rbgStrip_1 = require("./util/rbgStrip");
     midi.openInput();
     const rgbStrip = new rbgStrip_1.RgbStrip();
     rgbStrip.setBrightness(255);
-    rgbStrip.setColor(0, 50, 0);
+    rgbStrip.setColor(0, 100, 0);
     connection.listen((message) => {
         console.log(message);
         if (message.type === "midi" && (message === null || message === void 0 ? void 0 : message.data)) {
