@@ -2,7 +2,7 @@
 
 Piano RGB LED controller. Will light up LED strip when keys are pressed. Strictly uses websockets for communication between the host and the client. Built this because I am using the midi port on my keyboard for other things and wanted a super solid web based solution. Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visualizer).
 
-![led-piano](https://github.com/ozturkkl/RGBPiano/assets/51798197/1f567eb8-1ce5-4c22-b476-87d573d08db6)
+![led-piano](https://github.com/ozturkkl/RGBPiano/assets/51798197/996cd7ff-adf1-42fd-bbfb-e13fc2055af6)
 
 ## Getting Started
 
