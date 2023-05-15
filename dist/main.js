@@ -11,11 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const websocket_1 = require("./util/websocket");
 const initializeMidi_1 = require("./util/initializeMidi");
+const rbgStrip_1 = require("./util/rbgStrip");
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const connection = new websocket_1.Connection();
     yield connection.connect();
     const midi = yield (0, initializeMidi_1.initializeMidi)(connection);
     midi === null || midi === void 0 ? void 0 : midi.openInput();
+    const rgbStrip = new rbgStrip_1.RgbStrip();
+    rgbStrip.setBrightness(255);
     connection.listen((message) => {
         console.log(message);
     });
