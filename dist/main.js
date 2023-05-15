@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const websocket_1 = require("./util/websocket");
 const rbgStrip_1 = require("./util/rbgStrip");
 const midi_1 = require("./util/midi");
-const BACKGROUND_COLOR = [0, 1, 1];
+const BACKGROUND_COLOR = [0, 2, 2];
 const COLOR = [0, 255, 255];
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const connection = new websocket_1.Connection();
@@ -32,7 +32,10 @@ const COLOR = [0, 255, 255];
             }
             // pedal
             if (midiChannel === 176) {
-                rgbStrip.setBackgroundColor(...BACKGROUND_COLOR.map((c) => c * (noteVelocityRatio === 1 ? 2 : 1)));
+                // disabled until other notes disappearing is fixed
+                // rgbStrip.setBackgroundColor(
+                //   ...BACKGROUND_COLOR.map((c) => c * (noteVelocityRatio === 1 ? 2 : 1))
+                // );
             }
         }
     });
