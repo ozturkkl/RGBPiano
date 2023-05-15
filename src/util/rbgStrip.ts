@@ -20,13 +20,17 @@ export class RgbStrip {
     ws281x.render();
   }
 
-  setPixelColor(pixelPositionPercent: number, red: number, green: number, blue: number) {
+  setPixelColor(pixelPositionPercent: number, red = 255, green = 255, blue = 255) {
+    if (!pixelPositionPercent) {
+      console.error("No pixel position provided for setPixelColor()");
+      return;
+    }
     const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
     this.colors[pixel] = (red << 16) | (green << 8) | blue;
     ws281x.render();
   }
 
-  setColor(red: number, green: number, blue: number) {
+  setColor(red = 0, green = 0, blue = 0) {
     for (let i = 0; i < this.NUM_LEDS; i++) {
       this.setPixelColor(i, red, green, blue);
     }

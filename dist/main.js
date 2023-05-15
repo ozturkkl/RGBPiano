@@ -44,8 +44,8 @@ const rbgStrip_1 = require("./util/rbgStrip");
     rgbStrip.setColor(0, 25, 0);
     connection.listen((message) => {
         console.log(message);
-        if (message.type === "midi") {
-            const { notePositionPercent, noteVelocityPercent } = message.message;
+        if (message.type === "midi" && (message === null || message === void 0 ? void 0 : message.data)) {
+            const { notePositionPercent, noteVelocityPercent } = message.data;
             rgbStrip.setPixelColor(notePositionPercent, 0, 255 * noteVelocityPercent, 0);
         }
     });

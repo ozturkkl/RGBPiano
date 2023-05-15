@@ -28,7 +28,8 @@ class Midi {
                 type: "midi",
                 data: {
                     deltaTime,
-                    message: Object.assign(Object.assign({}, message), { notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote), noteVelocityPercent: message[2] / 127 })
+                    notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote),
+                    noteVelocityPercent: message[2] / 127,
                 },
             });
         });

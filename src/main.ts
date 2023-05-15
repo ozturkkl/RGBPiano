@@ -15,8 +15,8 @@ import { RgbStrip } from "./util/rbgStrip";
 
   connection.listen((message) => {
     console.log(message);
-    if (message.type === "midi") {
-      const { notePositionPercent, noteVelocityPercent } = message.message;
+    if (message.type === "midi" && message?.data) {
+      const { notePositionPercent, noteVelocityPercent } = message.data;
       rgbStrip.setPixelColor(
         notePositionPercent,
         0,

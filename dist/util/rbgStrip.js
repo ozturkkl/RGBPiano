@@ -22,12 +22,16 @@ class RgbStrip {
         this.channel.brightness = brightness;
         rpi_ws281x_native_1.default.render();
     }
-    setPixelColor(pixelPositionPercent, red, green, blue) {
+    setPixelColor(pixelPositionPercent, red = 255, green = 255, blue = 255) {
+        if (!pixelPositionPercent) {
+            console.error("No pixel position provided for setPixelColor()");
+            return;
+        }
         const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
         this.colors[pixel] = (red << 16) | (green << 8) | blue;
         rpi_ws281x_native_1.default.render();
     }
-    setColor(red, green, blue) {
+    setColor(red = 0, green = 0, blue = 0) {
         for (let i = 0; i < this.NUM_LEDS; i++) {
             this.setPixelColor(i, red, green, blue);
         }
