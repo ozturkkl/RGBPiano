@@ -10,7 +10,13 @@ const COLOR = [0, 255, 255];
   await connection.connect();
 
   const midi = new Midi(connection);
-  midi.openInput();
+  const devices = midi.getDevices();
+  devices.forEach((device) => {
+    if (device.includes("Springbeats vMIDI1")){
+      midi.openInput(device);
+    }
+  });
+  
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);

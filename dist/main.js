@@ -18,7 +18,12 @@ const COLOR = [0, 255, 255];
     const connection = new websocket_1.Connection();
     yield connection.connect();
     const midi = new midi_1.Midi(connection);
-    midi.openInput();
+    const devices = midi.getDevices();
+    devices.forEach((device) => {
+        if (device.includes("Springbeats vMIDI1")) {
+            midi.openInput(device);
+        }
+    });
     const rgbStrip = new rbgStrip_1.RgbStrip();
     rgbStrip.setBrightness(255);
     rgbStrip.setBackgroundColor(...BACKGROUND_COLOR);
