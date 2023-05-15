@@ -40,7 +40,7 @@ const rbgStrip_1 = require("./util/rbgStrip");
     const midi = new (yield Promise.resolve().then(() => __importStar(require("./util/midi")))).Midi(connection);
     midi.openInput();
     const rgbStrip = new rbgStrip_1.RgbStrip();
-    rgbStrip.setBrightness(255);
+    rgbStrip.setBrightness(150);
     rgbStrip.setBackgroundColor(0, 50, 0);
     connection.listen((message) => {
         console.log(message);

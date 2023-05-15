@@ -10,7 +10,7 @@ import { RgbStrip } from "./util/rbgStrip";
   midi.openInput();
 
   const rgbStrip = new RgbStrip();
-  rgbStrip.setBrightness(255);
+  rgbStrip.setBrightness(150);
   rgbStrip.setBackgroundColor(0, 50, 0);
 
   connection.listen((message) => {

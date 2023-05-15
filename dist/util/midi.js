@@ -26,11 +26,7 @@ class Midi {
         this.input.on("message", (deltaTime, message) => {
             connection.send({
                 type: "midi",
-                data: {
-                    deltaTime,
-                    notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote),
-                    noteVelocityPercent: message[2] / 127,
-                },
+                data: Object.assign({ deltaTime, notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote), noteVelocityPercent: message[2] / 127 }, message),
             });
         });
     }

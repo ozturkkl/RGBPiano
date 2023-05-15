@@ -17,7 +17,7 @@ class RgbStrip {
             invert: false,
         });
         this.colors = this.channel.array;
-        this.backgroundColor = 0x000000;
+        this.backgroundColor = [0, 0, 0];
     }
     setBrightness(brightness) {
         this.channel.brightness = brightness;
@@ -30,15 +30,20 @@ class RgbStrip {
         }
         const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
         // color to set will be a blend of the background color and the provided color depending on the saturation
-        const colorToSet = this.backgroundColor +
-            Math.floor(((red << 16) | (green << 8) | (blue - this.backgroundColor)) *
-                (colorSaturationPercent / 100));
+        const colorToSet = ((this.backgroundColor[0] * (100 - colorSaturationPercent)) / 100 +
+            (red * colorSaturationPercent) / 100) *
+            65536 +
+            ((this.backgroundColor[1] * (100 - colorSaturationPercent)) / 100 +
+                (green * colorSaturationPercent) / 100) *
+                256 +
+            ((this.backgroundColor[2] * (100 - colorSaturationPercent)) / 100 +
+                (blue * colorSaturationPercent) / 100);
         this.colors[pixel] = colorToSet;
         rpi_ws281x_native_1.default.render();
     }
     setBackgroundColor(red = 0, green = 0, blue = 0) {
         this.colors.fill((red << 16) | (green << 8) | blue);
-        this.backgroundColor = (red << 16) | (green << 8) | blue;
+        this.backgroundColor = [red, green, blue];
         rpi_ws281x_native_1.default.render();
     }
     reset() {
