@@ -10,8 +10,8 @@ import { RgbStrip } from "./util/rbgStrip";
   midi.openInput();
 
   const rgbStrip = new RgbStrip();
-  rgbStrip.setBrightness(150);
-  rgbStrip.setBackgroundColor(0, 50, 0);
+  rgbStrip.setBrightness(255);
+  rgbStrip.setBackgroundColor(0, 15, 15);
 
   connection.listen((message) => {
     console.log(message);
@@ -21,7 +21,7 @@ import { RgbStrip } from "./util/rbgStrip";
         notePositionPercent,
         noteVelocityPercent,
         0,
-        0,
+        255,
         255
       );
     }

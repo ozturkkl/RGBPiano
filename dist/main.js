@@ -40,13 +40,13 @@ const rbgStrip_1 = require("./util/rbgStrip");
     const midi = new (yield Promise.resolve().then(() => __importStar(require("./util/midi")))).Midi(connection);
     midi.openInput();
     const rgbStrip = new rbgStrip_1.RgbStrip();
-    rgbStrip.setBrightness(150);
-    rgbStrip.setBackgroundColor(0, 50, 0);
+    rgbStrip.setBrightness(255);
+    rgbStrip.setBackgroundColor(0, 15, 15);
     connection.listen((message) => {
         console.log(message);
         if (message.type === "midi" && (message === null || message === void 0 ? void 0 : message.data)) {
             const { notePositionPercent, noteVelocityPercent } = message.data;
-            rgbStrip.setPixelColor(notePositionPercent, noteVelocityPercent, 0, 0, 255);
+            rgbStrip.setPixelColor(notePositionPercent, noteVelocityPercent, 0, 255, 255);
         }
     });
 }))();
