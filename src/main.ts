@@ -11,7 +11,7 @@ import { RgbStrip } from "./util/rbgStrip";
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);
-  rgbStrip.setColor(0, 100, 0);
+  rgbStrip.setBackgroundColor(0, 160, 0);
 
   connection.listen((message) => {
     console.log(message);
@@ -19,8 +19,9 @@ import { RgbStrip } from "./util/rbgStrip";
       const { notePositionPercent, noteVelocityPercent } = message.data;
       rgbStrip.setPixelColor(
         notePositionPercent,
+        noteVelocityPercent,
         0,
-        255 * noteVelocityPercent,
+        255,
         0
       );
     }

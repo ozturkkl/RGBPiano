@@ -7,8 +7,8 @@ exports.RgbStrip = void 0;
 const rpi_ws281x_native_1 = __importDefault(require("rpi-ws281x-native"));
 class RgbStrip {
     constructor() {
-        this.NUM_LEDS = 175; // Number of LEDs in the strip
-        this.BRIGHTNESS = 128; // The brightness level of the LEDs (0-255)
+        this.NUM_LEDS = 172; // Number of LEDs in the strip
+        this.BRIGHTNESS = 255; // The brightness level of the LEDs (0-255)
         this.DATA_PIN = 18; // The GPIO pin that the strip is connected to
         this.channel = (0, rpi_ws281x_native_1.default)(this.NUM_LEDS, {
             stripType: rpi_ws281x_native_1.default.stripType.WS2812,
@@ -17,24 +17,28 @@ class RgbStrip {
             invert: false,
         });
         this.colors = this.channel.array;
+        this.backgroundColor = 0x000000;
     }
     setBrightness(brightness) {
         this.channel.brightness = brightness;
         rpi_ws281x_native_1.default.render();
     }
-    setPixelColor(pixelPositionPercent, red = 255, green = 255, blue = 255) {
+    setPixelColor(pixelPositionPercent, colorSaturationPercent, red = 255, green = 255, blue = 255) {
         if (!pixelPositionPercent) {
             console.error("No pixel position provided for setPixelColor()");
             return;
         }
-        const pixel = Math.floor(pixelPositionPercent * (this.NUM_LEDS - 2)) + 2;
-        this.colors[pixel] = (red << 16) | (green << 8) | blue;
+        const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
+        // color to set will be a blend of the background color and the provided color depending on the saturation
+        const colorToSet = this.backgroundColor +
+            Math.floor(((red << 16) | (green << 8) | (blue - this.backgroundColor)) *
+                (colorSaturationPercent / 100));
         rpi_ws281x_native_1.default.render();
     }
-    setColor(red = 0, green = 0, blue = 0) {
-        for (let i = 0; i < this.NUM_LEDS; i++) {
-            this.setPixelColor(i, red, green, blue);
-        }
+    setBackgroundColor(red = 0, green = 0, blue = 0) {
+        this.colors.fill((red << 16) | (green << 8) | blue);
+        this.backgroundColor = (red << 16) | (green << 8) | blue;
+        rpi_ws281x_native_1.default.render();
     }
     reset() {
         rpi_ws281x_native_1.default.reset();
