@@ -7,7 +7,7 @@ exports.RgbStrip = void 0;
 const rpi_ws281x_native_1 = __importDefault(require("rpi-ws281x-native"));
 class RgbStrip {
     constructor() {
-        this.NUM_LEDS = 100; // The number of LEDs on the strip
+        this.NUM_LEDS = 175; // Number of LEDs in the strip
         this.BRIGHTNESS = 128; // The brightness level of the LEDs (0-255)
         this.DATA_PIN = 18; // The GPIO pin that the strip is connected to
         this.channel = (0, rpi_ws281x_native_1.default)(this.NUM_LEDS, {
@@ -27,7 +27,7 @@ class RgbStrip {
             console.error("No pixel position provided for setPixelColor()");
             return;
         }
-        const pixel = Math.floor(pixelPositionPercent * this.NUM_LEDS);
+        const pixel = Math.floor(pixelPositionPercent * (this.NUM_LEDS - 1)) + 1;
         this.colors[pixel] = (red << 16) | (green << 8) | blue;
         rpi_ws281x_native_1.default.render();
     }
