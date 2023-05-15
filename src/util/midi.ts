@@ -58,6 +58,7 @@ export class Midi {
 
       const devices = this.getDevices();
       console.log("Available devices:");
+      console.log("0: Cancel")
       devices.forEach((d, i) => {
         console.log(`${i + 1}: ${d}`);
       });
