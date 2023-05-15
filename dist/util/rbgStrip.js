@@ -24,17 +24,19 @@ class RgbStrip {
         this.channel.brightness = brightness;
         rpi_ws281x_native_1.default.render();
     }
-    setPixelColor(pixelPositionRatio, velocityRatio, red = 255, green = 255, blue = 255) {
-        if (!pixelPositionRatio) {
-            console.error("No pixel position provided for setPixelColor()");
-            return;
-        }
-        const pixelPosition = Math.round((this.NUM_LEDS - 2) * pixelPositionRatio) + 1;
+    setPixelColor(pixelPositionRatio, velocityRatio = 1, red = 255, green = 255, blue = 255) {
         const blendedColor = color_1.default.rgb(Math.round(red * velocityRatio) +
             Math.round(this.backgroundColor[0] * (1 - velocityRatio)), Math.round(green * velocityRatio) +
             Math.round(this.backgroundColor[1] * (1 - velocityRatio)), Math.round(blue * velocityRatio) +
             Math.round(this.backgroundColor[2] * (1 - velocityRatio)));
-        this.colors[pixelPosition] = blendedColor.rgbNumber();
+        // if no pixel position is specified, set all pixels to the same color
+        if (pixelPositionRatio === undefined) {
+            this.colors.fill(blendedColor.rgbNumber());
+        }
+        else {
+            const pixelPosition = Math.round((this.NUM_LEDS - 2) * pixelPositionRatio) + 1;
+            this.colors[pixelPosition] = blendedColor.rgbNumber();
+        }
         rpi_ws281x_native_1.default.render();
     }
     setBackgroundColor(red = 0, green = 0, blue = 0) {

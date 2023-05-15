@@ -27,6 +27,10 @@ import { RgbStrip } from "./util/rbgStrip";
           255
         );
       }
+      if (midiChannel === 176) {
+        const brightness = Math.round(noteVelocityRatio * 55) + 200;
+        rgbStrip.setBrightness(brightness);
+      }
     }
   });
 })();

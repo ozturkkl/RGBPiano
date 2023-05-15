@@ -24,18 +24,11 @@ export class RgbStrip {
 
   setPixelColor(
     pixelPositionRatio: number,
-    velocityRatio: number,
+    velocityRatio = 1,
     red = 255,
     green = 255,
     blue = 255
   ) {
-    if (!pixelPositionRatio) {
-      console.error("No pixel position provided for setPixelColor()");
-      return;
-    }
-    const pixelPosition =
-      Math.round((this.NUM_LEDS - 2) * pixelPositionRatio) + 1;
-
     const blendedColor = color.rgb(
       Math.round(red * velocityRatio) +
         Math.round(this.backgroundColor[0] * (1 - velocityRatio)),
@@ -45,7 +38,15 @@ export class RgbStrip {
         Math.round(this.backgroundColor[2] * (1 - velocityRatio))
     );
 
-    this.colors[pixelPosition] = blendedColor.rgbNumber();
+    // if no pixel position is specified, set all pixels to the same color
+    if (pixelPositionRatio === undefined) {
+      this.colors.fill(blendedColor.rgbNumber());
+    } else {
+      const pixelPosition =
+        Math.round((this.NUM_LEDS - 2) * pixelPositionRatio) + 1;
+      this.colors[pixelPosition] = blendedColor.rgbNumber();
+    }
+
     ws281x.render();
   }
 

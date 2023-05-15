@@ -49,6 +49,10 @@ const rbgStrip_1 = require("./util/rbgStrip");
             if (midiChannel === 144) {
                 rgbStrip.setPixelColor(notePositionRatio, noteVelocityRatio, 0, 255, 255);
             }
+            if (midiChannel === 176) {
+                const brightness = Math.round(noteVelocityRatio * 55) + 200;
+                rgbStrip.setBrightness(brightness);
+            }
         }
     });
 }))();
