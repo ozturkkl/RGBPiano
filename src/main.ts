@@ -11,7 +11,7 @@ import { RgbStrip } from "./util/rbgStrip";
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);
-  rgbStrip.setBackgroundColor(0, 160, 0);
+  rgbStrip.setBackgroundColor(0, 50, 0);
 
   connection.listen((message) => {
     console.log(message);
@@ -21,8 +21,8 @@ import { RgbStrip } from "./util/rbgStrip";
         notePositionPercent,
         noteVelocityPercent,
         0,
-        255,
-        0
+        0,
+        255
       );
     }
   });

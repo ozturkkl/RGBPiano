@@ -7,7 +7,7 @@ exports.RgbStrip = void 0;
 const rpi_ws281x_native_1 = __importDefault(require("rpi-ws281x-native"));
 class RgbStrip {
     constructor() {
-        this.NUM_LEDS = 172; // Number of LEDs in the strip
+        this.NUM_LEDS = 177; // Number of LEDs in the strip
         this.BRIGHTNESS = 255; // The brightness level of the LEDs (0-255)
         this.DATA_PIN = 18; // The GPIO pin that the strip is connected to
         this.channel = (0, rpi_ws281x_native_1.default)(this.NUM_LEDS, {
@@ -33,6 +33,7 @@ class RgbStrip {
         const colorToSet = this.backgroundColor +
             Math.floor(((red << 16) | (green << 8) | (blue - this.backgroundColor)) *
                 (colorSaturationPercent / 100));
+        this.colors[pixel] = colorToSet;
         rpi_ws281x_native_1.default.render();
     }
     setBackgroundColor(red = 0, green = 0, blue = 0) {
