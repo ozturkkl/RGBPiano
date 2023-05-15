@@ -18,6 +18,8 @@ const readline_1 = __importDefault(require("readline"));
 class Midi {
     constructor(connection) {
         this.devices = [];
+        this.minNote = 21;
+        this.maxNote = 108;
         this.input = new midi_1.default.Input();
         this.output = new midi_1.default.Output();
         this.devices = this.getDevices();
@@ -26,7 +28,7 @@ class Midi {
                 type: "midi",
                 data: {
                     deltaTime,
-                    message,
+                    message: Object.assign(Object.assign({}, message), { notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote), noteVelocityPercent: message[2] / 127 })
                 },
             });
         });
