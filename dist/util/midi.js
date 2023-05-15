@@ -28,8 +28,8 @@ class Midi {
                 type: "midi",
                 data: {
                     deltaTime,
-                    notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote),
-                    noteVelocityPercent: message[2] / 127,
+                    notePositionRatio: (message[1] - this.minNote) / (this.maxNote - this.minNote),
+                    noteVelocityRatio: message[2] / 127,
                     midiChannel: message[0],
                 },
             });

@@ -20,9 +20,9 @@ export class Midi {
         type: "midi",
         data: {
           deltaTime,
-          notePositionPercent:
+          notePositionRatio:
             (message[1] - this.minNote) / (this.maxNote - this.minNote),
-          noteVelocityPercent: message[2] / 127,
+          noteVelocityRatio: message[2] / 127,
           midiChannel: message[0],
         },
       });

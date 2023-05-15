@@ -45,9 +45,9 @@ const rbgStrip_1 = require("./util/rbgStrip");
     connection.listen((message) => {
         console.log(message);
         if (message.type === "midi" && (message === null || message === void 0 ? void 0 : message.data)) {
-            const { notePositionPercent, noteVelocityPercent, midiChannel } = message.data;
+            const { notePositionRatio, noteVelocityRatio, midiChannel } = message.data;
             if (midiChannel === 144) {
-                rgbStrip.setPixelColor(notePositionPercent, noteVelocityPercent, 0, 255, 255);
+                rgbStrip.setPixelColor(notePositionRatio, noteVelocityRatio, 0, 255, 255);
             }
         }
     });

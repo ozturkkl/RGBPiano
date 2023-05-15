@@ -23,26 +23,28 @@ export class RgbStrip {
   }
 
   setPixelColor(
-    pixelPositionPercent: number,
-    velocityPercent: number,
+    pixelPositionRatio: number,
+    velocityRatio: number,
     red = 255,
     green = 255,
     blue = 255
   ) {
-    if (!pixelPositionPercent) {
+    if (!pixelPositionRatio) {
       console.error("No pixel position provided for setPixelColor()");
       return;
     }
-    const pixelPosition = Math.round(
-      (this.NUM_LEDS - 2) * (pixelPositionPercent / 100)
-    ) + 1;
+    const pixelPosition =
+      Math.round((this.NUM_LEDS - 2) * pixelPositionRatio) + 1;
 
     const blendedColor = color.rgb(
-      Math.round((red * velocityPercent) / 100) + (this.backgroundColor[0] * (100 - velocityPercent) / 100),
-      Math.round((green * velocityPercent) / 100) + (this.backgroundColor[1] * (100 - velocityPercent) / 100),
-      Math.round((blue * velocityPercent) / 100) + (this.backgroundColor[2] * (100 - velocityPercent) / 100)
-    )
-    
+      Math.round(red * velocityRatio) +
+        Math.round(this.backgroundColor[0] * (1 - velocityRatio)),
+      Math.round(green * velocityRatio) +
+        Math.round(this.backgroundColor[1] * (1 - velocityRatio)),
+      Math.round(blue * velocityRatio) +
+        Math.round(this.backgroundColor[2] * (1 - velocityRatio))
+    );
+
     this.colors[pixelPosition] = blendedColor.rgbNumber();
     ws281x.render();
   }
