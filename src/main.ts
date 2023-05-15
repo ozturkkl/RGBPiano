@@ -11,19 +11,22 @@ import { RgbStrip } from "./util/rbgStrip";
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);
-  rgbStrip.setBackgroundColor(0, 15, 15);
+  rgbStrip.setBackgroundColor(0, 5, 5);
 
   connection.listen((message) => {
     console.log(message);
     if (message.type === "midi" && message?.data) {
-      const { notePositionPercent, noteVelocityPercent } = message.data;
-      rgbStrip.setPixelColor(
-        notePositionPercent,
-        noteVelocityPercent,
-        0,
-        255,
-        255
-      );
+      const { notePositionPercent, noteVelocityPercent, midiChannel } =
+        message.data;
+      if (midiChannel === 144) {
+        rgbStrip.setPixelColor(
+          notePositionPercent,
+          noteVelocityPercent,
+          0,
+          255,
+          255
+        );
+      }
     }
   });
 })();

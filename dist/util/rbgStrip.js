@@ -30,7 +30,7 @@ class RgbStrip {
             return;
         }
         const pixelPosition = Math.round((this.NUM_LEDS - 2) * (pixelPositionPercent / 100)) + 1;
-        const blendedColor = color_1.default.rgb(Math.round((red * velocityPercent) / 100) + this.backgroundColor[0], Math.round((green * velocityPercent) / 100) + this.backgroundColor[1], Math.round((blue * velocityPercent) / 100) + this.backgroundColor[2]);
+        const blendedColor = color_1.default.rgb(Math.round((red * velocityPercent) / 100) + (this.backgroundColor[0] * (100 - velocityPercent) / 100), Math.round((green * velocityPercent) / 100) + (this.backgroundColor[1] * (100 - velocityPercent) / 100), Math.round((blue * velocityPercent) / 100) + (this.backgroundColor[2] * (100 - velocityPercent) / 100));
         this.colors[pixelPosition] = blendedColor.rgbNumber();
         rpi_ws281x_native_1.default.render();
     }

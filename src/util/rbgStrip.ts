@@ -38,9 +38,9 @@ export class RgbStrip {
     ) + 1;
 
     const blendedColor = color.rgb(
-      Math.round((red * velocityPercent) / 100) + this.backgroundColor[0],
-      Math.round((green * velocityPercent) / 100) + this.backgroundColor[1],
-      Math.round((blue * velocityPercent) / 100) + this.backgroundColor[2],
+      Math.round((red * velocityPercent) / 100) + (this.backgroundColor[0] * (100 - velocityPercent) / 100),
+      Math.round((green * velocityPercent) / 100) + (this.backgroundColor[1] * (100 - velocityPercent) / 100),
+      Math.round((blue * velocityPercent) / 100) + (this.backgroundColor[2] * (100 - velocityPercent) / 100)
     )
     
     this.colors[pixelPosition] = blendedColor.rgbNumber();

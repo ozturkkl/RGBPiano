@@ -23,7 +23,7 @@ export class Midi {
           notePositionPercent:
             (message[1] - this.minNote) / (this.maxNote - this.minNote),
           noteVelocityPercent: message[2] / 127,
-          ...message
+          midiChannel: message[0],
         },
       });
     });

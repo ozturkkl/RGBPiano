@@ -41,12 +41,14 @@ const rbgStrip_1 = require("./util/rbgStrip");
     midi.openInput();
     const rgbStrip = new rbgStrip_1.RgbStrip();
     rgbStrip.setBrightness(255);
-    rgbStrip.setBackgroundColor(0, 15, 15);
+    rgbStrip.setBackgroundColor(0, 5, 5);
     connection.listen((message) => {
         console.log(message);
         if (message.type === "midi" && (message === null || message === void 0 ? void 0 : message.data)) {
-            const { notePositionPercent, noteVelocityPercent } = message.data;
-            rgbStrip.setPixelColor(notePositionPercent, noteVelocityPercent, 0, 255, 255);
+            const { notePositionPercent, noteVelocityPercent, midiChannel } = message.data;
+            if (midiChannel === 144) {
+                rgbStrip.setPixelColor(notePositionPercent, noteVelocityPercent, 0, 255, 255);
+            }
         }
     });
 }))();
