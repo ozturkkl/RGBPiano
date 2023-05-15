@@ -6,10 +6,8 @@ Steps:
 
 1. Download and install node, install node 14 on rpi zero using this [guide](https://hassancorrigan.com/blog/install-nodejs-on-a-raspberry-pi-zero/):
 
+- `wget https://nodejs.org/dist/latest-v11.x/node-v11.15.0-linux-armv6l.tar.gz`
 
+- `tar xvfJ node-v11.15.0-linux-armv6l.tar.gz`
 
-- `wget https://unofficial-builds.nodejs.org/download/release/v14.13.0/node-v14.13.0-linux-armv6l.tar.xz`
-
-- `tar xvfJ node-v14.13.0-linux-armv6l.tar.xz`
-
-- `sudo cp -R node-v14.13.0-linux-armv6l/* /usr/local/`
+- `sudo cp -R node-v11.15.0-linux-armv6l/* /usr/local/`

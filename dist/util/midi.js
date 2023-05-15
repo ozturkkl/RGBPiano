@@ -66,20 +66,23 @@ class Midi {
                 const devices = this.getDevices();
                 console.log("Available devices:");
                 devices.forEach((d, i) => {
-                    console.log(`${i}: ${d}`);
+                    console.log(`${i + 1}: ${d}`);
                 });
                 console.log("Which device would you like to use?");
                 const answer = yield new Promise((resolve) => {
                     rl.question("Device: ", (answer) => {
-                        resolve(answer);
+                        resolve(parseInt(answer));
                     });
                 });
                 rl.close();
+                if (isNaN(answer) || answer < 1 || answer > devices.length) {
+                    return;
+                }
                 try {
-                    this.openInput(devices[parseInt(answer)]);
+                    this.openInput(devices[answer - 1]);
                 }
                 catch (e) {
-                    console.error(`Failed to open port ${this.devices[parseInt(answer)]}: ${e}`);
+                    console.error(`Failed to open port ${this.devices[answer - 1]}: ${e}`);
                 }
             }
         });
