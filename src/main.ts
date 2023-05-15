@@ -11,7 +11,7 @@ import { RgbStrip } from "./util/rbgStrip";
 
   const rgbStrip = new RgbStrip();
   rgbStrip.setBrightness(255);
-  rgbStrip.setColor(0, 25, 0);
+  rgbStrip.setColor(0, 50, 0);
 
   connection.listen((message) => {
     console.log(message);
