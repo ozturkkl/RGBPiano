@@ -106,7 +106,7 @@ export class Connection {
     }
   }
 
-  async listen(callback: (message: string) => void) {
+  async listen(callback: (message: any) => void) {
     if (this.server) {
       this.server.on("connection", (ws) => {
         ws.on("message", (message) => {

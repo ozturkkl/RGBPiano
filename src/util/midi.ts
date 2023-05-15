@@ -4,6 +4,8 @@ import { Connection } from "./websocket";
 
 export class Midi {
   devices: string[] = [];
+  minNote = 21;
+  maxNote = 108;
 
   input: midi.Input;
   output: midi.Output;
@@ -18,7 +20,11 @@ export class Midi {
         type: "midi",
         data: {
           deltaTime,
-          message,
+          message: {
+            ...message,
+            notePositionPercent: (message[1] - this.minNote) / (this.maxNote - this.minNote),
+            noteVelocityPercent: message[2] / 127,
+          }
         },
       });
     });
