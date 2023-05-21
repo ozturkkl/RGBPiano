@@ -33,7 +33,7 @@ You will need for a better list of hardware and setup instructions visit [onlaj/
 
 1. Clone this repo to your host system and raspberry pi zero
 2. Navigate to the repo and run: 
-   - `npm install --only=prod && npm run start` on the PI
+   - `npm install --only=prod && sudo npm run start` on the PI
    - `npm install && npm run electron-postinstall && npm run build && npm run dev` on the host system
 
 ### Future work
