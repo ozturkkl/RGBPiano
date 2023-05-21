@@ -27,6 +27,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+
     'no-async-promise-executor': 'off',
 
     'prettier/prettier': [

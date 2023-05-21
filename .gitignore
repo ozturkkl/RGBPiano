@@ -1,5 +1,5 @@
 node_modules
 dist
-# out
+out
 package-lock.json
 *.log*
