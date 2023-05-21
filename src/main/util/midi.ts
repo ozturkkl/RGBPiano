@@ -1,5 +1,4 @@
-import midi from 'midi'
-import readline from 'readline'
+import * as midi from 'midi'
 import { Connection } from './websocket'
 
 export class Midi {
@@ -36,48 +35,17 @@ export class Midi {
     return devices
   }
 
-  async openInput(device?: string): Promise<void> {
-    if (device) {
-      this.getDevices().forEach((d, i) => {
-        if (d === device) {
-          try {
-            this.input.closePort()
-            this.input.openPort(i)
-            console.log(`Opened port ${d}`)
-          } catch (e) {
-            console.error(`Failed to open port ${d}: ${e}`)
-          }
+  async openInput(device: string): Promise<void> {
+    this.getDevices().forEach((d, i) => {
+      if (d === device) {
+        try {
+          this.input.closePort()
+          this.input.openPort(i)
+          console.log(`Opened port ${d}`)
+        } catch (e) {
+          console.error(`Failed to open port ${d}: ${e}`)
         }
-      })
-    } else {
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      })
-
-      const devices = this.getDevices()
-      console.log('Available devices:')
-      console.log('0: Cancel')
-      devices.forEach((d, i) => {
-        console.log(`${i + 1}: ${d}`)
-      })
-      console.log('Which device would you like to use?')
-      const answer = await new Promise<number>((resolve) => {
-        rl.question('Device: ', (answer) => {
-          resolve(parseInt(answer))
-        })
-      })
-      rl.close()
-
-      if (isNaN(answer) || answer < 1 || answer > devices.length) {
-        return
       }
-
-      try {
-        this.openInput(devices[answer - 1])
-      } catch (e) {
-        console.error(`Failed to open port ${this.devices[answer - 1]}: ${e}`)
-      }
-    }
+    })
   }
 }

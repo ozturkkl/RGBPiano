@@ -1,5 +1,5 @@
-import WebSocket from 'ws'
-import ssdp from 'node-ssdp'
+import * as WebSocket from 'ws'
+import { Server, Client } from 'node-ssdp'
 import { PORT } from './config'
 
 export class Connection {
@@ -153,7 +153,7 @@ export class Connection {
         const wss = new WebSocket.Server({ port: PORT })
 
         // Advertise the WebSocket server via SSDP
-        const ssdpServer = new ssdp.Server({
+        const ssdpServer = new Server({
           location: {
             port: PORT,
             path: '/'
@@ -207,7 +207,7 @@ export class Connection {
   }> {
     console.log(`Searching for devices...`)
     return new Promise((resolve) => {
-      const client = new ssdp.Client()
+      const client = new Client()
 
       client.on('response', (headers) => {
         if (headers.LOCATION.includes(`:${PORT}/`)) resolve(headers)

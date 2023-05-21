@@ -32,7 +32,9 @@ You will need for a better list of hardware and setup instructions visit [onlaj/
 ### Clone this repo
 
 1. Clone this repo to your host system and raspberry pi zero
-2. Navigate to the repo and run `npm install && npm run build`
+2. Navigate to the repo and run: 
+   - `npm install --only=prod && npm run build && npm run start` on the PI
+   - `npm install && npm run electron-postinstall && npm run build && npm run dev`
 3. On your host system, run `npm run start`
    - After the app starts, it will prompt you to select a midi input device. Select the device you want to use to control the addressible RGB strip.
 4. On your raspberry pi zero, navigate to the repo and run `sudo npm run start`
