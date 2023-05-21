@@ -1,4 +1,4 @@
-import * as midi from 'midi'
+import midi from 'midi'
 import { Connection } from './websocket'
 
 export class Midi {

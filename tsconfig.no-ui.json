@@ -1,0 +1,10 @@
+{
+  "include": ["src/main/**/*"],
+  "exclude": ["src/main/index.ts"],
+  "compilerOptions": {
+    "declaration": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "outDir": "build/no-ui",
+  }
+}

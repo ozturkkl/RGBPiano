@@ -1,5 +1,5 @@
-import * as ws281x from 'rpi-ws281x-native'
-import * as color from 'color'
+import ws281x from 'rpi-ws281x-native'
+import color from 'color'
 
 export class RgbStrip {
   NUM_LEDS = 177 // Number of LEDs in the strip

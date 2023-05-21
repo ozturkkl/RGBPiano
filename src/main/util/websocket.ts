@@ -1,5 +1,5 @@
-import * as WebSocket from 'ws'
-import { Server, Client } from 'node-ssdp'
+import WebSocket from 'ws'
+import { Server, Client, SsdpHeaders } from 'node-ssdp'
 import { PORT } from './config'
 
 export class Connection {
@@ -28,7 +28,7 @@ export class Connection {
         const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
 
         if (device) {
-          const url = `ws://${device.LOCATION.split('//')[1]}`
+          const url = `ws://${device?.LOCATION?.split('//')[1]}`
           console.log(`Connecting to ${url}`)
           const ws = new WebSocket(url)
 
@@ -202,15 +202,13 @@ export class Connection {
     })
   }
 
-  searchForServer(searchTarget: string): Promise<null | {
-    LOCATION: string
-  }> {
+  searchForServer(searchTarget: string): Promise<null | SsdpHeaders> {
     console.log(`Searching for devices...`)
     return new Promise((resolve) => {
       const client = new Client()
 
       client.on('response', (headers) => {
-        if (headers.LOCATION.includes(`:${PORT}/`)) resolve(headers)
+        if (headers?.LOCATION?.includes(`:${PORT}/`)) resolve(headers)
       })
 
       client.search(searchTarget)
