@@ -1,3 +1,3 @@
-import { mainProcess } from './util/mainProcess'
+import { mainProcess } from './src/mainProcess'
 
 mainProcess()

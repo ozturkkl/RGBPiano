@@ -1,18 +1,19 @@
 import WebSocket from 'ws'
 import { Server, Client, SsdpHeaders } from 'node-ssdp'
 import { PORT } from './config'
+import { WebsocketMessage } from '../types/websocket'
 
 export class Connection {
   private server: WebSocket.Server | null
   private client: WebSocket | null
   private connectingPromise: Promise<void> | null
-  private delinquentServerCloseTimeout: NodeJS.Timeout | null
 
   constructor() {
     this.server = null
     this.client = null
     this.connectingPromise = null
-    this.delinquentServerCloseTimeout = null
+
+    this.setupDelinquentServerCleanup()
   }
 
   async connect(): Promise<void> {
@@ -46,7 +47,6 @@ export class Connection {
 
           ws.on('close', async () => {
             console.log('Client closed')
-            resolve()
           })
           return
         }
@@ -59,7 +59,6 @@ export class Connection {
       } catch (err) {
         console.error(`Error searching/creating WebSocket servers: ${err}`)
         reject(err)
-        return
       }
     })
 
@@ -67,28 +66,12 @@ export class Connection {
     this.connectingPromise = null
   }
 
-  send(message: { type: string; data: object }): void {
+  send(message: WebsocketMessage): void {
     console.log(`Sending message: ${JSON.stringify(message)}`)
     if (this.server) {
-      console.log(this.server.clients.size)
       this.server.clients.forEach((client) => {
         client.send(JSON.stringify(message))
       })
-
-      if (this.server.clients.size === 0 && !this.delinquentServerCloseTimeout) {
-        console.log(
-          'Sending failed: No WebSocket clients connected. Restarting server in 15 seconds...'
-        )
-        this.delinquentServerCloseTimeout = setTimeout(() => {
-          this.server?.close()
-          this.delinquentServerCloseTimeout = null
-        }, 15000)
-      }
-
-      if (this.server.clients.size > 0 && this.delinquentServerCloseTimeout) {
-        clearTimeout(this.delinquentServerCloseTimeout)
-        this.delinquentServerCloseTimeout = null
-      }
     } else if (this.client) {
       this.client.send(JSON.stringify(message))
     } else {
@@ -97,7 +80,7 @@ export class Connection {
     }
   }
 
-  async listen(callback: (message) => void): Promise<void> {
+  async listen(callback: (message: WebsocketMessage) => void): Promise<void> {
     if (this.server) {
       this.server.on('connection', (ws) => {
         ws.on('message', (message) => {
@@ -218,5 +201,14 @@ export class Connection {
         resolve(null)
       }, 5000)
     })
+  }
+
+  setupDelinquentServerCleanup(): void {
+    setInterval(() => {
+      if (this.server && this.server.clients.size === 0) {
+        console.log('WebSocket server has no clients, closing...')
+        this.server.close()
+      }
+    }, 15000)
   }
 }

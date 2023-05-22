@@ -13,5 +13,5 @@
     "checkJs": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
-  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.no-ui.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,8 +1,11 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { mainProcess } from './util/mainProcess'
+import { mainProcess } from './src/mainProcess'
+import { readFileSync } from 'fs'
+import { configPath, updateConfig } from './util/config'
+import { Config } from './types/config'
 
 function createWindow(): void {
   // Create the browser window.
@@ -10,7 +13,7 @@ function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -19,7 +22,6 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainProcess()
     mainWindow.show()
   })
 
@@ -52,6 +54,7 @@ app.whenReady().then(() => {
   })
 
   createWindow()
+  main()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -69,5 +72,26 @@ app.on('window-all-closed', () => {
   }
 })
 
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+async function main(): Promise<void> {
+  const { connection } = await mainProcess()
+
+  try {
+    const config: Config = JSON.parse(readFileSync(configPath, 'utf8'))
+    connection.send({
+      type: 'config',
+      data: config
+    })
+  } catch (e) {
+    console.error(e)
+  }
+
+  ipcMain.handle('config', (_, config: Config) => {
+    console.log('Received config: ', config)
+    connection.send({
+      type: 'config',
+      data: config
+    })
+
+    updateConfig(config)
+  })
+}
