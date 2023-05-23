@@ -18,7 +18,9 @@ export function getConfig(): typeof config {
 export function updateConfig(newConfig: Partial<typeof config>): void {
   const updatedProperties = {}
 
-  compareProperties(config, newConfig, updatedProperties)
+  getUpdatedProperties(config, newConfig).forEach((property) => {
+    updatedProperties[property] = newConfig[property]
+  })
 
   if (Object.keys(updatedProperties).length > 0) {
     config = {
@@ -53,18 +55,23 @@ function isObject(value): boolean {
   return typeof value === 'object' && value !== null
 }
 
-function compareProperties(currentConfig, newConfig, updatedProperties, path = ''): void {
-  for (const key in newConfig) {
-    const currentVal = currentConfig[key]
-    const newVal = newConfig[key]
-    const nestedPath = path ? `${path}.${key}` : key
+function getUpdatedProperties(currentConfig, newConfig): string[] {
+  const updatedProperties: string[] = []
 
-    if (isObject(currentVal) && isObject(newVal)) {
-      compareProperties(currentVal, newVal, updatedProperties, nestedPath)
-    } else if (currentVal !== newVal) {
-      updatedProperties[nestedPath] = newVal
+  for (const key in newConfig) {
+    if (!isObject(newConfig[key])) {
+      if (currentConfig[key] !== newConfig[key]) {
+        updatedProperties.push(key)
+      }
+    } else {
+      const nestedUpdatedProperties = getUpdatedProperties(currentConfig[key], newConfig[key])
+      if (nestedUpdatedProperties.length > 0) {
+        updatedProperties.push(key)
+      }
     }
   }
+
+  return updatedProperties
 }
 
 function initConfig(): void {

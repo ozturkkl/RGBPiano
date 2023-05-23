@@ -30,7 +30,9 @@ function getConfig() {
 exports.getConfig = getConfig;
 function updateConfig(newConfig) {
     var updatedProperties = {};
-    compareProperties(config, newConfig, updatedProperties);
+    getUpdatedProperties(config, newConfig).forEach(function (property) {
+        updatedProperties[property] = newConfig[property];
+    });
     if (Object.keys(updatedProperties).length > 0) {
         config = __assign(__assign({}, config), newConfig);
         configEmitter.emit('configUpdated', updatedProperties);
@@ -57,19 +59,22 @@ var configEmitter = new events_1["default"]();
 function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
-function compareProperties(currentConfig, newConfig, updatedProperties, path) {
-    if (path === void 0) { path = ''; }
+function getUpdatedProperties(currentConfig, newConfig) {
+    var updatedProperties = [];
     for (var key in newConfig) {
-        var currentVal = currentConfig[key];
-        var newVal = newConfig[key];
-        var nestedPath = path ? "".concat(path, ".").concat(key) : key;
-        if (isObject(currentVal) && isObject(newVal)) {
-            compareProperties(currentVal, newVal, updatedProperties, nestedPath);
+        if (!isObject(newConfig[key])) {
+            if (currentConfig[key] !== newConfig[key]) {
+                updatedProperties.push(key);
+            }
         }
-        else if (currentVal !== newVal) {
-            updatedProperties[nestedPath] = newVal;
+        else {
+            var nestedUpdatedProperties = getUpdatedProperties(currentConfig[key], newConfig[key]);
+            if (nestedUpdatedProperties.length > 0) {
+                updatedProperties.push(key);
+            }
         }
     }
+    return updatedProperties;
 }
 function initConfig() {
     try {
