@@ -42,9 +42,9 @@ export class RgbStrip {
   }
 
   fillColors(color = getConfig().BACKGROUND_COLOR, preserveLightness = false): void {
-    Object.keys(this.colors).forEach((key) => {
-      this.setColor(Number(key), color, preserveLightness)
-    })
+    for (let i = 0; i < NUM_LEDS; i++) {
+      this.setColor(i, color, preserveLightness)
+    }
 
     this.render()
   }

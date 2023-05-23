@@ -42,12 +42,11 @@ var RgbStrip = /** @class */ (function () {
         }
     };
     RgbStrip.prototype.fillColors = function (color, preserveLightness) {
-        var _this = this;
         if (color === void 0) { color = (0, config_1.getConfig)().BACKGROUND_COLOR; }
         if (preserveLightness === void 0) { preserveLightness = false; }
-        Object.keys(this.colors).forEach(function (key) {
-            _this.setColor(Number(key), color, preserveLightness);
-        });
+        for (var i = 0; i < config_1.NUM_LEDS; i++) {
+            this.setColor(i, color, preserveLightness);
+        }
         this.render();
     };
     RgbStrip.prototype.render = function () {
