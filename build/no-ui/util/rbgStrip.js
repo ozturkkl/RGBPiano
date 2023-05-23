@@ -6,6 +6,7 @@ exports.__esModule = true;
 exports.RgbStrip = void 0;
 var rpi_ws281x_native_1 = __importDefault(require("rpi-ws281x-native"));
 var config_1 = require("./config");
+var colors_1 = require("./colors");
 var RgbStrip = /** @class */ (function () {
     function RgbStrip() {
         var _this = this;
@@ -37,7 +38,7 @@ var RgbStrip = /** @class */ (function () {
     RgbStrip.prototype.setStripColor = function (positionRatio, velocityRatio, _a) {
         if (velocityRatio === void 0) { velocityRatio = 1; }
         var _b = _a === void 0 ? (0, config_1.getConfig)().COLOR : _a, red = _b[0], green = _b[1], blue = _b[2];
-        var blendedColor = this.getBlendedRGB([red, green, blue], (0, config_1.getConfig)().BACKGROUND_COLOR, velocityRatio);
+        var blendedColor = (0, colors_1.getBlendedRGB)([red, green, blue], (0, config_1.getConfig)().BACKGROUND_COLOR, velocityRatio);
         // if no pixel position is specified, set all pixels to the same color
         if (positionRatio === undefined) {
             this.fillColors(blendedColor, false);
@@ -66,7 +67,7 @@ var RgbStrip = /** @class */ (function () {
                 this.setBackgroundColor((0, config_1.getConfig)().BACKGROUND_COLOR);
             }
             else {
-                this.setBackgroundColor(this.getBlendedRGB((0, config_1.getConfig)().BACKGROUND_COLOR, [0, 0, 0], 0.5));
+                this.setBackgroundColor((0, colors_1.getBlendedRGB)((0, config_1.getConfig)().BACKGROUND_COLOR, [0, 0, 0], 0.5));
             }
         }
     };
@@ -78,46 +79,16 @@ var RgbStrip = /** @class */ (function () {
         });
         rpi_ws281x_native_1["default"].render();
     };
-    RgbStrip.prototype.RGBToHSL = function (r, g, b) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        var l = Math.max(r, g, b);
-        var s = l - Math.min(r, g, b);
-        var h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-        return [
-            60 * h < 0 ? 60 * h + 360 : 60 * h,
-            100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-            (100 * (2 * l - s)) / 2
-        ];
-    };
-    RgbStrip.prototype.HSLToRGB = function (h, s, l) {
-        s /= 100;
-        l /= 100;
-        var k = function (n) { return (n + h / 30) % 12; };
-        var a = s * Math.min(l, 1 - l);
-        var f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); };
-        return [255 * f(0), 255 * f(8), 255 * f(4)];
-    };
-    RgbStrip.prototype.getBlendedRGB = function (_a, _b, ratio) {
-        var c1r = _a[0], c1g = _a[1], c1b = _a[2];
-        var c2r = _b[0], c2g = _b[1], c2b = _b[2];
-        return [
-            Math.round(c1r * ratio) + Math.round(c2r * (1 - ratio)),
-            Math.round(c1g * ratio) + Math.round(c2g * (1 - ratio)),
-            Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio))
-        ];
-    };
     RgbStrip.prototype.setColor = function (index, color) {
         this.colors[index] = color;
     };
     RgbStrip.prototype.fillColors = function (color, preserveLightness) {
         var _this = this;
         if (preserveLightness === void 0) { preserveLightness = true; }
-        var _a = this.RGBToHSL.apply(this, color), h = _a[0], s = _a[1], l = _a[2];
+        var _a = colors_1.RGBToHSL.apply(void 0, color), h = _a[0], s = _a[1], l = _a[2];
         Object.keys(this.colors).forEach(function (key) {
             var currentRGB = _this.colors[Number(key)];
-            var newRGB = _this.HSLToRGB(h, s, preserveLightness ? _this.RGBToHSL.apply(_this, currentRGB)[2] : l);
+            var newRGB = (0, colors_1.HSLToRGB)(h, s, preserveLightness ? colors_1.RGBToHSL.apply(void 0, currentRGB)[2] : l);
             _this.setColor(Number(key), newRGB);
         });
     };

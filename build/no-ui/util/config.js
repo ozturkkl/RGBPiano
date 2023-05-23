@@ -18,6 +18,7 @@ exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.NUM
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
+var colors_1 = require("./colors");
 exports.configPath = path_1["default"].join(__dirname, 'RGBPiano-config.json');
 exports.PORT = 3192;
 exports.DATA_PIN = 18;
@@ -47,10 +48,11 @@ function onConfigUpdated(listener) {
     });
 }
 exports.onConfigUpdated = onConfigUpdated;
+var hue = Math.round(Math.random() * 360);
 var config = {
     BRIGHTNESS: 1,
-    BACKGROUND_COLOR: [0, 2, 2],
-    COLOR: [0, 255, 255],
+    BACKGROUND_COLOR: (0, colors_1.HSLToRGB)(hue, 1, 0.02),
+    COLOR: (0, colors_1.HSLToRGB)(hue, 1, 1),
     CONSTANT_VELOCITY: true,
     SELECTED_DEVICE: 'Springbeats vMIDI1'
 };

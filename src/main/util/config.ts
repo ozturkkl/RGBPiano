@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
 import { readFileSync, writeFileSync } from 'fs'
 import path from 'path'
+import { HSLToRGB } from './colors'
 
 export type ConfigType = typeof config
 export const configPath = path.join(__dirname, 'RGBPiano-config.json')
@@ -39,6 +40,8 @@ export function onConfigUpdated(listener: (conf: Partial<typeof config>) => void
   })
 }
 
+const hue = Math.round(Math.random() * 360)
+
 let config: {
   BRIGHTNESS: number
   BACKGROUND_COLOR: [number, number, number]
@@ -47,8 +50,8 @@ let config: {
   SELECTED_DEVICE: string
 } = {
   BRIGHTNESS: 1,
-  BACKGROUND_COLOR: [0, 2, 2],
-  COLOR: [0, 255, 255],
+  BACKGROUND_COLOR: HSLToRGB(hue, 1, 0.02),
+  COLOR: HSLToRGB(hue, 1, 1),
   CONSTANT_VELOCITY: true,
   SELECTED_DEVICE: 'Springbeats vMIDI1'
 }
