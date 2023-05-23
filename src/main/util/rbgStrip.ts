@@ -4,8 +4,7 @@ import { DATA_PIN, NUM_LEDS, getConfig, onConfigUpdated } from './config'
 import { WebsocketMessageDataMidi } from '../types/websocket'
 
 export class RgbStrip {
-  channel = ws281x(NUM_LEDS, {
-    stripType: ws281x.stripType.WS2812,
+  private channel = ws281x(NUM_LEDS, {
     gpio: DATA_PIN,
     brightness: getConfig().BRIGHTNESS * 255,
     invert: false
@@ -21,6 +20,8 @@ export class RgbStrip {
         this.setBackgroundColor(...updatedProperties.BACKGROUND_COLOR)
       }
     })
+
+    this.setBackgroundColor(...getConfig().BACKGROUND_COLOR)
   }
 
   setBrightness(brightness: number): void {
