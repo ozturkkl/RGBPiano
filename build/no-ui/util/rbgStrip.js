@@ -23,7 +23,7 @@ var RgbStrip = /** @class */ (function () {
                 _this.setBackgroundColor(updatedProperties.BACKGROUND_COLOR);
             }
         });
-        this.setBackgroundColor((0, config_1.getConfig)().BACKGROUND_COLOR);
+        this.reset();
     }
     RgbStrip.prototype.setBrightness = function (brightness) {
         this.channel.brightness = brightness * 255;

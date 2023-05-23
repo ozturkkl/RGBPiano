@@ -22,7 +22,7 @@ export class RgbStrip {
       }
     })
 
-    this.setBackgroundColor(getConfig().BACKGROUND_COLOR)
+    this.reset()
   }
 
   setBrightness(brightness: number): void {
