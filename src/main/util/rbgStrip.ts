@@ -66,7 +66,7 @@ export class RgbStrip {
       getConfig().BACKGROUND_COLOR,
       velocityRatio
     )
-    const colorPosition = Math.floor(positionRatio * NUM_LEDS)
+    const colorPosition = positionRatio === 1 ? NUM_LEDS - 1 : Math.floor(positionRatio * NUM_LEDS)
 
     this.setColor(colorPosition, blendedColor)
     this.render()

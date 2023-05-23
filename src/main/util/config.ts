@@ -10,7 +10,7 @@ export const PORT = 3192
 export const DATA_PIN = 18
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
-export const NUM_LEDS = 176
+export const NUM_LEDS = 177
 
 export function getConfig(): typeof config {
   return config

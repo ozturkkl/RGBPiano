@@ -61,7 +61,7 @@ var RgbStrip = /** @class */ (function () {
         if (velocityRatio === void 0) { velocityRatio = 1; }
         var _b = _a === void 0 ? (0, config_1.getConfig)().COLOR : _a, red = _b[0], green = _b[1], blue = _b[2];
         var blendedColor = (0, colors_1.getBlendedRGB)([red, green, blue], (0, config_1.getConfig)().BACKGROUND_COLOR, velocityRatio);
-        var colorPosition = Math.floor(positionRatio * config_1.NUM_LEDS);
+        var colorPosition = positionRatio === 1 ? config_1.NUM_LEDS - 1 : Math.floor(positionRatio * config_1.NUM_LEDS);
         this.setColor(colorPosition, blendedColor);
         this.render();
     };
