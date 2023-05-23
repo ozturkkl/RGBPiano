@@ -209,6 +209,6 @@ export class Connection {
         console.log('WebSocket server has no clients, closing...')
         this.server.close()
       }
-    }, 15000)
+    }, 20000 + Math.random() * 50000)
   }
 }

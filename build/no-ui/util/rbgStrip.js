@@ -20,7 +20,6 @@ var RgbStrip = /** @class */ (function () {
     function RgbStrip() {
         var _this = this;
         this.channel = (0, rpi_ws281x_native_1["default"])(config_1.NUM_LEDS, {
-            stripType: rpi_ws281x_native_1["default"].stripType.WS2812,
             gpio: config_1.DATA_PIN,
             brightness: (0, config_1.getConfig)().BRIGHTNESS * 255,
             invert: false
@@ -34,6 +33,7 @@ var RgbStrip = /** @class */ (function () {
                 _this.setBackgroundColor.apply(_this, updatedProperties.BACKGROUND_COLOR);
             }
         });
+        this.setBackgroundColor.apply(this, (0, config_1.getConfig)().BACKGROUND_COLOR);
     }
     RgbStrip.prototype.setBrightness = function (brightness) {
         this.channel.brightness = brightness * 255;

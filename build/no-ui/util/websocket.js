@@ -285,7 +285,7 @@ var Connection = /** @class */ (function () {
                 console.log('WebSocket server has no clients, closing...');
                 _this.server.close();
             }
-        }, 15000);
+        }, 20000 + Math.random() * 50000);
     };
     return Connection;
 }());
