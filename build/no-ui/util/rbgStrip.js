@@ -21,18 +21,19 @@ var RgbStrip = /** @class */ (function () {
                 _this.setBrightness(updatedProperties.BRIGHTNESS);
             }
             if (updatedProperties.BACKGROUND_COLOR) {
-                _this.setBackgroundColor(updatedProperties.BACKGROUND_COLOR);
+                _this.setBackgroundColor();
             }
         });
-        this.reset();
+        this.setBackgroundColor();
     }
     RgbStrip.prototype.setBrightness = function (brightness) {
         this.channel.brightness = brightness * 255;
         this.render();
     };
-    RgbStrip.prototype.setBackgroundColor = function (_a) {
-        var red = _a[0], green = _a[1], blue = _a[2];
-        this.fillColors([red, green, blue]);
+    RgbStrip.prototype.setBackgroundColor = function (_a, preserveLightness) {
+        var _b = _a === void 0 ? (0, config_1.getConfig)().BACKGROUND_COLOR : _a, red = _b[0], green = _b[1], blue = _b[2];
+        if (preserveLightness === void 0) { preserveLightness = false; }
+        this.fillColors([red, green, blue], preserveLightness);
         this.render();
     };
     RgbStrip.prototype.setStripColor = function (positionRatio, velocityRatio, _a) {
@@ -49,10 +50,6 @@ var RgbStrip = /** @class */ (function () {
         }
         this.render();
     };
-    RgbStrip.prototype.reset = function () {
-        this.fillColors((0, config_1.getConfig)().BACKGROUND_COLOR, false);
-        this.render();
-    };
     RgbStrip.prototype.handleNotePress = function (data) {
         // note
         if (data.midiChannel === 144) {
@@ -64,10 +61,10 @@ var RgbStrip = /** @class */ (function () {
         // pedal
         if (data.midiChannel === 176) {
             if (data.noteVelocityRatio === 0) {
-                this.setBackgroundColor((0, config_1.getConfig)().BACKGROUND_COLOR);
+                this.setBackgroundColor((0, config_1.getConfig)().BACKGROUND_COLOR, true);
             }
             else {
-                this.setBackgroundColor((0, colors_1.getBlendedRGB)((0, config_1.getConfig)().BACKGROUND_COLOR, [0, 0, 0], 0.5));
+                this.setBackgroundColor((0, colors_1.getBlendedRGB)((0, config_1.getConfig)().BACKGROUND_COLOR, [0, 0, 0], 0.5), true);
             }
         }
     };

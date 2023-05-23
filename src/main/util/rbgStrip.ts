@@ -19,11 +19,11 @@ export class RgbStrip {
         this.setBrightness(updatedProperties.BRIGHTNESS)
       }
       if (updatedProperties.BACKGROUND_COLOR) {
-        this.setBackgroundColor(updatedProperties.BACKGROUND_COLOR)
+        this.setBackgroundColor()
       }
     })
 
-    this.reset()
+    this.setBackgroundColor()
   }
 
   setBrightness(brightness: number): void {
@@ -31,8 +31,11 @@ export class RgbStrip {
     this.render()
   }
 
-  setBackgroundColor([red, green, blue]): void {
-    this.fillColors([red, green, blue])
+  setBackgroundColor(
+    [red, green, blue] = getConfig().BACKGROUND_COLOR,
+    preserveLightness = false
+  ): void {
+    this.fillColors([red, green, blue], preserveLightness)
     this.render()
   }
 
@@ -58,11 +61,6 @@ export class RgbStrip {
     this.render()
   }
 
-  reset(): void {
-    this.fillColors(getConfig().BACKGROUND_COLOR, false)
-    this.render()
-  }
-
   handleNotePress(data: WebsocketMessageDataMidi): void {
     // note
     if (data.midiChannel === 144) {
@@ -76,9 +74,9 @@ export class RgbStrip {
     // pedal
     if (data.midiChannel === 176) {
       if (data.noteVelocityRatio === 0) {
-        this.setBackgroundColor(getConfig().BACKGROUND_COLOR)
+        this.setBackgroundColor(getConfig().BACKGROUND_COLOR, true)
       } else {
-        this.setBackgroundColor(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5))
+        this.setBackgroundColor(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5), true)
       }
     }
   }

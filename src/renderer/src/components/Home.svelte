@@ -1,21 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { Config } from '../../../main/types/config'
+  import { HSLToRGB } from '../../../main/util/colors'
 
   async function buttonClick() {
-    const color: [number, number, number] = [
-      Math.floor(Math.random() * 255),
-      Math.floor(Math.random() * 255),
-      Math.floor(Math.random() * 255)
-    ]
+    const hue = Math.round(Math.random() * 360)
+
     const config: Partial<Config> = {
-      BRIGHTNESS: 1,
-      COLOR: color,
-      BACKGROUND_COLOR: [
-        Math.round(color[0] * 0.02),
-        Math.round(color[1] * 0.02),
-        Math.round(color[2] * 0.02)
-      ]
+      BACKGROUND_COLOR: HSLToRGB(hue, 100, 1),
+      COLOR: HSLToRGB(hue, 100, 50)
     }
 
     await window.electron.ipcRenderer.invoke('config', config)

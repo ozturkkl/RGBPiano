@@ -50,8 +50,8 @@ let config: {
   SELECTED_DEVICE: string
 } = {
   BRIGHTNESS: 1,
-  BACKGROUND_COLOR: HSLToRGB(hue, 1, 0.02),
-  COLOR: HSLToRGB(hue, 1, 1),
+  BACKGROUND_COLOR: HSLToRGB(hue, 100, 1),
+  COLOR: HSLToRGB(hue, 100, 50),
   CONSTANT_VELOCITY: true,
   SELECTED_DEVICE: 'Springbeats vMIDI1'
 }
