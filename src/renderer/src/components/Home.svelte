@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { Config } from '../../../main/types/config'
   import { HSLToRGB } from '../../../main/util/colors'
+
+  let interval: NodeJS.Timeout | null = null
 
   async function buttonClick() {
     const hue = Math.round(Math.random() * 360)
@@ -15,10 +17,15 @@
   }
 
   onMount(() => {
-    console.log('Home mounted')
-    return setInterval(() => {
+    interval = setInterval(() => {
       // buttonClick()
-    }, 500000)
+    }, 200000)
+  })
+
+  onDestroy(() => {
+    if (interval) {
+      clearInterval(interval)
+    }
   })
 </script>
 
