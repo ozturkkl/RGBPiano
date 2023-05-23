@@ -3,20 +3,19 @@
   import type { Config } from '../../../main/types/config'
 
   async function buttonClick() {
-    const color = [
+    const color: [number, number, number] = [
       Math.floor(Math.random() * 255),
       Math.floor(Math.random() * 255),
       Math.floor(Math.random() * 255)
     ]
-    const bgColor = [
-      Math.floor(color[0] * 0.2),
-      Math.floor(color[1] * 0.2),
-      Math.floor(color[2] * 0.2)
-    ]
     const config: Partial<Config> = {
       BRIGHTNESS: 1,
-      BACKGROUND_COLOR: bgColor,
-      COLOR: color
+      COLOR: color,
+      BACKGROUND_COLOR: [
+        Math.round(color[0] * 0.02),
+        Math.round(color[1] * 0.02),
+        Math.round(color[2] * 0.02)
+      ]
     }
 
     await window.electron.ipcRenderer.invoke('config', config)
@@ -24,6 +23,9 @@
 
   onMount(() => {
     console.log('Home mounted')
+    return setInterval(() => {
+      // buttonClick()
+    }, 500000)
   })
 </script>
 

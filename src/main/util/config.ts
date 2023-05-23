@@ -39,7 +39,13 @@ export function onConfigUpdated(listener: (conf: Partial<typeof config>) => void
   })
 }
 
-let config = {
+let config: {
+  BRIGHTNESS: number
+  BACKGROUND_COLOR: [number, number, number]
+  COLOR: [number, number, number]
+  CONSTANT_VELOCITY: boolean
+  SELECTED_DEVICE: string
+} = {
   BRIGHTNESS: 1,
   BACKGROUND_COLOR: [0, 2, 2],
   COLOR: [0, 255, 255],
