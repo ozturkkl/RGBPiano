@@ -24,7 +24,7 @@ exports.PORT = 3192;
 exports.DATA_PIN = 18;
 exports.MIN_NOTE = 21;
 exports.MAX_NOTE = 108;
-exports.NUM_LEDS = 177;
+exports.NUM_LEDS = 176;
 function getConfig() {
     return config;
 }
