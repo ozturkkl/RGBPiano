@@ -83,12 +83,12 @@ export class RgbStrip {
     }
 
     // pedal
-    if (data.midiChannel === 176) {
-      if (data.noteVelocityRatio === 0) {
-        this.fillColors(getConfig().BACKGROUND_COLOR, true)
-      } else {
-        this.fillColors(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5), true)
-      }
-    }
+    // if (data.midiChannel === 176) {
+    //   if (data.noteVelocityRatio === 0) {
+    //     this.fillColors(getConfig().BACKGROUND_COLOR, true)
+    //   } else {
+    //     this.fillColors(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5), true)
+    //   }
+    // }
   }
 }

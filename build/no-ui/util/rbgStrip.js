@@ -74,14 +74,13 @@ var RgbStrip = /** @class */ (function () {
             this.noteHandler(data.notePositionRatio, data.noteVelocityRatio);
         }
         // pedal
-        if (data.midiChannel === 176) {
-            if (data.noteVelocityRatio === 0) {
-                this.fillColors((0, config_1.getConfig)().BACKGROUND_COLOR, true);
-            }
-            else {
-                this.fillColors((0, colors_1.getBlendedRGB)((0, config_1.getConfig)().BACKGROUND_COLOR, [0, 0, 0], 0.5), true);
-            }
-        }
+        // if (data.midiChannel === 176) {
+        //   if (data.noteVelocityRatio === 0) {
+        //     this.fillColors(getConfig().BACKGROUND_COLOR, true)
+        //   } else {
+        //     this.fillColors(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5), true)
+        //   }
+        // }
     };
     return RgbStrip;
 }());
