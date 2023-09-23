@@ -33,15 +33,16 @@ You will need for a better list of hardware and setup instructions visit [onlaj/
 
 1. Clone this repo to your host system and raspberry pi zero
 2. Navigate to the repo and run: 
-   - `npm install --only=prod && sudo npm run start` on the PI
-   - `npm install && npm run electron-postinstall && npm run build && npm run dev` on the host system
+   - PI ----> `npm run pi:install && npm run pi:start`
+   - HOST ----> use dist app or `npm run electron:install && npm run electron` for debug mode
 
 ### Future work
 
 - [x] Complete MVP, ability to control the strip with the keyboard using websockets
+- [x] Add ability to save settings
+- [ ] Add ability to control the strip with google home
 - [ ] Add UI to select midi input device, color, brightness, etc.
 - [ ] Create RPI image to make setup easier
-- [ ] Add ability to save settings
 - [ ] Create packaged version of the app for windows, mac, and linux (don't know if will ever do this)
 - [ ] Maybe support for basic API to control the strip?
 - [ ] Make app work in sync with keysight (maybe, depends on how much I use keysight going forward)
