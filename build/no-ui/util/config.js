@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.NUM_LEDS = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
+exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
@@ -24,7 +24,6 @@ exports.PORT = 3192;
 exports.DATA_PIN = 18;
 exports.MIN_NOTE = 21;
 exports.MAX_NOTE = 108;
-exports.NUM_LEDS = 177;
 function getConfig() {
     return config;
 }
@@ -51,10 +50,14 @@ exports.onConfigUpdated = onConfigUpdated;
 var hue = Math.round(Math.random() * 360);
 var config = {
     BRIGHTNESS: 1,
-    BACKGROUND_COLOR: (0, colors_1.HSLToRGB)(hue, 100, 1),
-    COLOR: (0, colors_1.HSLToRGB)(hue, 100, 50),
+    BACKGROUND_BRIGHTNESS: 0.05,
+    BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
+    NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
     CONSTANT_VELOCITY: true,
-    SELECTED_DEVICE: 'Springbeats vMIDI1'
+    SELECTED_DEVICE: 'Springbeats vMIDI1',
+    LED_INVERT: true,
+    LED_END_COUNT: 177,
+    LED_START_COUNT: 0
 };
 initConfig();
 var configEmitter = new events_1["default"]();
