@@ -18,7 +18,8 @@ export class RgbStrip {
         this.fillColors()
       }
       if (updatedProperties.LED_END_COUNT) {
-        this.fillColors([0, 0, 0])
+        this.colors = {}
+        this.fillColors()
         ws281x.finalize()
         this.channel = this.initializeWS281x()
       }

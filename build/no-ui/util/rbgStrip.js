@@ -20,7 +20,8 @@ var RgbStrip = /** @class */ (function () {
                 _this.fillColors();
             }
             if (updatedProperties.LED_END_COUNT) {
-                _this.fillColors([0, 0, 0]);
+                _this.colors = {};
+                _this.fillColors();
                 rpi_ws281x_native_1["default"].finalize();
                 _this.channel = _this.initializeWS281x();
             }
