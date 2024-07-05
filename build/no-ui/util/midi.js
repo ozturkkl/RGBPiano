@@ -14,7 +14,6 @@ var Midi = /** @class */ (function () {
         this.output = new midi_1["default"].Output();
         this.connection = connection;
         this.rgbStrip = rgbStrip;
-        this.invertPosition = (0, config_1.getConfig)().LED_INVERT;
         this.listenToInput();
         this.initConfiguredInput();
     }
@@ -45,7 +44,7 @@ var Midi = /** @class */ (function () {
         this.input.on('message', function (deltaTime, message) {
             var payload = {
                 deltaTime: deltaTime,
-                notePositionRatio: _this.invertPosition
+                notePositionRatio: (0, config_1.getConfig)().LED_INVERT
                     ? 1 - (message[1] - _this.minNote) / (_this.maxNote - _this.minNote)
                     : (message[1] - _this.minNote) / (_this.maxNote - _this.minNote),
                 noteVelocityRatio: message[2] / 127,
@@ -69,9 +68,6 @@ var Midi = /** @class */ (function () {
         (0, config_1.onConfigUpdated)(function (config) {
             if (config.SELECTED_DEVICE) {
                 _this.openInput(config.SELECTED_DEVICE);
-            }
-            if (config.LED_INVERT) {
-                _this.invertPosition = config.LED_INVERT;
             }
         });
     };

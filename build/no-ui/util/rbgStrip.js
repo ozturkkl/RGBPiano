@@ -24,7 +24,6 @@ var RgbStrip = /** @class */ (function () {
                 _this.channel = _this.initializeWS281x();
             }
             if (updatedProperties.LED_START_COUNT) {
-                rpi_ws281x_native_1["default"].reset();
                 _this.fillColors();
             }
         });
@@ -52,6 +51,7 @@ var RgbStrip = /** @class */ (function () {
     };
     RgbStrip.prototype.render = function () {
         var _this = this;
+        this.channel.array.fill(0);
         Object.entries(this.colors).forEach(function (_a) {
             var index = _a[0], color = _a[1];
             _this.channel.array[index] = (color[0] << 16) | (color[1] << 8) | color[2];

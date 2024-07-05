@@ -7,8 +7,6 @@ export class Midi {
   minNote = MIN_NOTE
   maxNote = MAX_NOTE
 
-  invertPosition: boolean
-
   input: midi.Input
   output: midi.Output
 
@@ -20,7 +18,6 @@ export class Midi {
     this.output = new midi.Output()
     this.connection = connection
     this.rgbStrip = rgbStrip
-    this.invertPosition = getConfig().LED_INVERT
     this.listenToInput()
     this.initConfiguredInput()
   }
@@ -33,7 +30,7 @@ export class Midi {
     return devices
   }
 
-  private openInput(device: string){
+  private openInput(device: string) {
     this.getDevices().forEach((d, i) => {
       if (d === device) {
         try {
@@ -52,7 +49,7 @@ export class Midi {
     this.input.on('message', (deltaTime, message) => {
       const payload = {
         deltaTime,
-        notePositionRatio: this.invertPosition
+        notePositionRatio: getConfig().LED_INVERT
           ? 1 - (message[1] - this.minNote) / (this.maxNote - this.minNote)
           : (message[1] - this.minNote) / (this.maxNote - this.minNote),
         noteVelocityRatio: message[2] / 127,
@@ -79,9 +76,6 @@ export class Midi {
     onConfigUpdated((config) => {
       if (config.SELECTED_DEVICE) {
         this.openInput(config.SELECTED_DEVICE)
-      }
-      if (config.LED_INVERT) {
-        this.invertPosition = config.LED_INVERT
       }
     })
   }

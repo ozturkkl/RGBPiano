@@ -22,7 +22,6 @@ export class RgbStrip {
         this.channel = this.initializeWS281x()
       }
       if (updatedProperties.LED_START_COUNT) {
-        ws281x.reset()
         this.fillColors()
       }
     })
@@ -61,6 +60,7 @@ export class RgbStrip {
   }
 
   render(): void {
+    this.channel.array.fill(0)
     Object.entries(this.colors).forEach(([index, color]) => {
       this.channel.array[index] = (color[0] << 16) | (color[1] << 8) | color[2]
     })
