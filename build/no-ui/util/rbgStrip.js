@@ -20,6 +20,7 @@ var RgbStrip = /** @class */ (function () {
                 _this.fillColors();
             }
             if (updatedProperties.LED_END_COUNT) {
+                _this.fillColors([0, 0, 0]);
                 rpi_ws281x_native_1["default"].finalize();
                 _this.channel = _this.initializeWS281x();
             }
@@ -44,8 +45,8 @@ var RgbStrip = /** @class */ (function () {
     };
     RgbStrip.prototype.fillColors = function (color) {
         if (color === void 0) { color = (0, config_1.getConfig)().BACKGROUND_COLOR_RGB.map(function (c) { return c * (0, config_1.getConfig)().BACKGROUND_BRIGHTNESS; }); }
-        for (var i = (0, config_1.getConfig)().LED_START_COUNT; i < (0, config_1.getConfig)().LED_END_COUNT; i++) {
-            this.setColor(i, color);
+        for (var i = 0; i < (0, config_1.getConfig)().LED_END_COUNT; i++) {
+            this.setColor(i, i < (0, config_1.getConfig)().LED_START_COUNT ? [0, 0, 0] : color);
         }
         this.render();
     };
