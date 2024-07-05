@@ -32,18 +32,17 @@ You will need for a better list of hardware and setup instructions visit [onlaj/
 ### Clone this repo
 
 1. Clone this repo to your host system and raspberry pi zero
-2. Navigate to the repo and run `npm install && npm run build`
-3. On your host system, run `npm run start`
-   - After the app starts, it will prompt you to select a midi input device. Select the device you want to use to control the addressible RGB strip.
-4. On your raspberry pi zero, navigate to the repo and run `sudo npm run start`
-   - You must run as sudo to access the GPIO pins
+2. Navigate to the repo and run: 
+   - PI ----> `npm run pi:install && npm run pi:start`
+   - HOST ----> use dist app or `npm run electron:install && npm run electron` for debug mode
 
 ### Future work
 
 - [x] Complete MVP, ability to control the strip with the keyboard using websockets
+- [x] Add ability to save settings
+- [ ] Add ability to control the strip with google home
 - [ ] Add UI to select midi input device, color, brightness, etc.
 - [ ] Create RPI image to make setup easier
-- [ ] Add ability to save settings
 - [ ] Create packaged version of the app for windows, mac, and linux (don't know if will ever do this)
 - [ ] Maybe support for basic API to control the strip?
 - [ ] Make app work in sync with keysight (maybe, depends on how much I use keysight going forward)
