@@ -10,7 +10,6 @@ export const PORT = 3192
 export const DATA_PIN = 18
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
-export const NUM_LEDS = 177
 
 export function getConfig(): typeof config {
   return config
@@ -44,16 +43,24 @@ const hue = Math.round(Math.random() * 360)
 
 let config: {
   BRIGHTNESS: number
-  BACKGROUND_COLOR: [number, number, number]
-  COLOR: [number, number, number]
+  BACKGROUND_BRIGHTNESS: number
+  BACKGROUND_COLOR_RGB: [number, number, number]
+  NOTE_PRESS_COLOR_RGB: [number, number, number]
   CONSTANT_VELOCITY: boolean
   SELECTED_DEVICE: string
+  LED_INVERT: boolean
+  LED_END_COUNT: number
+  LED_START_COUNT: number
 } = {
   BRIGHTNESS: 1,
-  BACKGROUND_COLOR: HSLToRGB(hue, 100, 1),
-  COLOR: HSLToRGB(hue, 100, 50),
+  BACKGROUND_BRIGHTNESS: 0.05,
+  BACKGROUND_COLOR_RGB: HSLToRGB(hue, 100, 100),
+  NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, 100, 100),
   CONSTANT_VELOCITY: true,
-  SELECTED_DEVICE: 'Springbeats vMIDI1'
+  SELECTED_DEVICE: 'Springbeats vMIDI1',
+  LED_INVERT: true,
+  LED_END_COUNT: 177,
+  LED_START_COUNT: 0
 }
 
 initConfig()

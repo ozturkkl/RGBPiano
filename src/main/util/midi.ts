@@ -7,6 +7,8 @@ export class Midi {
   minNote = MIN_NOTE
   maxNote = MAX_NOTE
 
+  invertPosition: boolean
+
   input: midi.Input
   output: midi.Output
 
@@ -18,11 +20,12 @@ export class Midi {
     this.output = new midi.Output()
     this.connection = connection
     this.rgbStrip = rgbStrip
+    this.invertPosition = getConfig().LED_INVERT
     this.listenToInput()
     this.initConfiguredInput()
   }
 
-  getDevices(): string[] {
+  private getDevices(): string[] {
     const devices: string[] = []
     for (let i = 0; i < this.input.getPortCount(); i++) {
       devices.push(this.input.getPortName(i))
@@ -30,7 +33,7 @@ export class Midi {
     return devices
   }
 
-  async openInput(device: string): Promise<void> {
+  private openInput(device: string){
     this.getDevices().forEach((d, i) => {
       if (d === device) {
         try {
@@ -45,11 +48,13 @@ export class Midi {
     })
   }
 
-  listenToInput(): void {
+  private listenToInput(): void {
     this.input.on('message', (deltaTime, message) => {
       const payload = {
         deltaTime,
-        notePositionRatio: (message[1] - this.minNote) / (this.maxNote - this.minNote),
+        notePositionRatio: this.invertPosition
+          ? 1 - (message[1] - this.minNote) / (this.maxNote - this.minNote)
+          : (message[1] - this.minNote) / (this.maxNote - this.minNote),
         noteVelocityRatio: message[2] / 127,
         midiChannel: message[0]
       }
@@ -63,7 +68,7 @@ export class Midi {
     })
   }
 
-  initConfiguredInput(): void {
+  private initConfiguredInput(): void {
     const devices: string[] = this.getDevices()
     devices.forEach((device) => {
       if (device.includes(getConfig().SELECTED_DEVICE)) {
@@ -74,6 +79,9 @@ export class Midi {
     onConfigUpdated((config) => {
       if (config.SELECTED_DEVICE) {
         this.openInput(config.SELECTED_DEVICE)
+      }
+      if (config.LED_INVERT) {
+        this.invertPosition = config.LED_INVERT
       }
     })
   }

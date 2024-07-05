@@ -14,9 +14,9 @@
     "electron:install": "npm install && npm run electron:postinstall && npm run electron:build",
     "electron:build": "npm run typecheck && electron-vite build && tsc -p tsconfig.no-ui.json",
     "electron:postinstall": "electron-builder install-app-deps && electron-rebuild",
-    "electron:win": "npm run build && electron-builder --win --config",
-    "electron:mac": "npm run build && electron-builder --mac --config",
-    "electron:linux": "npm run build && electron-builder --linux --config"
+    "electron:win": "npm run electron:build && electron-builder --win --config",
+    "electron:mac": "npm run electron:build && electron-builder --mac --config",
+    "electron:linux": "npm run electron:build && electron-builder --linux --config"
   },
   "dependencies": {
     "midi": "^2.0.0",

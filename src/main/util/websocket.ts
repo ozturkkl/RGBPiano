@@ -130,7 +130,7 @@ export class Connection {
     }
   }
 
-  createWebSocketServer(): Promise<void> {
+  private createWebSocketServer(): Promise<void> {
     return new Promise<void>((resolve) => {
       try {
         const wss = new WebSocket.Server({ port: PORT })
@@ -185,7 +185,7 @@ export class Connection {
     })
   }
 
-  searchForServer(searchTarget: string): Promise<null | SsdpHeaders> {
+  private searchForServer(searchTarget: string): Promise<null | SsdpHeaders> {
     console.log(`Searching for devices...`)
     return new Promise((resolve) => {
       const client = new Client()
@@ -203,7 +203,7 @@ export class Connection {
     })
   }
 
-  setupDelinquentServerCleanup(): void {
+  private setupDelinquentServerCleanup(): void {
     setInterval(() => {
       if (this.server && this.server.clients.size === 0) {
         console.log('WebSocket server has no clients, closing...')

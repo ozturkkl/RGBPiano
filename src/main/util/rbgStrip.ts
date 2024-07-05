@@ -1,15 +1,11 @@
 import ws281x from 'rpi-ws281x-native'
-import { DATA_PIN, NUM_LEDS, getConfig, onConfigUpdated } from './config'
+import { DATA_PIN, getConfig, onConfigUpdated } from './config'
 import { WebsocketMessageDataMidi } from '../types/websocket'
-import { HSLToRGB, RGBToHSL, getBlendedRGB } from './colors'
+import { getBlendedRGB } from './colors'
 
 export class RgbStrip {
-  private channel = ws281x(NUM_LEDS, {
-    gpio: DATA_PIN,
-    brightness: getConfig().BRIGHTNESS * 255,
-    invert: false
-  })
-  colors: {
+  private channel = this.initializeWS281x()
+  private colors: {
     [key: number]: [number, number, number]
   } = {}
 
@@ -18,32 +14,47 @@ export class RgbStrip {
       if (updatedProperties.BRIGHTNESS) {
         this.setBrightness(updatedProperties.BRIGHTNESS)
       }
-      if (updatedProperties.BACKGROUND_COLOR) {
-        this.fillColors(updatedProperties.BACKGROUND_COLOR)
+      if (updatedProperties.BACKGROUND_BRIGHTNESS || updatedProperties.BACKGROUND_COLOR_RGB) {
+        this.fillColors()
+      }
+      if (updatedProperties.LED_END_COUNT) {
+        ws281x.finalize()
+        this.channel = this.initializeWS281x()
+      }
+      if (updatedProperties.LED_START_COUNT) {
+        ws281x.reset()
+        this.fillColors()
       }
     })
 
-    this.fillColors(getConfig().BACKGROUND_COLOR)
+    this.fillColors()
   }
 
-  setBrightness(brightness: number): void {
+  private initializeWS281x() {
+    return ws281x(getConfig().LED_END_COUNT, {
+      gpio: DATA_PIN,
+      brightness: getConfig().BRIGHTNESS * 255
+    })
+  }
+
+  private setBrightness(brightness: number): void {
     this.channel.brightness = brightness * 255
     this.render()
   }
 
-  setColor(index: number, color: [number, number, number], preserveLightness = false): void {
-    if (preserveLightness) {
-      const targetHSL = RGBToHSL(...color)
-      const currentHSL = RGBToHSL(...this.colors[index])
-      this.colors[index] = HSLToRGB(targetHSL[0], targetHSL[1], currentHSL[2])
-    } else {
-      this.colors[index] = color
-    }
+  private setColor(index: number, color: [number, number, number]) {
+    this.colors[index] = color
   }
 
-  fillColors(color = getConfig().BACKGROUND_COLOR, preserveLightness = false): void {
-    for (let i = 0; i < NUM_LEDS; i++) {
-      this.setColor(i, color, preserveLightness)
+  fillColors(
+    color = getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [
+      number,
+      number,
+      number
+    ]
+  ) {
+    for (let i = getConfig().LED_START_COUNT; i < getConfig().LED_END_COUNT; i++) {
+      this.setColor(i, color)
     }
 
     this.render()
@@ -59,14 +70,24 @@ export class RgbStrip {
   noteHandler(
     positionRatio: number,
     velocityRatio = 1,
-    [red, green, blue] = getConfig().COLOR
+    [red, green, blue] = getConfig().NOTE_PRESS_COLOR_RGB
   ): void {
     const blendedColor = getBlendedRGB(
       [red, green, blue],
-      getConfig().BACKGROUND_COLOR,
+      getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [
+        number,
+        number,
+        number
+      ],
       velocityRatio
     )
-    const colorPosition = positionRatio === 1 ? NUM_LEDS - 1 : Math.floor(positionRatio * NUM_LEDS)
+    const colorPosition =
+      positionRatio === 1
+        ? getConfig().LED_END_COUNT - 1
+        : Math.floor(
+            positionRatio * (getConfig().LED_END_COUNT - getConfig().LED_START_COUNT) +
+              getConfig().LED_START_COUNT
+          )
 
     this.setColor(colorPosition, blendedColor)
     this.render()
@@ -80,6 +101,9 @@ export class RgbStrip {
       }
 
       this.noteHandler(data.notePositionRatio, data.noteVelocityRatio)
+    }
+    if (data.midiChannel === 128) {
+      this.noteHandler(data.notePositionRatio, 0)
     }
 
     // pedal

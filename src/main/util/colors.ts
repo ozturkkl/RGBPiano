@@ -21,6 +21,26 @@ export function HSLToRGB(h: number, s: number, l: number): [number, number, numb
   return [255 * f(0), 255 * f(8), 255 * f(4)]
 }
 
+export function hexToRgb(hex) {
+  return hex
+    .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
+    .substring(1)
+    .match(/.{2}/g)
+    .map((x) => parseInt(x, 16))
+}
+
+export function RGBToHex(r, g, b) {
+  return (
+    '#' +
+    [r, g, b]
+      .map((x) => {
+        const hex = x.toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+      })
+      .join('')
+  )
+}
+
 export function getBlendedRGB(
   [c1r, c1g, c1b]: [number, number, number],
   [c2r, c2g, c2b]: [number, number, number],
