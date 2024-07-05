@@ -1,6 +1,6 @@
 import { mainProcess } from './src/mainProcess'
-import { initNORA } from './src/nora'
+// import { initNORA } from './src/nora'
 
 mainProcess()
 
-initNORA()
+// initNORA()
