@@ -11,7 +11,7 @@ var Midi = /** @class */ (function () {
         this.minNote = config_1.MIN_NOTE;
         this.maxNote = config_1.MAX_NOTE;
         this.input = new midi_1["default"].Input();
-        this.output = new midi_1["default"].Output();
+        // this.output = new midi.Output()
         this.connection = connection;
         this.rgbStrip = rgbStrip;
         this.listenToInput();
@@ -66,7 +66,7 @@ var Midi = /** @class */ (function () {
             }
         });
         (0, config_1.onConfigUpdated)(function (config) {
-            if (config.SELECTED_DEVICE) {
+            if (config.SELECTED_DEVICE !== undefined) {
                 _this.openInput(config.SELECTED_DEVICE);
             }
         });

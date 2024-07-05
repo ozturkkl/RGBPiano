@@ -4,18 +4,18 @@ import { RgbStrip } from './rbgStrip'
 import { MAX_NOTE, MIN_NOTE, getConfig, onConfigUpdated } from './config'
 
 export class Midi {
-  minNote = MIN_NOTE
-  maxNote = MAX_NOTE
+  private minNote = MIN_NOTE
+  private maxNote = MAX_NOTE
 
-  input: midi.Input
-  output: midi.Output
+  private input: midi.Input
+  // private output: midi.Output
 
-  connection: Connection
-  rgbStrip: RgbStrip
+  private connection: Connection
+  private rgbStrip: RgbStrip
 
   constructor(connection: Connection, rgbStrip: RgbStrip) {
     this.input = new midi.Input()
-    this.output = new midi.Output()
+    // this.output = new midi.Output()
     this.connection = connection
     this.rgbStrip = rgbStrip
     this.listenToInput()
@@ -74,7 +74,7 @@ export class Midi {
     })
 
     onConfigUpdated((config) => {
-      if (config.SELECTED_DEVICE) {
+      if (config.SELECTED_DEVICE !== undefined) {
         this.openInput(config.SELECTED_DEVICE)
       }
     })

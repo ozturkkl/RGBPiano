@@ -11,19 +11,23 @@ export class RgbStrip {
 
   constructor() {
     onConfigUpdated((updatedProperties) => {
-      if (updatedProperties.BRIGHTNESS) {
+      if (updatedProperties.BRIGHTNESS !== undefined) {
         this.setBrightness(updatedProperties.BRIGHTNESS)
       }
-      if (updatedProperties.BACKGROUND_BRIGHTNESS || updatedProperties.BACKGROUND_COLOR_RGB) {
+      if (
+        updatedProperties.BACKGROUND_BRIGHTNESS !== undefined ||
+        updatedProperties.BACKGROUND_COLOR_RGB !== undefined
+      ) {
         this.fillColors()
       }
-      if (updatedProperties.LED_END_COUNT) {
+      if (updatedProperties.LED_END_COUNT !== undefined) {
         this.colors = {}
         this.fillColors()
         ws281x.finalize()
         this.channel = this.initializeWS281x()
       }
-      if (updatedProperties.LED_START_COUNT) {
+      if (updatedProperties.LED_START_COUNT !== undefined) {
+        this.colors = {}
         this.fillColors()
       }
     })
@@ -47,21 +51,21 @@ export class RgbStrip {
     this.colors[index] = color
   }
 
-  fillColors(
+  private fillColors(
     color = getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [
       number,
       number,
       number
     ]
   ) {
-    for (let i = 0; i < getConfig().LED_END_COUNT; i++) {
-      this.setColor(i, i < getConfig().LED_START_COUNT ? [0, 0, 0] : color)
+    for (let i = getConfig().LED_START_COUNT; i < getConfig().LED_END_COUNT; i++) {
+      this.setColor(i, color)
     }
 
     this.render()
   }
 
-  render(): void {
+  private render(): void {
     this.channel.array.fill(0)
     Object.entries(this.colors).forEach(([index, color]) => {
       this.channel.array[index] = (color[0] << 16) | (color[1] << 8) | color[2]
@@ -69,7 +73,7 @@ export class RgbStrip {
     ws281x.render()
   }
 
-  noteHandler(
+  private noteHandler(
     positionRatio: number,
     velocityRatio = 1,
     [red, green, blue] = getConfig().NOTE_PRESS_COLOR_RGB

@@ -13,19 +13,21 @@ var RgbStrip = /** @class */ (function () {
         this.channel = this.initializeWS281x();
         this.colors = {};
         (0, config_1.onConfigUpdated)(function (updatedProperties) {
-            if (updatedProperties.BRIGHTNESS) {
+            if (updatedProperties.BRIGHTNESS !== undefined) {
                 _this.setBrightness(updatedProperties.BRIGHTNESS);
             }
-            if (updatedProperties.BACKGROUND_BRIGHTNESS || updatedProperties.BACKGROUND_COLOR_RGB) {
+            if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined ||
+                updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
                 _this.fillColors();
             }
-            if (updatedProperties.LED_END_COUNT) {
+            if (updatedProperties.LED_END_COUNT !== undefined) {
                 _this.colors = {};
                 _this.fillColors();
                 rpi_ws281x_native_1["default"].finalize();
                 _this.channel = _this.initializeWS281x();
             }
-            if (updatedProperties.LED_START_COUNT) {
+            if (updatedProperties.LED_START_COUNT !== undefined) {
+                _this.colors = {};
                 _this.fillColors();
             }
         });
@@ -46,8 +48,8 @@ var RgbStrip = /** @class */ (function () {
     };
     RgbStrip.prototype.fillColors = function (color) {
         if (color === void 0) { color = (0, config_1.getConfig)().BACKGROUND_COLOR_RGB.map(function (c) { return c * (0, config_1.getConfig)().BACKGROUND_BRIGHTNESS; }); }
-        for (var i = 0; i < (0, config_1.getConfig)().LED_END_COUNT; i++) {
-            this.setColor(i, i < (0, config_1.getConfig)().LED_START_COUNT ? [0, 0, 0] : color);
+        for (var i = (0, config_1.getConfig)().LED_START_COUNT; i < (0, config_1.getConfig)().LED_END_COUNT; i++) {
+            this.setColor(i, color);
         }
         this.render();
     };
