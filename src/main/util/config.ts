@@ -5,41 +5,15 @@ import { HSLToRGB } from './colors'
 
 export type ConfigType = typeof config
 export const configPath = path.join(__dirname, 'RGBPiano-config.json')
+const configEmitter = new EventEmitter()
+
+const hue = Math.round(Math.random() * 360)
 
 export const PORT = 3192
 export const DATA_PIN = 18
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
-
-export function getConfig(): typeof config {
-  return config
-}
-
-export function updateConfig(newConfig: Partial<typeof config>): void {
-  const updatedProperties = {}
-
-  getUpdatedProperties(config, newConfig).forEach((property) => {
-    updatedProperties[property] = newConfig[property]
-  })
-
-  if (Object.keys(updatedProperties).length > 0) {
-    config = {
-      ...config,
-      ...newConfig
-    }
-    configEmitter.emit('configUpdated', updatedProperties)
-    // write config to file
-    writeFileSync(configPath, JSON.stringify(config, null, 2))
-  }
-}
-
-export function onConfigUpdated(listener: (conf: Partial<typeof config>) => void): void {
-  configEmitter.on('configUpdated', (updatedProperties: Partial<typeof config>) => {
-    listener(updatedProperties)
-  })
-}
-
-const hue = Math.round(Math.random() * 360)
+export const INPUT_DEVICE_REFRESH_INTERVAL = 30000
 
 let config: {
   BRIGHTNESS: number
@@ -63,14 +37,53 @@ let config: {
   LED_START_COUNT: 0
 }
 
-initConfig()
+export function initSavedConfig() {
+  try {
+    config = {
+      ...config,
+      ...JSON.parse(readFileSync(configPath, 'utf8'))
+    }
 
-const configEmitter = new EventEmitter()
+    return config
+  } catch (error) {
+    console.log('Could not load config file, using default config')
+
+    return null
+  }
+}
+export function saveConfigToFile() {
+  writeFileSync(configPath, JSON.stringify(config, null, 2))
+}
+
+export function getConfig(): typeof config {
+  return config
+}
+
+export function updateConfig(newConfig: Partial<typeof config>): void {
+  const updatedProperties = {}
+
+  getUpdatedProperties(config, newConfig).forEach((property) => {
+    updatedProperties[property] = newConfig[property]
+  })
+
+  if (Object.keys(updatedProperties).length > 0) {
+    config = {
+      ...config,
+      ...newConfig
+    }
+    configEmitter.emit('configUpdated', updatedProperties)
+  }
+}
+
+export function onConfigUpdated(listener: (conf: Partial<typeof config>) => void): void {
+  configEmitter.on('configUpdated', (updatedProperties: Partial<typeof config>) => {
+    listener(updatedProperties)
+  })
+}
 
 function isObject(value): boolean {
   return typeof value === 'object' && value !== null
 }
-
 function getUpdatedProperties(currentConfig, newConfig): string[] {
   const updatedProperties: string[] = []
 
@@ -88,15 +101,4 @@ function getUpdatedProperties(currentConfig, newConfig): string[] {
   }
 
   return updatedProperties
-}
-
-function initConfig(): void {
-  try {
-    config = {
-      ...config,
-      ...JSON.parse(readFileSync(configPath, 'utf8'))
-    }
-  } catch (error) {
-    console.log('Could not load config file, using default config')
-  }
 }

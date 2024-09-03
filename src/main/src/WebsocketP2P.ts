@@ -1,9 +1,9 @@
 import WebSocket from 'ws'
 import { Server, Client, SsdpHeaders } from 'node-ssdp'
-import { PORT } from './config'
+import { PORT } from '../util/config'
 import { WebsocketMessage } from '../types/websocket'
 
-export class Connection {
+export class WebsocketP2P {
   private server: WebSocket.Server | null
   private client: WebSocket | null
   private connectingPromise: Promise<void> | null

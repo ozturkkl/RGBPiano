@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import type { Config } from '../../../main/types/config'
   import { HSLToRGB, hexToRgb } from '../../../main/util/colors'
   import { RGBToHSL } from '../../../main/util/colors'
+  import type { ConfigType } from '../../../main/util/config'
 
   function changeColor(e: Event & { currentTarget: HTMLInputElement }) {
     const [red, green, blue] = hexToRgb(e.currentTarget.value)
     const [hue, sat, bri] = RGBToHSL(red, green, blue)
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       BACKGROUND_COLOR_RGB: HSLToRGB(hue, sat, bri),
       NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri)
     }
@@ -16,14 +16,14 @@
   }
 
   function changeBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
     window.electron.ipcRenderer.invoke('config', config)
   }
   function changeBackgroundBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
@@ -31,7 +31,7 @@
   }
 
   function changeConstantVelocity(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       CONSTANT_VELOCITY: e.currentTarget.checked
     }
 
@@ -39,7 +39,7 @@
   }
 
   function changeLEDInvert(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       LED_INVERT: e.currentTarget.checked
     }
 
@@ -47,7 +47,7 @@
   }
 
   function changeLEDStartCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       LED_START_COUNT: parseInt(e.currentTarget.value)
     }
 
@@ -55,7 +55,7 @@
   }
 
   function changeLEDEndCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<Config> = {
+    const config: Partial<ConfigType> = {
       LED_END_COUNT: parseInt(e.currentTarget.value)
     }
 

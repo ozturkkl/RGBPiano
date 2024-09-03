@@ -1,18 +1,12 @@
-import { Config } from './config'
+import { ConfigType } from '../util/config'
+import { PrettyMidiMessage } from './midi'
 
 export type WebsocketMessage =
   | {
       type: 'midi'
-      data: WebsocketMessageDataMidi
+      data: PrettyMidiMessage
     }
   | {
       type: 'config'
-      data: Partial<Config>
+      data: Partial<ConfigType>
     }
-
-export interface WebsocketMessageDataMidi {
-  deltaTime: number
-  notePositionRatio: number
-  noteVelocityRatio: number
-  midiChannel: number
-}

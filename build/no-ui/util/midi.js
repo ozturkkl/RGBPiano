@@ -7,13 +7,14 @@ exports.Midi = void 0;
 var midi_1 = __importDefault(require("midi"));
 var config_1 = require("./config");
 var Midi = /** @class */ (function () {
-    function Midi(connection, rgbStrip) {
+    // private output: midi.Output
+    function Midi() {
+        this.onMessage = function () { return null; };
         this.minNote = config_1.MIN_NOTE;
         this.maxNote = config_1.MAX_NOTE;
         this.input = new midi_1["default"].Input();
         // this.output = new midi.Output()
-        this.connection = connection;
-        this.rgbStrip = rgbStrip;
+        this.input.openVirtualPort("Kemal's Midi Input");
         this.listenToInput();
         this.initConfiguredInput();
     }
@@ -50,11 +51,7 @@ var Midi = /** @class */ (function () {
                 noteVelocityRatio: message[2] / 127,
                 midiChannel: message[0]
             };
-            _this.connection.send({
-                type: 'midi',
-                data: payload
-            });
-            _this.rgbStrip.handleNotePress(payload);
+            _this.onMessage(payload);
         });
     };
     Midi.prototype.initConfiguredInput = function () {

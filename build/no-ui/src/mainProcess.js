@@ -52,7 +52,14 @@ function mainProcess() {
                 case 1:
                     _a.sent();
                     rgbStrip = new rbgStrip_1.RgbStrip();
-                    midi = new midi_1.Midi(connection, rgbStrip);
+                    midi = new midi_1.Midi();
+                    midi.onMessage = function (payload) {
+                        connection.send({
+                            type: 'midi',
+                            data: payload
+                        });
+                        rgbStrip.handleNotePress(payload);
+                    };
                     connection.listen(function (message) {
                         console.log(message);
                         if ((message === null || message === void 0 ? void 0 : message.type) === 'midi') {

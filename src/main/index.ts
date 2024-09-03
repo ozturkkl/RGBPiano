@@ -2,10 +2,14 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { mainProcess } from './src/mainProcess'
-import { readFileSync } from 'fs'
-import { configPath, updateConfig } from './util/config'
-import { Config } from './types/config'
+import { Main } from './src/Main'
+import {
+  ConfigType,
+  initSavedConfig,
+  onConfigUpdated,
+  saveConfigToFile,
+  updateConfig
+} from './util/config'
 
 function createWindow(): void {
   // Create the browser window.
@@ -73,19 +77,23 @@ app.on('window-all-closed', () => {
 })
 
 async function main(): Promise<void> {
-  const { connection } = await mainProcess()
+  const savedConfig = initSavedConfig()
+  const { connection } = await Main(true)
 
-  try {
-    const config: Config = JSON.parse(readFileSync(configPath, 'utf8'))
+  // if config was saved, send it to the websocket listeners
+  if (savedConfig) {
     connection.send({
       type: 'config',
-      data: config
+      data: savedConfig
     })
-  } catch (e) {
-    console.error(e)
   }
+  // if config is updated, save it to the file
+  onConfigUpdated(() => {
+    saveConfigToFile()
+  })
 
-  ipcMain.handle('config', (_, config: Config) => {
+  // if new config is received from the UI, update the saved config
+  ipcMain.handle('config', (_, config: ConfigType) => {
     console.log('Received config: ', config)
     connection.send({
       type: 'config',

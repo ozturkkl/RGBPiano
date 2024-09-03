@@ -10,7 +10,7 @@
     "pi:build": "tsc -p tsconfig.no-ui.json",
     "pi:start": "node ./build/no-ui/index-no-ui.js",
     "pi:install": "npm install --only=prod",
-    "electron": "electron-vite dev",
+    "electron": "set NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true && electron-vite dev",
     "electron:preview": "electron-vite preview",
     "electron:install": "npm install && npm run electron:postinstall && npm run electron:build",
     "electron:build": "npm run typecheck && electron-vite build && tsc -p tsconfig.no-ui.json",
@@ -20,9 +20,11 @@
     "electron:linux": "npm run electron:build && electron-builder --linux --config"
   },
   "dependencies": {
+    "jzz": "^1.8.5",
     "midi": "^2.0.0",
     "node-ssdp": "^4.0.1",
     "rpi-ws281x-native": "^1.0.4",
+    "webbluetooth": "^3.2.1",
     "ws": "^8.13.0"
   },
   "devDependencies": {

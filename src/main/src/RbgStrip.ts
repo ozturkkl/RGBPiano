@@ -1,9 +1,9 @@
-import ws281x from 'rpi-ws281x-native'
-import { DATA_PIN, getConfig, onConfigUpdated } from './config'
-import { WebsocketMessageDataMidi } from '../types/websocket'
-import { getBlendedRGB } from './colors'
+import { DATA_PIN, getConfig, onConfigUpdated } from '../util/config'
+import { getBlendedRGB } from '../util/colors'
+import { PrettyMidiMessage } from '../types/midi'
 
 export class RgbStrip {
+  private ws281x = require('rpi-ws281x-native')
   private channel = this.initializeWS281x()
   private colors: {
     [key: number]: [number, number, number]
@@ -23,7 +23,7 @@ export class RgbStrip {
       if (updatedProperties.LED_END_COUNT !== undefined) {
         this.colors = {}
         this.fillColors()
-        ws281x.finalize()
+        this.ws281x.finalize()
         this.channel = this.initializeWS281x()
       }
       if (updatedProperties.LED_START_COUNT !== undefined) {
@@ -36,7 +36,7 @@ export class RgbStrip {
   }
 
   private initializeWS281x() {
-    return ws281x(getConfig().LED_END_COUNT, {
+    return this.ws281x(getConfig().LED_END_COUNT, {
       gpio: DATA_PIN,
       brightness: getConfig().BRIGHTNESS * 255
     })
@@ -70,7 +70,7 @@ export class RgbStrip {
     Object.entries(this.colors).forEach(([index, color]) => {
       this.channel.array[index] = (color[0] << 16) | (color[1] << 8) | color[2]
     })
-    ws281x.render()
+    this.ws281x.render()
   }
 
   private noteHandler(
@@ -99,7 +99,7 @@ export class RgbStrip {
     this.render()
   }
 
-  handleNotePress(data: WebsocketMessageDataMidi): void {
+  handleNotePress(data: PrettyMidiMessage): void {
     // note
     if (data.midiChannel === 144) {
       if (getConfig().CONSTANT_VELOCITY) {

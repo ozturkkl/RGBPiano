@@ -1,3 +1,3 @@
-import { mainProcess } from './src/mainProcess'
+import { Main } from './src/Main'
 
-mainProcess()
+Main(false)

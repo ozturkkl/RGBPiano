@@ -20,10 +20,22 @@ var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
 var colors_1 = require("./colors");
 exports.configPath = path_1["default"].join(__dirname, 'RGBPiano-config.json');
+var hue = Math.round(Math.random() * 360);
 exports.PORT = 3192;
 exports.DATA_PIN = 18;
 exports.MIN_NOTE = 21;
 exports.MAX_NOTE = 108;
+var config = {
+    BRIGHTNESS: 1,
+    BACKGROUND_BRIGHTNESS: 0.05,
+    BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
+    NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
+    CONSTANT_VELOCITY: true,
+    SELECTED_DEVICE: 'Springbeats vMIDI1',
+    LED_INVERT: true,
+    LED_END_COUNT: 177,
+    LED_START_COUNT: 0
+};
 function getConfig() {
     return config;
 }
@@ -47,18 +59,6 @@ function onConfigUpdated(listener) {
     });
 }
 exports.onConfigUpdated = onConfigUpdated;
-var hue = Math.round(Math.random() * 360);
-var config = {
-    BRIGHTNESS: 1,
-    BACKGROUND_BRIGHTNESS: 0.05,
-    BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
-    NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
-    CONSTANT_VELOCITY: true,
-    SELECTED_DEVICE: 'Springbeats vMIDI1',
-    LED_INVERT: true,
-    LED_END_COUNT: 177,
-    LED_START_COUNT: 0
-};
 initConfig();
 var configEmitter = new events_1["default"]();
 function isObject(value) {
