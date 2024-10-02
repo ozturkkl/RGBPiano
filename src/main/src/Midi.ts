@@ -2,29 +2,10 @@ import { INPUT_DEVICE_REFRESH_INTERVAL } from '../util/config'
 import JZZ from 'jzz'
 
 export class Midi {
-  static inputs: string[] = []
-  static outputs: string[] = []
-
+  private static _inputs: string[] = []
+  private static _outputs: string[] = []
   private static _jzz: WebMidi.MIDIAccess
   private static _initialized = false
-
-  static async init() {
-    if (this._initialized) return
-    if (this._jzz === undefined) this._jzz = await JZZ.requestMIDIAccess()
-
-    this._jzz.onstatechange = () => {
-      this.populateDevices()
-    }
-    await this.populateDevices()
-    this._initialized = true
-  }
-  private static async populateDevices() {
-    const inputDevices = Array.from(this._jzz.inputs.values()).map((i) => i.name)
-    const outputDevices = Array.from(this._jzz.outputs.values()).map((o) => o.name)
-
-    this.inputs = inputDevices
-    this.outputs = outputDevices
-  }
 
   private _deviceName: string
   private _inputActive = false
@@ -35,6 +16,23 @@ export class Midi {
   }
   get online() {
     return this._inputActive
+  }
+  static get inputs() {
+    return this._inputs
+  }
+  static get outputs() {
+    return this._outputs
+  }
+
+  static async init() {
+    if (this._initialized) return
+    if (this._jzz === undefined) this._jzz = await JZZ.requestMIDIAccess()
+
+    this._jzz.onstatechange = () => {
+      this.populateDevices()
+    }
+    await this.populateDevices()
+    this._initialized = true
   }
 
   constructor(deviceName: string, onMessage?: (payload: number[]) => void) {
@@ -55,6 +53,17 @@ export class Midi {
       }, 1000)
     }
   }
+
+  sendMessage(message: number[]): void {
+    const output = Midi._jzz.outputs.get(this._deviceName)
+    if (!output) {
+      console.error(`Could not find output device with name ${this._deviceName}`)
+      return
+    }
+
+    output.send(message)
+  }
+
   private listenToInputIfNeeded(): void {
     if (this._inputActive) return
 
@@ -75,17 +84,12 @@ export class Midi {
 
     selectedDevice.onmidimessage = (msg) => {
       ito()
-      this._onMessage(Array.from(msg.data))
+      this._onMessage?.(Array.from(msg.data))
     }
   }
 
-  sendMessage(message: number[]): void {
-    const output = Midi._jzz.outputs.get(this._deviceName)
-    if (!output) {
-      console.error(`Could not find output device with name ${this._deviceName}`)
-      return
-    }
-
-    output.send(message)
+  private static async populateDevices() {
+    this._inputs = Array.from(this._jzz.inputs.values()).map((i) => i.name ?? 'Unknown')
+    this._outputs = Array.from(this._jzz.outputs.values()).map((o) => o.name ?? 'Unknown')
   }
 }
