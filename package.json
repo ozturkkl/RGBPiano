@@ -5,7 +5,7 @@
   "main": "./out/main/index.js",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.node.json --composite false && svelte-check --tsconfig ./tsconfig.json",
-    "clean": "rm -rf package-lock.json node_modules out dist .node-red-data/node_modules .node-red-data/package-lock.json",
+    "clean": "rm -rf package-lock.json node_modules out dist",
     "pi": "npm run pi:build && npm run pi:start",
     "pi:build": "tsc -p tsconfig.no-ui.json",
     "pi:start": "node ./build/no-ui/index-no-ui.js",
