@@ -25,8 +25,11 @@ function createWindow(): void {
     }
   })
 
+  mainWindow.webContents.openDevTools()
+
   mainWindow.on('ready-to-show', () => {
-    mainWindow.minimize()
+    // mainWindow.minimize()
+    mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -41,6 +44,44 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  const pairedDevicesMap = new Map<string, string>()
+  // let selectDeviceCallback: ((deviceId: string) => void) | null = null
+  mainWindow.webContents.on('select-bluetooth-device', (event, deviceList) => {
+    event.preventDefault()
+    // selectDeviceCallback = callback
+    console.log('Bluetooth devices:', deviceList)
+    mainWindow.webContents.send('bluetooth-device-list', deviceList)
+  })
+
+  ipcMain.on('bluetooth-connect', (_ev, data) => {
+    console.log('Bluetooth connected:', data)
+    pairedDevicesMap.set(data.id, 'Unknown Device')
+  })
+  ipcMain.on('bluetooth-disconnect', (_ev, data) => {
+    console.log('Bluetooth disconnected:', data)
+    pairedDevicesMap.delete(data.id)
+  })
+  ipcMain.on('bluetooth-data', (_ev, data) => {
+    console.log('Received Bluetooth data in main process:', data)
+    // Process or handle the data here as needed
+  })
+  // Listen for a message from the renderer to get the response for the Bluetooth pairing.
+  ipcMain.on('bluetooth-pairing-response', (_ev, response) => {
+    console.log('Bluetooth pairing response:', response)
+  })
+  mainWindow.webContents.session.setBluetoothPairingHandler((details) => {
+    console.log('Bluetooth pairing details:', details)
+  })
+
+  // mainWindow.webContents.on('did-finish-load', () => {
+  //   mainWindow.webContents.executeJavaScript(
+  //     `
+  //     document.getElementById('bluetoothButton').click();
+  //   `,
+  //     true
+  //   )
+  // })
 }
 
 // This method will be called when Electron has finished
