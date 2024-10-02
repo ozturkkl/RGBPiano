@@ -67,7 +67,7 @@ export class WebsocketP2P {
   }
 
   send(message: WebsocketMessage): void {
-    console.log(`Sending message: ${JSON.stringify(message)}`)
+    console.log(`Sending message: ${JSON.stringify(message, null, 2)}`)
     if (this.server) {
       this.server.clients.forEach((client) => {
         client.send(JSON.stringify(message))

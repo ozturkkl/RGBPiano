@@ -8,7 +8,5 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": [
-    "typecheck"
-  ]
+  "cSpell.words": ["gpio", "onmidimessage", "typecheck"]
 }

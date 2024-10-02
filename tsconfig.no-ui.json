@@ -1,7 +1,13 @@
 {
-  "include": ["src/main/**/*"],
-  "exclude": ["src/main/index.ts"],
+  "include": [
+    "src/main/**/*",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/main/index.ts"
+  ],
   "compilerOptions": {
+    "target": "es5",
     "declaration": false,
     "skipLibCheck": true,
     "esModuleInterop": true,

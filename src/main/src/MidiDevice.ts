@@ -1,7 +1,5 @@
 import midi, { MidiMessage } from 'midi'
-import JZZ from 'jzz'
-import { INPUT_DEVICE_REFRESH_INTERVAL, MAX_NOTE, MIN_NOTE, getConfig } from '../util/config'
-import { PrettyMidiMessage } from '../types/midi'
+import { INPUT_DEVICE_REFRESH_INTERVAL } from '../util/config'
 
 export class MidiDevice {
   static getDevices() {
@@ -23,13 +21,13 @@ export class MidiDevice {
   }
 
   deviceName: string | undefined
-  onMessage: ((payload: PrettyMidiMessage) => void) | undefined
+  onMessage: ((payload: number[]) => void) | undefined
 
   private input: midi.Input
   private output: midi.Output
   private outputConnected = false
 
-  constructor(deviceName: string | undefined, onMessage?: (payload: PrettyMidiMessage) => void) {
+  constructor(deviceName: string | undefined, onMessage?: (payload: number[]) => void) {
     this.deviceName = deviceName
     this.onMessage = onMessage
     this.input = new midi.Input()
@@ -68,17 +66,9 @@ export class MidiDevice {
   private listenToInput(): void {
     let lastMessageTime = Date.now()
 
-    this.input.on('message', (deltaTime, message) => {
-      const payload = {
-        deltaTime,
-        notePositionRatio: getConfig().LED_INVERT
-          ? 1 - (message[1] - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
-          : (message[1] - MIN_NOTE) / (MAX_NOTE - MIN_NOTE),
-        noteVelocityRatio: message[2] / 127,
-        midiChannel: message[0]
-      }
+    this.input.on('message', (_deltaTime, message) => {
       lastMessageTime = Date.now()
-      this.onMessage?.(payload)
+      this.onMessage?.(message)
     })
 
     setInterval(() => {
