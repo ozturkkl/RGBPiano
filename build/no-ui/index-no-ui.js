@@ -1,4 +1,4 @@
 "use strict";
-exports.__esModule = true;
-var mainProcess_1 = require("./src/mainProcess");
-(0, mainProcess_1.mainProcess)();
+Object.defineProperty(exports, "__esModule", { value: true });
+var Main_1 = require("./src/Main");
+(0, Main_1.Main)(false);

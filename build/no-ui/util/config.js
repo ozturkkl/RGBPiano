@@ -13,18 +13,20 @@ var __assign = (this && this.__assign) || function () {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.__esModule = true;
-exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.initSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
 var colors_1 = require("./colors");
-exports.configPath = path_1["default"].join(__dirname, 'RGBPiano-config.json');
+exports.configPath = path_1.default.join(__dirname, 'RGBPiano-config.json');
+var configEmitter = new events_1.default();
 var hue = Math.round(Math.random() * 360);
 exports.PORT = 3192;
 exports.DATA_PIN = 18;
 exports.MIN_NOTE = 21;
 exports.MAX_NOTE = 108;
+exports.INPUT_DEVICE_REFRESH_INTERVAL = 30000;
 var config = {
     BRIGHTNESS: 1,
     BACKGROUND_BRIGHTNESS: 0.05,
@@ -36,6 +38,21 @@ var config = {
     LED_END_COUNT: 177,
     LED_START_COUNT: 0
 };
+function initSavedConfig() {
+    try {
+        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(exports.configPath, 'utf8')));
+        return config;
+    }
+    catch (error) {
+        console.log('Could not load config file, using default config');
+        return null;
+    }
+}
+exports.initSavedConfig = initSavedConfig;
+function saveConfigToFile() {
+    (0, fs_1.writeFileSync)(exports.configPath, JSON.stringify(config, null, 2));
+}
+exports.saveConfigToFile = saveConfigToFile;
 function getConfig() {
     return config;
 }
@@ -48,8 +65,6 @@ function updateConfig(newConfig) {
     if (Object.keys(updatedProperties).length > 0) {
         config = __assign(__assign({}, config), newConfig);
         configEmitter.emit('configUpdated', updatedProperties);
-        // write config to file
-        (0, fs_1.writeFileSync)(exports.configPath, JSON.stringify(config, null, 2));
     }
 }
 exports.updateConfig = updateConfig;
@@ -59,8 +74,6 @@ function onConfigUpdated(listener) {
     });
 }
 exports.onConfigUpdated = onConfigUpdated;
-initConfig();
-var configEmitter = new events_1["default"]();
 function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
@@ -80,12 +93,4 @@ function getUpdatedProperties(currentConfig, newConfig) {
         }
     }
     return updatedProperties;
-}
-function initConfig() {
-    try {
-        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(exports.configPath, 'utf8')));
-    }
-    catch (error) {
-        console.log('Could not load config file, using default config');
-    }
 }
