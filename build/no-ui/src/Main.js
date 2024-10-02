@@ -44,14 +44,15 @@ var WebsocketP2P_1 = require("./WebsocketP2P");
 var config_1 = require("../util/config");
 var RbgStrip_1 = require("./RbgStrip");
 var jzz_1 = __importDefault(require("jzz"));
-var BluetoothManager_1 = require("./BluetoothManager");
+// import { BluetoothManager } from './BluetoothManager'
+// import { MidiDevice } from './MidiDevice'
 // interface MidiMessage {
 //   time: number
 //   data: number[]
 // }
 function Main(isElectron) {
     return __awaiter(this, void 0, void 0, function () {
-        var connection, rgbStrip, jzz, selectedDevice, bm, e_1;
+        var connection, rgbStrip, jzz, selectedDevice, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -92,7 +93,7 @@ function Main(isElectron) {
                         };
                     }
                     if (isElectron) {
-                        bm = new BluetoothManager_1.BluetoothManager();
+                        // const bm = new BluetoothManager()
                     }
                     return [3 /*break*/, 5];
                 case 4:

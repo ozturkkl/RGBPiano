@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "jzz": "^1.8.5",
-    "midi": "^2.0.0",
     "node-ssdp": "^4.0.1",
     "rpi-ws281x-native": "^1.0.4",
     "ws": "^8.13.0"
