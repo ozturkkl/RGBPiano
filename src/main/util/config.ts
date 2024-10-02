@@ -13,7 +13,7 @@ export const PORT = 3192
 export const DATA_PIN = 18
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
-export const INPUT_DEVICE_REFRESH_INTERVAL = 30000
+export const INPUT_DEVICE_REFRESH_INTERVAL = 10000
 
 let config: {
   BRIGHTNESS: number

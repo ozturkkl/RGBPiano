@@ -2,14 +2,8 @@ import { WebsocketP2P } from './WebsocketP2P'
 import { getConfig, updateConfig } from '../util/config'
 import { WebsocketMessage } from '../types/websocket'
 import { RgbStrip } from './RbgStrip'
-import JZZ from 'jzz'
+import { Midi } from './Midi'
 // import { BluetoothManager } from './BluetoothManager'
-// import { MidiDevice } from './MidiDevice'
-
-// interface MidiMessage {
-//   time: number
-//   data: number[]
-// }
 
 export async function Main(isElectron: boolean): Promise<{
   connection: WebsocketP2P
@@ -24,45 +18,24 @@ export async function Main(isElectron: boolean): Promise<{
   }
 
   try {
-    // new MidiDevice(getConfig().SELECTED_DEVICE, (msg) => {
-    //   connection.send({
-    //     type: 'midi',
-    //     data: msg
-    //   })
+    await Midi.init()
+    console.log('Midi initialized')
+    console.log(`Midi inputs:\n  ${Midi.inputs.join('\n  ')}`)
+    console.log(`Midi outputs:\n  ${Midi.outputs.join('\n  ')}`)
+    new Midi(getConfig().SELECTED_DEVICE, (msg) => {
+      connection.send({
+        type: 'midi',
+        data: msg
+      })
 
-    //   rgbStrip?.handleNotePress(msg)
-    // })
-
-    const jzz = await JZZ.requestMIDIAccess()
-    console.log('MIDI Inputs:')
-    jzz.inputs.forEach((input) => {
-      console.log(input.name)
+      rgbStrip?.handleNotePress(msg)
     })
-    console.log('MIDI Outputs:')
-    jzz.outputs.forEach((output) => {
-      console.log(output.name)
-    })
-    jzz.onstatechange = function (e) {
-      console.log(e.port.name, e.port.state)
-    }
-
-    // send note to rgbStrip from SELECTED_DEVICE
-    const selectedDevice = jzz.inputs.get(getConfig().SELECTED_DEVICE)
-    if (selectedDevice) {
-      selectedDevice.onmidimessage = (msg) => {
-        connection.send({
-          type: 'midi',
-          data: Array.from(msg.data)
-        })
-        rgbStrip?.handleNotePress(Array.from(msg.data))
-      }
-    }
 
     if (isElectron) {
       // const bm = new BluetoothManager()
     }
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 
   connection.listen((message: WebsocketMessage) => {
