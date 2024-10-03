@@ -3,13 +3,6 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Main } from './src/Main'
-import {
-  ConfigType,
-  initSavedConfig,
-  onConfigUpdated,
-  saveConfigToFile,
-  updateConfig
-} from './util/config'
 
 function createWindow(): void {
   // Create the browser window.
@@ -44,44 +37,6 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-
-  const pairedDevicesMap = new Map<string, string>()
-  // let selectDeviceCallback: ((deviceId: string) => void) | null = null
-  mainWindow.webContents.on('select-bluetooth-device', (event, deviceList) => {
-    event.preventDefault()
-    // selectDeviceCallback = callback
-    console.log('Bluetooth devices:', deviceList)
-    mainWindow.webContents.send('bluetooth-device-list', deviceList)
-  })
-
-  ipcMain.on('bluetooth-connect', (_ev, data) => {
-    console.log('Bluetooth connected:', data)
-    pairedDevicesMap.set(data.id, 'Unknown Device')
-  })
-  ipcMain.on('bluetooth-disconnect', (_ev, data) => {
-    console.log('Bluetooth disconnected:', data)
-    pairedDevicesMap.delete(data.id)
-  })
-  ipcMain.on('bluetooth-data', (_ev, data) => {
-    console.log('Received Bluetooth data in main process:', data)
-    // Process or handle the data here as needed
-  })
-  // Listen for a message from the renderer to get the response for the Bluetooth pairing.
-  ipcMain.on('bluetooth-pairing-response', (_ev, response) => {
-    console.log('Bluetooth pairing response:', response)
-  })
-  mainWindow.webContents.session.setBluetoothPairingHandler((details) => {
-    console.log('Bluetooth pairing details:', details)
-  })
-
-  // mainWindow.webContents.on('did-finish-load', () => {
-  //   mainWindow.webContents.executeJavaScript(
-  //     `
-  //     document.getElementById('bluetoothButton').click();
-  //   `,
-  //     true
-  //   )
-  // })
 }
 
 // This method will be called when Electron has finished
@@ -99,7 +54,7 @@ app.whenReady().then(() => {
   })
 
   createWindow()
-  main()
+  Main(ipcMain)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -116,31 +71,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-async function main(): Promise<void> {
-  const savedConfig = initSavedConfig()
-  const { connection } = await Main(true)
-
-  // if config was saved, send it to the websocket listeners
-  if (savedConfig) {
-    connection.send({
-      type: 'config',
-      data: savedConfig
-    })
-  }
-  // if config is updated, save it to the file
-  onConfigUpdated(() => {
-    saveConfigToFile()
-  })
-
-  // if new config is received from the UI, update the saved config
-  ipcMain.handle('config', (_, config: ConfigType) => {
-    console.log('Received config: ', config)
-    connection.send({
-      type: 'config',
-      data: config
-    })
-
-    updateConfig(config)
-  })
-}

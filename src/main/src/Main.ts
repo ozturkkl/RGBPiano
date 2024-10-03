@@ -1,55 +1,85 @@
-import { WebsocketP2P } from './WebsocketP2P'
-import { getConfig, updateConfig } from '../util/config'
-import { WebsocketMessage } from '../types/websocket'
+import { WebsocketMessage, WebsocketP2P } from './WebsocketP2P'
+import {
+  ConfigType,
+  getConfig,
+  getSavedConfig,
+  onConfigUpdated,
+  saveConfigToFile,
+  updateConfig
+} from '../util/config'
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
+import { BluetoothManager } from './BluetoothManager'
 // import { BluetoothManager } from './BluetoothManager'
 
-export async function Main(isElectron: boolean): Promise<{
-  connection: WebsocketP2P
-}> {
+export async function Main(ipcMain: Electron.IpcMain) {
   const connection = new WebsocketP2P()
   await connection.connect()
 
-  let rgbStrip: RgbStrip | null = null
-  if (!isElectron) {
-    // lazy load the RGB strip for non-electron environments like the Raspberry Pi
-    rgbStrip = new RgbStrip()
-  }
-
-  try {
-    await Midi.init()
-    console.log('Midi initialized')
-    console.log(`Midi inputs:\n  ${Midi.inputs.join('\n  ')}`)
-    console.log(`Midi outputs:\n  ${Midi.outputs.join('\n  ')}`)
-    new Midi(getConfig().SELECTED_DEVICE, (msg) => {
-      connection.send({
-        type: 'midi',
-        data: msg
+  // IF ELECTRON
+  if (ipcMain) {
+    try {
+      // SETUP MIDI
+      await Midi.init()
+      console.log('Midi initialized')
+      console.log(`Midi inputs:\n  ${Midi.inputs.join('\n  ')}`)
+      console.log(`Midi outputs:\n  ${Midi.outputs.join('\n  ')}`)
+      new Midi(getConfig().SELECTED_DEVICE, (msg) => {
+        connection.send({
+          type: 'midi',
+          data: msg
+        })
       })
 
-      rgbStrip?.handleNotePress(msg)
-    })
+      // SETUP CONFIG
+      const config = getSavedConfig()
+      connection.send({
+        type: 'config',
+        data: config
+      })
+      onConfigUpdated(() => {
+        saveConfigToFile()
+      })
+      ipcMain.handle('config', (_, config: ConfigType) => {
+        console.log('Received config: ', config)
+        connection.send({
+          type: 'config',
+          data: config
+        })
+        updateConfig(config)
+      })
 
-    if (isElectron) {
-      // const bm = new BluetoothManager()
+      // SETUP BLUETOOTH
+      // TODO: WIP
+      // bm.onMidiDeviceListUpdated = (devices) => {
+      //   console.log('Midi devices updated: ', devices)
+      // }
+      const bm = new BluetoothManager()
+      await bm.connectDevice('48:B6:20:22:01:4A', (data) => {
+        console.log('Received data from 48:B6:20:22:01:4A: ', data)
+      })
+      const bm2 = new BluetoothManager()
+      await bm2.connectDevice('48:B6:20:19:80:CE', (data) => {
+        console.log('Received data from 48:B6:20:19:80:CE: ', data)
+      })
+    } catch (e) {
+      console.error(e)
     }
-  } catch (e) {
-    console.error(e)
   }
 
-  connection.listen((message: WebsocketMessage) => {
-    console.log(message)
-    if (message?.type === 'midi') {
-      rgbStrip?.handleNotePress(message.data)
-    }
-    if (message?.type === 'config') {
-      updateConfig(message.data)
-    }
-  })
+  // IF NOT ELECTRON => RASPBERRY PI - LED STRIP
+  if (!ipcMain) {
+    const rgbStrip = new RgbStrip()
 
-  return {
-    connection
+    connection.listen((message: WebsocketMessage) => {
+      console.log(message)
+      if (message?.type === 'midi') {
+        rgbStrip.handleNotePress(message.data)
+      }
+      if (message?.type === 'config') {
+        updateConfig(message.data)
+      }
+    })
   }
 }
 

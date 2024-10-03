@@ -8,5 +8,11 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["gpio", "onmidimessage", "typecheck"]
+  "cSpell.words": [
+    "characteristicvaluechanged",
+    "gattserverdisconnected",
+    "gpio",
+    "onmidimessage",
+    "typecheck"
+  ]
 }

@@ -7,7 +7,7 @@ export type ConfigType = typeof config
 export const configPath = path.join(__dirname, 'RGBPiano-config.json')
 const configEmitter = new EventEmitter()
 
-const hue = Math.round(Math.random() * 360)
+const hue = 18
 
 export const PORT = 3192
 export const DATA_PIN = 18
@@ -27,9 +27,9 @@ let config: {
   LED_START_COUNT: number
 } = {
   BRIGHTNESS: 1,
-  BACKGROUND_BRIGHTNESS: 0.05,
-  BACKGROUND_COLOR_RGB: HSLToRGB(hue, 100, 100),
-  NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, 100, 100),
+  BACKGROUND_BRIGHTNESS: 0.03,
+  BACKGROUND_COLOR_RGB: HSLToRGB(hue, 100, 50),
+  NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, 100, 50),
   CONSTANT_VELOCITY: true,
   SELECTED_DEVICE: 'Springbeats vMIDI1',
   LED_INVERT: true,
@@ -37,19 +37,17 @@ let config: {
   LED_START_COUNT: 0
 }
 
-export function initSavedConfig() {
+export function getSavedConfig() {
   try {
     config = {
       ...config,
       ...JSON.parse(readFileSync(configPath, 'utf8'))
     }
-
-    return config
   } catch (error) {
     console.log('Could not load config file, using default config')
-
-    return null
   }
+
+  return config
 }
 export function saveConfigToFile() {
   writeFileSync(configPath, JSON.stringify(config, null, 2))

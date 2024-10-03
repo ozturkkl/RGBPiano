@@ -26,7 +26,8 @@ declare global {
   interface BluetoothDevice {
     id: string
     name?: string
-    gatt?: BluetoothRemoteGATTServer
+    gatt: BluetoothRemoteGATTServer
+    addEventListener(event: string, callback: () => void): void
   }
 
   interface BluetoothRemoteGATTServer {
@@ -44,6 +45,12 @@ declare global {
 
   interface BluetoothRemoteGATTCharacteristic {
     startNotifications(): Promise<void>
-    addEventListener(event: string, callback: (event: Event) => void): void
+    addEventListener(event: string, callback: (event: BluetoothCharacteristicEvent) => void): void
+  }
+
+  interface BluetoothCharacteristicEvent {
+    target: {
+      value: DataView
+    }
   }
 }
