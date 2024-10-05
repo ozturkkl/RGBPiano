@@ -14,41 +14,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.initSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
+exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.getSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
 var colors_1 = require("./colors");
 exports.configPath = path_1.default.join(__dirname, 'RGBPiano-config.json');
 var configEmitter = new events_1.default();
-var hue = Math.round(Math.random() * 360);
+var hue = 18;
 exports.PORT = 3192;
 exports.DATA_PIN = 18;
 exports.MIN_NOTE = 21;
 exports.MAX_NOTE = 108;
-exports.INPUT_DEVICE_REFRESH_INTERVAL = 30000;
+exports.INPUT_DEVICE_REFRESH_INTERVAL = 10000;
 var config = {
     BRIGHTNESS: 1,
-    BACKGROUND_BRIGHTNESS: 0.05,
-    BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
-    NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 100),
+    BACKGROUND_BRIGHTNESS: 0.03,
+    BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 50),
+    NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(hue, 100, 50),
     CONSTANT_VELOCITY: true,
     SELECTED_DEVICE: 'Springbeats vMIDI1',
     LED_INVERT: true,
     LED_END_COUNT: 177,
-    LED_START_COUNT: 0
+    LED_START_COUNT: 0,
+    AUTO_CONNECT_BLE_DEVICES: [
+        {
+            id: '48:B6:20:19:80:CE',
+            port: 'Springbeats vMIDI2'
+        },
+        {
+            id: '48:B6:20:22:01:4A',
+            port: 'Springbeats vMIDI3'
+        }
+    ]
 };
-function initSavedConfig() {
+function getSavedConfig() {
     try {
         config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(exports.configPath, 'utf8')));
-        return config;
     }
     catch (error) {
         console.log('Could not load config file, using default config');
-        return null;
     }
+    return config;
 }
-exports.initSavedConfig = initSavedConfig;
+exports.getSavedConfig = getSavedConfig;
 function saveConfigToFile() {
     (0, fs_1.writeFileSync)(exports.configPath, JSON.stringify(config, null, 2));
 }
