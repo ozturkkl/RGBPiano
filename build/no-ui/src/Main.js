@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -41,10 +64,9 @@ var WebsocketP2P_1 = require("./WebsocketP2P");
 var config_1 = require("../util/config");
 var RbgStrip_1 = require("./RbgStrip");
 var Midi_1 = require("./Midi");
-var BluetoothMidi_1 = require("./BluetoothMidi");
 function Main(ipcMain) {
     return __awaiter(this, void 0, void 0, function () {
-        var connection, config, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
+        var connection, config, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -56,10 +78,10 @@ function Main(ipcMain) {
                     (0, config_1.onConfigUpdated)(function () {
                         (0, config_1.saveConfigToFile)();
                     });
-                    if (!ipcMain) return [3 /*break*/, 5];
+                    if (!ipcMain) return [3 /*break*/, 6];
                     _a.label = 2;
                 case 2:
-                    _a.trys.push([2, 4, , 5]);
+                    _a.trys.push([2, 5, , 6]);
                     // SETUP MIDI
                     return [4 /*yield*/, Midi_1.Midi.init()];
                 case 3:
@@ -88,18 +110,21 @@ function Main(ipcMain) {
                             data: config
                         });
                     });
+                    return [4 /*yield*/, Promise.resolve().then(function () { return __importStar(require('./BluetoothMidi')); })];
+                case 4:
+                    BluetoothMidi_1 = (_a.sent()).BluetoothMidi;
                     connectBleDevices_1 = function () {
                         var autoConnectDevices = (0, config_1.getConfig)().AUTO_CONNECT_BLE_DEVICES;
                         autoConnectDevices.forEach(function (device) {
                             var midi = new Midi_1.Midi(device.port);
-                            BluetoothMidi_1.BluetoothMidi.getDevice(device.id, function (data) {
+                            BluetoothMidi_1.getDevice(device.id, function (data) {
                                 midi.sendMessage(data);
                             });
                         });
                         connectBleDevicesInterval_1 && clearInterval(connectBleDevicesInterval_1);
                         connectBleDevicesInterval_1 = setInterval(function () {
                             autoConnectDevices.forEach(function (device) {
-                                BluetoothMidi_1.BluetoothMidi.getDevice(device.id).connect();
+                                BluetoothMidi_1.getDevice(device.id).connect();
                             });
                         }, 1000);
                     };
@@ -107,12 +132,12 @@ function Main(ipcMain) {
                         connectBleDevices_1();
                     });
                     connectBleDevices_1();
-                    return [3 /*break*/, 5];
-                case 4:
+                    return [3 /*break*/, 6];
+                case 5:
                     e_1 = _a.sent();
                     console.error(e_1);
-                    return [3 /*break*/, 5];
-                case 5:
+                    return [3 /*break*/, 6];
+                case 6:
                     // IF NOT ELECTRON => RASPBERRY PI - LED STRIP
                     if (!ipcMain) {
                         rgbStrip_1 = new RbgStrip_1.RgbStrip();

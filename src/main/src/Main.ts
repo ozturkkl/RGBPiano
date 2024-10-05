@@ -9,7 +9,6 @@ import {
 } from '../util/config'
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
-import { BluetoothMidi } from './BluetoothMidi'
 
 export async function Main(ipcMain?: Electron.IpcMain) {
   const connection = new WebsocketP2P()
@@ -52,6 +51,7 @@ export async function Main(ipcMain?: Electron.IpcMain) {
       })
 
       // SETUP BLE MIDI
+      const { BluetoothMidi } = await import('./BluetoothMidi')
       let connectBleDevicesInterval: NodeJS.Timeout
       const connectBleDevices = () => {
         const autoConnectDevices = getConfig().AUTO_CONNECT_BLE_DEVICES
