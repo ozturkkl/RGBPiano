@@ -9,12 +9,16 @@ import {
 } from '../util/config'
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
-import { BluetoothManager } from './BluetoothManager'
-// import { BluetoothManager } from './BluetoothManager'
+import { BluetoothMidi } from './BluetoothMidi'
 
 export async function Main(ipcMain: Electron.IpcMain) {
   const connection = new WebsocketP2P()
   await connection.connect()
+
+  const config = getSavedConfig()
+  onConfigUpdated(() => {
+    saveConfigToFile()
+  })
 
   // IF ELECTRON
   if (ipcMain) {
@@ -32,36 +36,44 @@ export async function Main(ipcMain: Electron.IpcMain) {
       })
 
       // SETUP CONFIG
-      const config = getSavedConfig()
       connection.send({
         type: 'config',
         data: config
       })
-      onConfigUpdated(() => {
-        saveConfigToFile()
-      })
+
       ipcMain.handle('config', (_, config: ConfigType) => {
-        console.log('Received config: ', config)
+        updateConfig(config)
+      })
+      onConfigUpdated((config) => {
         connection.send({
           type: 'config',
           data: config
         })
-        updateConfig(config)
       })
 
-      // SETUP BLUETOOTH
-      // TODO: WIP
-      // bm.onMidiDeviceListUpdated = (devices) => {
-      //   console.log('Midi devices updated: ', devices)
-      // }
-      const bm = new BluetoothManager()
-      await bm.connectDevice('48:B6:20:22:01:4A', (data) => {
-        console.log('Received data from 48:B6:20:22:01:4A: ', data)
+      // SETUP BLE MIDI
+      let connectBleDevicesInterval: NodeJS.Timeout
+      const connectBleDevices = () => {
+        const autoConnectDevices = getConfig().AUTO_CONNECT_BLE_DEVICES
+        autoConnectDevices.forEach((device) => {
+          const midi = new Midi(device.port)
+
+          BluetoothMidi.getDevice(device.id, (data) => {
+            midi.sendMessage(data)
+          })
+        })
+
+        connectBleDevicesInterval && clearInterval(connectBleDevicesInterval)
+        connectBleDevicesInterval = setInterval(() => {
+          autoConnectDevices.forEach((device) => {
+            BluetoothMidi.getDevice(device.id).connect()
+          })
+        }, 1000)
+      }
+      onConfigUpdated(() => {
+        connectBleDevices()
       })
-      const bm2 = new BluetoothManager()
-      await bm2.connectDevice('48:B6:20:19:80:CE', (data) => {
-        console.log('Received data from 48:B6:20:19:80:CE: ', data)
-      })
+      connectBleDevices()
     } catch (e) {
       console.error(e)
     }
@@ -82,101 +94,3 @@ export async function Main(ipcMain: Electron.IpcMain) {
     })
   }
 }
-
-// function parseMIDIData(dataArray: Uint8Array) {
-//   // COMMON MIDI VALUES
-//   // 128 - 143: Note Off
-//   // 144 - 159: Note On
-//   // 160 - 175: Polyphonic Aftertouch
-//   // 176 - 191: CC
-//   // 192 - 207: Program Change
-//   // 208 - 223: Channel Aftertouch
-//   // 224 - 239: Pitch Bend
-
-//   // COMMON CC VALUES
-//   // 0: Bank Select
-//   // 1: Modulation Wheel
-//   // 2: Breath Controller
-//   // 7: Volume
-//   // 10: Pan
-//   // 11: Expression Controller
-//   // 64: Sustain
-//   // 65: Portamento
-//   // 66: Sostenuto
-//   // 67: Soft Pedal
-//   // 120: All Sound Off
-//   // 121: Reset All Controllers
-//   // 123: All Notes Off
-
-//   const MST = dataArray[0] // most significant time byte
-
-//   let errorParsing = false
-
-//   const messages: MidiMessage[] = []
-//   const message: MidiMessage = {
-//     time: 0,
-//     data: []
-//   }
-
-//   for (let i = 1; i < dataArray.length; i++) {
-//     const LST = dataArray[i] // least significant time byte
-//     message.time = (MST << 8) + LST
-
-//     const status = dataArray[i + 1]
-//     if (status < 128 || status > 239) {
-//       errorParsing = true
-//       break
-//     }
-
-//     if (status >= 128 && status <= 143) {
-//       // Note Off
-//       message.data = [status, dataArray[i + 2], dataArray[i + 3]]
-
-//       // sometimes the note off message is sent twice, check for that condition
-//       if (dataArray[i + 4] < 128 && dataArray[i + 5] < 128) {
-//         // next two bytes are not a valid status or time byte, they are likely a combined note off message
-//         message.data = [status, dataArray[i + 4], dataArray[i + 5]]
-//         i += 2
-//       }
-//       i += 3
-//     } else if (status >= 144 && status <= 159) {
-//       // Note On
-//       message.data = [status, dataArray[i + 2], dataArray[i + 3]]
-//       i += 3
-//     } else if (status >= 160 && status <= 175) {
-//       // Polyphonic Aftertouch
-//       message.data = [status, dataArray[i + 2], dataArray[i + 3]]
-//       i += 3
-//     } else if (status >= 176 && status <= 191) {
-//       // CC
-//       message.data = [status, dataArray[i + 2], dataArray[i + 3]]
-//       i += 3
-//     } else if (status >= 192 && status <= 207) {
-//       // Program Change
-//       message.data = [status, dataArray[i + 2]]
-//       i += 2
-//     } else if (status >= 208 && status <= 223) {
-//       // Channel Aftertouch
-//       message.data = [status, dataArray[i + 2]]
-//       i += 2
-//     } else if (status >= 224 && status <= 239) {
-//       // Pitch Bend
-//       message.data = [status, dataArray[i + 2], dataArray[i + 3]]
-
-//       // sometimes the pitch bend message is sent twice, check for that condition
-//       if (dataArray[i + 4] < 128 && dataArray[i + 5] < 128) {
-//         // next two bytes are not a valid status or time byte, they are likely a combined pitch bend message
-//         message.data = [status, dataArray[i + 4], dataArray[i + 5]]
-//         i += 2
-//       }
-//       i += 3
-//     }
-
-//     messages.push(message)
-//   }
-
-//   return {
-//     messages,
-//     errorParsing
-//   }
-// }

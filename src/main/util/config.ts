@@ -25,6 +25,7 @@ let config: {
   LED_INVERT: boolean
   LED_END_COUNT: number
   LED_START_COUNT: number
+  AUTO_CONNECT_BLE_DEVICES: { id: string; port: string }[]
 } = {
   BRIGHTNESS: 1,
   BACKGROUND_BRIGHTNESS: 0.03,
@@ -34,7 +35,17 @@ let config: {
   SELECTED_DEVICE: 'Springbeats vMIDI1',
   LED_INVERT: true,
   LED_END_COUNT: 177,
-  LED_START_COUNT: 0
+  LED_START_COUNT: 0,
+  AUTO_CONNECT_BLE_DEVICES: [
+    {
+      id: '48:B6:20:19:80:CE',
+      port: 'Springbeats vMIDI2'
+    },
+    {
+      id: '48:B6:20:22:01:4A',
+      port: 'Springbeats vMIDI3'
+    }
+  ]
 }
 
 export function getSavedConfig() {

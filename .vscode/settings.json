@@ -9,6 +9,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "cSpell.words": [
+    "Aftertouch",
     "characteristicvaluechanged",
     "gattserverdisconnected",
     "gpio",
