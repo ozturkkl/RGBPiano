@@ -11,7 +11,7 @@ import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
 import { BluetoothMidi } from './BluetoothMidi'
 
-export async function Main(ipcMain: Electron.IpcMain) {
+export async function Main(ipcMain?: Electron.IpcMain) {
   const connection = new WebsocketP2P()
   await connection.connect()
 

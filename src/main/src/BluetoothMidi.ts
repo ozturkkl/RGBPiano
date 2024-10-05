@@ -37,7 +37,7 @@ export class BluetoothMidi {
       const device = BluetoothMidi.getDevice(deviceId)
       const parsed = BluetoothMidi.parseMIDIData(data)
       parsed.messages.forEach((msg) => {
-        device.onMessage(msg.data)
+        device.onMessage?.(msg.data)
       })
     })
 
