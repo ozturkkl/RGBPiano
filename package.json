@@ -5,15 +5,15 @@
   "main": "./out/main/index.js",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.node.json --composite false && svelte-check --tsconfig ./tsconfig.json",
-    "clean": "rm -rf package-lock.json node_modules out dist .node-red-data/node_modules .node-red-data/package-lock.json",
+    "clean": "rm -rf package-lock.json node_modules out dist",
     "pi": "npm run pi:build && npm run pi:start",
     "pi:build": "tsc -p tsconfig.no-ui.json",
     "pi:start": "node ./build/no-ui/index-no-ui.js",
     "pi:install": "npm install --only=prod",
-    "electron": "set NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true && electron-vite dev",
+    "electron": "set NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true && electron-vite dev --watch",
     "electron:preview": "electron-vite preview",
     "electron:install": "npm install && npm run electron:postinstall && npm run electron:build",
-    "electron:build": "npm run typecheck && electron-vite build && tsc -p tsconfig.no-ui.json",
+    "electron:build": "npm run typecheck && electron-vite build && tsc -p tsconfig.json",
     "electron:postinstall": "electron-builder install-app-deps && electron-rebuild",
     "electron:win": "npm run electron:build && electron-builder --win --config",
     "electron:mac": "npm run electron:build && electron-builder --mac --config",
@@ -21,10 +21,8 @@
   },
   "dependencies": {
     "jzz": "^1.8.5",
-    "midi": "^2.0.0",
     "node-ssdp": "^4.0.1",
     "rpi-ws281x-native": "^1.0.4",
-    "webbluetooth": "^3.2.1",
     "ws": "^8.13.0"
   },
   "devDependencies": {

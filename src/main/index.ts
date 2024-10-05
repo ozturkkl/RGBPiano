@@ -3,13 +3,6 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Main } from './src/Main'
-import {
-  ConfigType,
-  initSavedConfig,
-  onConfigUpdated,
-  saveConfigToFile,
-  updateConfig
-} from './util/config'
 
 function createWindow(): void {
   // Create the browser window.
@@ -25,8 +18,11 @@ function createWindow(): void {
     }
   })
 
+  mainWindow.webContents.openDevTools()
+
   mainWindow.on('ready-to-show', () => {
-    mainWindow.minimize()
+    // mainWindow.minimize()
+    mainWindow.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -58,7 +54,7 @@ app.whenReady().then(() => {
   })
 
   createWindow()
-  main()
+  Main(ipcMain)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -75,31 +71,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-async function main(): Promise<void> {
-  const savedConfig = initSavedConfig()
-  const { connection } = await Main(true)
-
-  // if config was saved, send it to the websocket listeners
-  if (savedConfig) {
-    connection.send({
-      type: 'config',
-      data: savedConfig
-    })
-  }
-  // if config is updated, save it to the file
-  onConfigUpdated(() => {
-    saveConfigToFile()
-  })
-
-  // if new config is received from the UI, update the saved config
-  ipcMain.handle('config', (_, config: ConfigType) => {
-    console.log('Received config: ', config)
-    connection.send({
-      type: 'config',
-      data: config
-    })
-
-    updateConfig(config)
-  })
-}

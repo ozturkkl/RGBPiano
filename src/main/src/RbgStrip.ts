@@ -1,6 +1,5 @@
-import { DATA_PIN, getConfig, onConfigUpdated } from '../util/config'
+import { DATA_PIN, getConfig, MAX_NOTE, MIN_NOTE, onConfigUpdated } from '../util/config'
 import { getBlendedRGB } from '../util/colors'
-import { PrettyMidiMessage } from '../types/midi'
 
 export class RgbStrip {
   private ws281x = require('rpi-ws281x-native')
@@ -99,26 +98,24 @@ export class RgbStrip {
     this.render()
   }
 
-  handleNotePress(data: PrettyMidiMessage): void {
+  handleNotePress(message: number[]): void {
+    const midiChannel = message[0]
+
     // note
-    if (data.midiChannel === 144) {
-      if (getConfig().CONSTANT_VELOCITY) {
-        data.noteVelocityRatio = data.noteVelocityRatio === 0 ? 0 : 1
-      }
-
-      this.noteHandler(data.notePositionRatio, data.noteVelocityRatio)
+    if (midiChannel === 144) {
+      const notePositionRatio = this.getNotePositionRatio(message[1])
+      const noteVelocityRatio = getConfig().CONSTANT_VELOCITY ? 1 : message[2] / 127
+      this.noteHandler(notePositionRatio, noteVelocityRatio)
     }
-    if (data.midiChannel === 128) {
-      this.noteHandler(data.notePositionRatio, 0)
+    if (midiChannel === 128) {
+      const notePositionRatio = this.getNotePositionRatio(message[1])
+      this.noteHandler(notePositionRatio, 0)
     }
+  }
 
-    // pedal
-    // if (data.midiChannel === 176) {
-    //   if (data.noteVelocityRatio === 0) {
-    //     this.fillColors(getConfig().BACKGROUND_COLOR, true)
-    //   } else {
-    //     this.fillColors(getBlendedRGB(getConfig().BACKGROUND_COLOR, [0, 0, 0], 0.5), true)
-    //   }
-    // }
+  getNotePositionRatio(note: number): number {
+    return getConfig().LED_INVERT
+      ? 1 - (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
+      : (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
   }
 }

@@ -1,7 +1,16 @@
 import WebSocket from 'ws'
 import { Server, Client, SsdpHeaders } from 'node-ssdp'
-import { PORT } from '../util/config'
-import { WebsocketMessage } from '../types/websocket'
+import { ConfigType, PORT } from '../util/config'
+
+export type WebsocketMessage =
+  | {
+      type: 'midi'
+      data: number[]
+    }
+  | {
+      type: 'config'
+      data: Partial<ConfigType>
+    }
 
 export class WebsocketP2P {
   private server: WebSocket.Server | null
@@ -67,7 +76,7 @@ export class WebsocketP2P {
   }
 
   send(message: WebsocketMessage): void {
-    console.log(`Sending message: ${JSON.stringify(message)}`)
+    console.log(`Sending message: ${JSON.stringify(message, null, 2)}`)
     if (this.server) {
       this.server.clients.forEach((client) => {
         client.send(JSON.stringify(message))

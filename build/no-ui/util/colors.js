@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBlendedRGB = exports.RGBToHex = exports.hexToRgb = exports.HSLToRGB = exports.RGBToHSL = void 0;
 function RGBToHSL(r, g, b) {
     r /= 255;

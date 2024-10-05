@@ -7,13 +7,13 @@ export type ConfigType = typeof config
 export const configPath = path.join(__dirname, 'RGBPiano-config.json')
 const configEmitter = new EventEmitter()
 
-const hue = Math.round(Math.random() * 360)
+const hue = 18
 
 export const PORT = 3192
 export const DATA_PIN = 18
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
-export const INPUT_DEVICE_REFRESH_INTERVAL = 30000
+export const INPUT_DEVICE_REFRESH_INTERVAL = 10000
 
 let config: {
   BRIGHTNESS: number
@@ -25,31 +25,40 @@ let config: {
   LED_INVERT: boolean
   LED_END_COUNT: number
   LED_START_COUNT: number
+  AUTO_CONNECT_BLE_DEVICES: { id: string; port: string }[]
 } = {
   BRIGHTNESS: 1,
-  BACKGROUND_BRIGHTNESS: 0.05,
-  BACKGROUND_COLOR_RGB: HSLToRGB(hue, 100, 100),
-  NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, 100, 100),
+  BACKGROUND_BRIGHTNESS: 0.03,
+  BACKGROUND_COLOR_RGB: HSLToRGB(hue, 100, 50),
+  NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, 100, 50),
   CONSTANT_VELOCITY: true,
   SELECTED_DEVICE: 'Springbeats vMIDI1',
   LED_INVERT: true,
   LED_END_COUNT: 177,
-  LED_START_COUNT: 0
+  LED_START_COUNT: 0,
+  AUTO_CONNECT_BLE_DEVICES: [
+    {
+      id: '48:B6:20:19:80:CE',
+      port: 'Springbeats vMIDI2'
+    },
+    {
+      id: '48:B6:20:22:01:4A',
+      port: 'Springbeats vMIDI3'
+    }
+  ]
 }
 
-export function initSavedConfig() {
+export function getSavedConfig() {
   try {
     config = {
       ...config,
       ...JSON.parse(readFileSync(configPath, 'utf8'))
     }
-
-    return config
   } catch (error) {
     console.log('Could not load config file, using default config')
-
-    return null
   }
+
+  return config
 }
 export function saveConfigToFile() {
   writeFileSync(configPath, JSON.stringify(config, null, 2))
