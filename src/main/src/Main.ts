@@ -17,7 +17,6 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
 
   const connection = new WebsocketP2P()
   connection.connect()
-  connection.listen((m: WebsocketMessage) => m?.type === 'ping' && console.log('Received ping'))
 
   // IF ELECTRON
   if (electron?.ipcMain) {
@@ -72,6 +71,11 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
         if (config.AUTO_CONNECT_BLE_DEVICES) connectBleDevices()
       })
       connectBleDevices()
+
+      // DEBUG LISTENER
+      connection.listen((message: WebsocketMessage) => {
+        message.type !== 'ping' && console.log(message)
+      })
     } catch (e) {
       console.error(e)
     }
