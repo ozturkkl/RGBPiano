@@ -39,7 +39,7 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
       })
 
       // SETUP CONFIG
-      connection.onDeviceUpdate = () => {
+      connection.onConnectionEstablished = () => {
         connection.send({
           type: 'config',
           data: getConfig()
@@ -85,16 +85,14 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
   if (!electron?.ipcMain) {
     const rgbStrip = new RgbStrip()
 
-    connection.waitForConnection().then(() => {
-      connection.listen((message: WebsocketMessage) => {
-        console.log(message)
-        if (message?.type === 'midi') {
-          rgbStrip.handleNotePress(message.data)
-        }
-        if (message?.type === 'config') {
-          updateConfig(message.data)
-        }
-      })
+    connection.listen((message: WebsocketMessage) => {
+      console.log(message)
+      if (message?.type === 'midi') {
+        rgbStrip.handleNotePress(message.data)
+      }
+      if (message?.type === 'config') {
+        updateConfig(message.data)
+      }
     })
   }
 }

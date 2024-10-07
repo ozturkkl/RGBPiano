@@ -99,7 +99,7 @@ function Main(electron) {
                         });
                     });
                     // SETUP CONFIG
-                    connection.onDeviceUpdate = function () {
+                    connection.onConnectionEstablished = function () {
                         connection.send({
                             type: 'config',
                             data: (0, config_1.getConfig)()
@@ -142,16 +142,14 @@ function Main(electron) {
                     // IF NOT ELECTRON => RASPBERRY PI - LED STRIP
                     if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) {
                         rgbStrip_1 = new RbgStrip_1.RgbStrip();
-                        connection.waitForConnection().then(function () {
-                            connection.listen(function (message) {
-                                console.log(message);
-                                if ((message === null || message === void 0 ? void 0 : message.type) === 'midi') {
-                                    rgbStrip_1.handleNotePress(message.data);
-                                }
-                                if ((message === null || message === void 0 ? void 0 : message.type) === 'config') {
-                                    (0, config_1.updateConfig)(message.data);
-                                }
-                            });
+                        connection.listen(function (message) {
+                            console.log(message);
+                            if ((message === null || message === void 0 ? void 0 : message.type) === 'midi') {
+                                rgbStrip_1.handleNotePress(message.data);
+                            }
+                            if ((message === null || message === void 0 ? void 0 : message.type) === 'config') {
+                                (0, config_1.updateConfig)(message.data);
+                            }
                         });
                     }
                     return [2 /*return*/];

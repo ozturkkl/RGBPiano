@@ -16,10 +16,10 @@ export class WebsocketP2P {
   private server: WebSocket.Server | null
   private client: WebSocket | null
   private connectingPromise: Promise<void> | null
-  private _onConnectionEstablished: () => void = () => {}
+  private onConnectionEstablishedListeners: (() => void)[] = []
 
-  set onDeviceUpdate(callback: () => void) {
-    this._onConnectionEstablished = callback
+  set onConnectionEstablished(callback: () => void) {
+    this.onConnectionEstablishedListeners.push(callback)
   }
 
   constructor() {
@@ -50,7 +50,7 @@ export class WebsocketP2P {
           console.log('Connected to remote server')
           this.client = ws
           resolve()
-          this._onConnectionEstablished()
+          this.onConnectionEstablishedListeners.forEach((listener) => listener())
         })
 
         ws.on('error', async (err) => {
@@ -95,7 +95,7 @@ export class WebsocketP2P {
       wss.on('connection', () => {
         console.log('Client connected')
         resolve()
-        this._onConnectionEstablished()
+        this.onConnectionEstablishedListeners.forEach((listener) => listener())
       })
 
       wss.on('error', (err) => {
@@ -154,18 +154,18 @@ export class WebsocketP2P {
 
         ws.on('error', (err) => {
           console.error(`Listen error: WebSocket server connection error: ${err}`)
-          setTimeout(this.listen.bind(this, callback), 1000)
+          this.onConnectionEstablished = () => this.listen(callback)
         })
       })
 
       this.server.on('error', (err) => {
         console.error(`Listen error: WebSocket server error: ${err}`)
-        setTimeout(this.listen.bind(this, callback), 1000)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
 
       this.server.on('close', async () => {
         console.log('Listen rerun: WebSocket server closed')
-        setTimeout(this.listen.bind(this, callback), 1000)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
     } else if (this.client) {
       this.client.on('message', (message) => {
@@ -175,16 +175,16 @@ export class WebsocketP2P {
 
       this.client.on('error', (err) => {
         console.error(`Listen error: WebSocket client error: ${err}`)
-        setTimeout(this.listen.bind(this, callback), 1000)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
 
       this.client.on('close', async () => {
         console.log('Listen rerun: WebSocket client closed')
-        setTimeout(this.listen.bind(this, callback), 1000)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
     } else {
-      console.log('Listening failed: No WebSocket connection, retrying in 1s...')
-      setTimeout(this.listen.bind(this, callback), 1000)
+      console.log('Listening failed: No WebSocket connection, waiting for connection...')
+      this.onConnectionEstablished = () => this.listen(callback)
     }
   }
 
@@ -217,12 +217,7 @@ export class WebsocketP2P {
 
   waitForConnection(): Promise<void> {
     return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if ((this.server || this.client) && this.connectingPromise === null) {
-          clearInterval(interval)
-          resolve()
-        }
-      }, 1000)
+      this.onConnectionEstablished = resolve
     })
   }
 }
