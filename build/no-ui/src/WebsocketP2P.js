@@ -200,14 +200,16 @@ var WebsocketP2P = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log('Listening for messages...', callback.toString());
                 if (this.server) {
+                    this.server.clients.forEach(function (client) {
+                        client.on('message', function (message) {
+                            var data = JSON.parse(message.toString());
+                            callback(data);
+                        });
+                    });
                     this.server.on('connection', function (ws) {
                         ws.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
-                        });
-                        ws.on('error', function (err) {
-                            console.error("Listen error: WebSocket server connection error: ".concat(err));
-                            _this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
                         });
                     });
                     this.server.on('error', function (err) {
