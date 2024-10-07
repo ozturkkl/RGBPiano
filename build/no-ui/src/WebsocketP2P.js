@@ -217,13 +217,13 @@ var WebsocketP2P = /** @class */ (function () {
                     });
                     this.server.on('error', function (err) {
                         console.error("Listen error: WebSocket server error: ".concat(err));
-                        _this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
+                        _this.onConnectionEstablished = function () { return _this.listen(callback); };
                     });
                     this.server.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             console.log('Listen rerun: WebSocket server closed');
-                            this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
+                            this.onConnectionEstablished = function () { return _this.listen(callback); };
                             return [2 /*return*/];
                         });
                     }); });
@@ -236,20 +236,20 @@ var WebsocketP2P = /** @class */ (function () {
                     });
                     this.client.on('error', function (err) {
                         console.error("Listen error: WebSocket client error: ".concat(err));
-                        _this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
+                        _this.onConnectionEstablished = function () { return _this.listen(callback); };
                     });
                     this.client.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             console.log('Listen rerun: WebSocket client closed');
-                            this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
+                            this.onConnectionEstablished = function () { return _this.listen(callback); };
                             return [2 /*return*/];
                         });
                     }); });
                 }
                 else {
                     console.log('Listening failed: No WebSocket connection, waiting for connection...');
-                    this.onConnectionEstablished = function () { return _this.listen.bind(_this, callback); };
+                    this.onConnectionEstablished = function () { return _this.listen(callback); };
                 }
                 return [2 /*return*/];
             });

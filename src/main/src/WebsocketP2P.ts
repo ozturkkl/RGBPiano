@@ -166,12 +166,12 @@ export class WebsocketP2P {
 
       this.server.on('error', (err) => {
         console.error(`Listen error: WebSocket server error: ${err}`)
-        this.onConnectionEstablished = () => this.listen.bind(this, callback)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
 
       this.server.on('close', async () => {
         console.log('Listen rerun: WebSocket server closed')
-        this.onConnectionEstablished = () => this.listen.bind(this, callback)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
     } else if (this.client) {
       console.log('Client listen')
@@ -182,16 +182,16 @@ export class WebsocketP2P {
 
       this.client.on('error', (err) => {
         console.error(`Listen error: WebSocket client error: ${err}`)
-        this.onConnectionEstablished = () => this.listen.bind(this, callback)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
 
       this.client.on('close', async () => {
         console.log('Listen rerun: WebSocket client closed')
-        this.onConnectionEstablished = () => this.listen.bind(this, callback)
+        this.onConnectionEstablished = () => this.listen(callback)
       })
     } else {
       console.log('Listening failed: No WebSocket connection, waiting for connection...')
-      this.onConnectionEstablished = () => this.listen.bind(this, callback)
+      this.onConnectionEstablished = () => this.listen(callback)
     }
   }
 
