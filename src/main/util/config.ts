@@ -2,6 +2,7 @@ import EventEmitter from 'events'
 import { readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import { HSLToRGB } from './colors'
+import { debounce, throttleWithTrailing } from './timeThrottleDebounce'
 
 export type ConfigType = typeof config
 const configEmitter = new EventEmitter()
@@ -67,22 +68,15 @@ export function getSavedConfig(app?: Electron.App) {
   return config
 }
 
-let debounceTimeout: NodeJS.Timeout
-export function saveConfigToFile(app?: Electron.App) {
-  const saveConfig = () => {
-    console.log(`Saving config to ${getConfigPath(app)}`)
-    try {
-      writeFileSync(getConfigPath(app), JSON.stringify(config, null, 2))
-    } catch (error) {
-      console.error('Could not save config file')
-      console.error(error)
-    }
+export const saveConfigToFile = debounce((app?: Electron.App) => {
+  console.log(`Saving config to ${getConfigPath(app)}`)
+  try {
+    writeFileSync(getConfigPath(app), JSON.stringify(config, null, 2))
+  } catch (error) {
+    console.error('Could not save config file')
+    console.error(error)
   }
-
-  // add debounce logic before saving the config
-  if (debounceTimeout) clearTimeout(debounceTimeout)
-  debounceTimeout = setTimeout(saveConfig, 1000)
-}
+}, 1000)
 
 export function getConfig(): typeof config {
   return config
@@ -105,8 +99,9 @@ export function updateConfig(newConfig: Partial<typeof config>): void {
 }
 
 export function onConfigUpdated(listener: (conf: Partial<typeof config>) => void): void {
+  const throttled = throttleWithTrailing(listener, 22) // 45 FPS
   configEmitter.on('configUpdated', (updatedProperties: Partial<typeof config>) => {
-    listener(updatedProperties)
+    throttled(updatedProperties)
   })
 }
 

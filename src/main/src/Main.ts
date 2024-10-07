@@ -67,8 +67,8 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
           })
         }, 1000)
       }
-      onConfigUpdated(() => {
-        connectBleDevices()
+      onConfigUpdated((config) => {
+        if (config.AUTO_CONNECT_BLE_DEVICES) connectBleDevices()
       })
       connectBleDevices()
     } catch (e) {
