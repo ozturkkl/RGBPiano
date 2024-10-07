@@ -198,7 +198,7 @@ var WebsocketP2P = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                console.log('Listening for messages...');
+                console.log('Listening for messages...', JSON.stringify(callback, null, 2));
                 if (this.server) {
                     this.server.on('connection', function (ws) {
                         ws.on('message', function (message) {
