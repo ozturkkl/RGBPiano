@@ -4,7 +4,6 @@ import path from 'path'
 import { HSLToRGB } from './colors'
 
 export type ConfigType = typeof config
-export const configPath = path.join(__dirname, 'RGBPiano-config.json')
 const configEmitter = new EventEmitter()
 
 const hue = 18
@@ -48,11 +47,18 @@ let config: {
   ]
 }
 
-export function getSavedConfig() {
+function getConfigPath(app?: Electron.App) {
+  if (app) {
+    return path.join(app.getAppPath(), 'RGBPiano-config.json')
+  } else {
+    return path.join(__dirname, 'RGBPiano-config.json')
+  }
+}
+export function getSavedConfig(app?: Electron.App) {
   try {
     config = {
       ...config,
-      ...JSON.parse(readFileSync(configPath, 'utf8'))
+      ...JSON.parse(readFileSync(getConfigPath(app), 'utf8'))
     }
   } catch (error) {
     console.log('Could not load config file, using default config')
@@ -60,8 +66,22 @@ export function getSavedConfig() {
 
   return config
 }
-export function saveConfigToFile() {
-  writeFileSync(configPath, JSON.stringify(config, null, 2))
+
+let debounceTimeout: NodeJS.Timeout
+export function saveConfigToFile(app?: Electron.App) {
+  const saveConfig = () => {
+    console.log(`Saving config to ${getConfigPath(app)}`)
+    try {
+      writeFileSync(getConfigPath(app), JSON.stringify(config, null, 2))
+    } catch (error) {
+      console.error('Could not save config file')
+      console.error(error)
+    }
+  }
+
+  // add debounce logic before saving the config
+  if (debounceTimeout) clearTimeout(debounceTimeout)
+  debounceTimeout = setTimeout(saveConfig, 1000)
 }
 
 export function getConfig(): typeof config {

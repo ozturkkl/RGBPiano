@@ -10,17 +10,21 @@ import {
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
 
-export async function Main(ipcMain?: Electron.IpcMain) {
-  const connection = new WebsocketP2P()
-  await connection.connect()
-
-  const config = getSavedConfig()
+export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron.App }) {
+  electron?.ipcMain.handle('config', (_, config: ConfigType) => {
+    updateConfig(config)
+  })
+  getSavedConfig(electron?.app)
   onConfigUpdated(() => {
-    saveConfigToFile()
+    console.log('Config updated')
+    saveConfigToFile(electron?.app)
   })
 
+  const connection = new WebsocketP2P()
+  connection.connect()
+
   // IF ELECTRON
-  if (ipcMain) {
+  if (electron?.ipcMain) {
     try {
       // SETUP MIDI
       await Midi.init()
@@ -35,14 +39,12 @@ export async function Main(ipcMain?: Electron.IpcMain) {
       })
 
       // SETUP CONFIG
-      connection.send({
-        type: 'config',
-        data: config
-      })
-
-      ipcMain.handle('config', (_, config: ConfigType) => {
-        updateConfig(config)
-      })
+      connection.onDeviceUpdate = () => {
+        connection.send({
+          type: 'config',
+          data: getConfig()
+        })
+      }
       onConfigUpdated((config) => {
         connection.send({
           type: 'config',
@@ -80,7 +82,7 @@ export async function Main(ipcMain?: Electron.IpcMain) {
   }
 
   // IF NOT ELECTRON => RASPBERRY PI - LED STRIP
-  if (!ipcMain) {
+  if (!electron?.ipcMain) {
     const rgbStrip = new RgbStrip()
 
     connection.listen((message: WebsocketMessage) => {

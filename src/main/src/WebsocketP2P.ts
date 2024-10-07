@@ -16,6 +16,11 @@ export class WebsocketP2P {
   private server: WebSocket.Server | null
   private client: WebSocket | null
   private connectingPromise: Promise<void> | null
+  private _onConnectionEstablished: () => void = () => {}
+
+  set onDeviceUpdate(callback: () => void) {
+    this._onConnectionEstablished = callback
+  }
 
   constructor() {
     this.server = null
@@ -30,49 +35,100 @@ export class WebsocketP2P {
       return await this.connectingPromise
     }
 
-    this.connectingPromise = new Promise(async (resolve, reject) => {
+    this.connectingPromise = new Promise(async (resolve) => {
       this.client = null
       this.server = null
 
-      try {
-        const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
+      const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
 
-        if (device) {
-          const url = `ws://${device?.LOCATION?.split('//')[1]}`
-          console.log(`Connecting to ${url}`)
-          const ws = new WebSocket(url)
+      if (device) {
+        const url = `ws://${device?.LOCATION?.split('//')[1]}`
+        console.log(`Connecting to ws server: ${url}`)
+        const ws = new WebSocket(url)
 
-          ws.on('open', () => {
-            console.log('Connected')
-            this.client = ws
-            resolve()
-          })
+        ws.on('open', () => {
+          console.log('Connected to remote server')
+          this.client = ws
+          resolve()
+          this._onConnectionEstablished()
+        })
 
-          ws.on('error', async (err) => {
-            console.error(`WebSocket error: ${err}`)
-            this.client = null
-            resolve()
-          })
+        ws.on('error', async (err) => {
+          console.error(`Client error: ${err}`)
+          console.log('Remote server errored, trying to reconnect...')
+          resolve()
+          setTimeout(this.connect.bind(this), 0)
+        })
 
-          ws.on('close', async () => {
-            console.log('Client closed')
-          })
-          return
-        }
+        ws.on('close', async () => {
+          console.log('Remote server closed, trying to reconnect...')
+          resolve()
+          setTimeout(this.connect.bind(this), 0)
+        })
 
-        console.log(`No WebSocket servers with port ${PORT} found, creating one...`)
-
-        // If no WebSocket servers were found, create one
-        await this.createWebSocketServer()
-        resolve()
-      } catch (err) {
-        console.error(`Error searching/creating WebSocket servers: ${err}`)
-        reject(err)
+        return
       }
+
+      console.log(`No WebSocket servers with port ${PORT} found, creating one...`)
+
+      // If no WebSocket servers were found, create one
+      await this.createWebSocketServer()
+      resolve()
     })
 
     await this.connectingPromise
     this.connectingPromise = null
+  }
+
+  private async createWebSocketServer(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const wss = new WebSocket.Server({ port: PORT })
+
+      // Advertise the WebSocket server via SSDP
+      const ssdpServer = new Server({
+        location: {
+          port: PORT,
+          path: '/'
+        }
+      })
+
+      wss.on('connection', () => {
+        console.log('Client connected')
+        resolve()
+        this._onConnectionEstablished()
+      })
+
+      wss.on('error', (err) => {
+        try {
+          ssdpServer.stop()
+        } catch (err) {
+          console.error(`Could not stop ssdp server: ${err}`)
+        }
+        resolve()
+        console.log('WebSocket server error, trying to reconnect...')
+        console.error(err)
+        setTimeout(this.connect.bind(this), 0)
+      })
+
+      wss.on('listening', () => {
+        ssdpServer.addUSN('urn:schemas-upnp-org:service:WebSocket:1')
+        ssdpServer.start()
+
+        console.log('WebSocket server created, waiting for clients...')
+        this.server = wss
+      })
+
+      wss.on('close', () => {
+        try {
+          ssdpServer.stop()
+        } catch (e) {
+          console.log(`Could not stop ssdp server.`)
+        }
+        resolve()
+        console.log('WebSocket server closed, trying to reconnect...')
+        setTimeout(this.connect.bind(this), 0)
+      })
+    })
   }
 
   send(message: WebsocketMessage): void {
@@ -84,8 +140,7 @@ export class WebsocketP2P {
     } else if (this.client) {
       this.client.send(JSON.stringify(message))
     } else {
-      console.log('Sending failed: No WebSocket connection, trying to connect again...')
-      this.connect()
+      console.warn('Sending failed: No WebSocket connection, message not sent!')
     }
   }
 
@@ -98,22 +153,19 @@ export class WebsocketP2P {
         })
 
         ws.on('error', (err) => {
-          console.error(`Listen error: WebSocket client error: ${err}`)
-          this.server = null
-          this.listen(callback)
+          console.error(`Listen error: WebSocket server connection error: ${err}`)
+          setTimeout(this.listen.bind(this, callback), 1000)
         })
       })
 
       this.server.on('error', (err) => {
         console.error(`Listen error: WebSocket server error: ${err}`)
-        this.server = null
-        this.listen(callback)
+        setTimeout(this.listen.bind(this, callback), 1000)
       })
 
       this.server.on('close', async () => {
-        console.log('WebSocket server closed, trying to reconnect...')
-        await this.connect()
-        this.listen(callback)
+        console.log('Listen rerun: WebSocket server closed')
+        setTimeout(this.listen.bind(this, callback), 1000)
       })
     } else if (this.client) {
       this.client.on('message', (message) => {
@@ -122,76 +174,18 @@ export class WebsocketP2P {
       })
 
       this.client.on('error', (err) => {
-        console.error(`Listen error: WebSocket error: ${err}`)
-        this.client = null
-        this.listen(callback)
+        console.error(`Listen error: WebSocket client error: ${err}`)
+        setTimeout(this.listen.bind(this, callback), 1000)
       })
 
       this.client.on('close', async () => {
-        console.log('Connection closed, trying to reconnect...')
-        this.client = null
-        this.listen(callback)
+        console.log('Listen rerun: WebSocket client closed')
+        setTimeout(this.listen.bind(this, callback), 1000)
       })
     } else {
-      console.log('Listening failed: No WebSocket connection, trying to connect...')
-      await this.connect()
-      this.listen(callback)
+      console.log('Listening failed: No WebSocket connection, retrying in 1s...')
+      setTimeout(this.listen.bind(this, callback), 1000)
     }
-  }
-
-  private createWebSocketServer(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      try {
-        const wss = new WebSocket.Server({ port: PORT })
-
-        // Advertise the WebSocket server via SSDP
-        const ssdpServer = new Server({
-          location: {
-            port: PORT,
-            path: '/'
-          }
-        })
-
-        wss.on('connection', () => {
-          console.log('Client connected')
-        })
-
-        wss.on('error', (err) => {
-          console.error(`WebSocket server error: ${err}`)
-          this.server = null
-          try {
-            ssdpServer.stop()
-          } catch (e) {
-            console.log(`Could not stop ssdp server.`)
-          }
-          resolve()
-        })
-
-        wss.on('listening', () => {
-          ssdpServer.addUSN('urn:schemas-upnp-org:service:WebSocket:1')
-          ssdpServer.start()
-
-          console.log('WebSocket server created')
-          this.server = wss
-          resolve()
-        })
-
-        wss.on('close', () => {
-          console.log('WebSocket server closed')
-          this.server = null
-          try {
-            ssdpServer.stop()
-          } catch (e) {
-            console.log(`Could not stop ssdp server.`)
-          }
-          resolve()
-        })
-      } catch (err) {
-        console.error(`Error creating WebSocket server: ${err}`)
-        this.server = null
-        resolve()
-      }
-    })
   }
 
   private searchForServer(searchTarget: string): Promise<null | SsdpHeaders> {

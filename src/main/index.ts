@@ -54,7 +54,10 @@ app.whenReady().then(() => {
   })
 
   createWindow()
-  Main(ipcMain)
+  Main({
+    ipcMain,
+    app
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

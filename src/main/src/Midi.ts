@@ -61,7 +61,11 @@ export class Midi {
       return
     }
 
-    output.send(message)
+    try {
+      output.send(message)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   private listenToInputIfNeeded(): void {
