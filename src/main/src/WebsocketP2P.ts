@@ -145,7 +145,7 @@ export class WebsocketP2P {
   }
 
   async listen(callback: (message: WebsocketMessage) => void): Promise<void> {
-    console.log('Listening for messages...', JSON.stringify(callback, null, 2))
+    console.log('Listening for messages...', callback.toString())
     if (this.server) {
       this.server.on('connection', (ws) => {
         ws.on('message', (message) => {
