@@ -11,12 +11,16 @@ export type WebsocketMessage =
       type: 'config'
       data: Partial<ConfigType>
     }
+  | {
+      type: 'ping'
+    }
 
 export class WebsocketP2P {
   private server: WebSocket.Server | null
   private client: WebSocket | null
   private connectingPromise: Promise<void> | null
   private onConnectionEstablishedListeners: (() => void)[] = []
+  private serverPingInterval: NodeJS.Timeout | null = null
 
   set onConnectionEstablished(callback: () => void) {
     this.onConnectionEstablishedListeners.push(callback)
@@ -38,6 +42,7 @@ export class WebsocketP2P {
     this.connectingPromise = new Promise(async (resolve) => {
       this.client = null
       this.server = null
+      if (this.serverPingInterval) clearInterval(this.serverPingInterval)
 
       const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
 
@@ -114,6 +119,9 @@ export class WebsocketP2P {
 
         console.log('WebSocket server created, waiting for clients...')
         this.server = wss
+        this.serverPingInterval = setInterval(() => {
+          this.send({ type: 'ping' })
+        }, 500)
       })
 
       wss.on('close', () => {
@@ -130,7 +138,7 @@ export class WebsocketP2P {
   }
 
   send(message: WebsocketMessage): void {
-    console.log(`Sending message: ${JSON.stringify(message, null, 2)}`)
+    message.type !== 'ping' && console.log(`Sending message: ${JSON.stringify(message, null, 2)}`)
     if (this.server) {
       this.server.clients.forEach((client) => {
         client.send(JSON.stringify(message))

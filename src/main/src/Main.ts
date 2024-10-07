@@ -17,6 +17,7 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
 
   const connection = new WebsocketP2P()
   connection.connect()
+  connection.listen((m: WebsocketMessage) => m?.type === 'ping' && console.log('Received ping'))
 
   // IF ELECTRON
   if (electron?.ipcMain) {
@@ -81,7 +82,7 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
     const rgbStrip = new RgbStrip()
 
     connection.listen((message: WebsocketMessage) => {
-      console.log(message)
+      message.type !== 'ping' && console.log(message)
       if (message?.type === 'midi') {
         rgbStrip.handleNotePress(message.data)
       }
