@@ -271,6 +271,17 @@ var WebsocketP2P = /** @class */ (function () {
             }
         }, 20000 + Math.random() * 50000);
     };
+    WebsocketP2P.prototype.waitForConnection = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            var interval = setInterval(function () {
+                if ((_this.server || _this.client) && _this.connectingPromise === null) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 1000);
+        });
+    };
     return WebsocketP2P;
 }());
 exports.WebsocketP2P = WebsocketP2P;
