@@ -79,12 +79,13 @@ export class BluetoothMidi {
       data: number[]
     }
     const messages: MidiMessage[] = []
-    const message: MidiMessage = {
-      time: 0,
-      data: []
-    }
 
     for (let i = 1; i < dataArray.length; i++) {
+      const message: MidiMessage = {
+        time: 0,
+        data: []
+      }
+
       const LST = dataArray[i] // least significant time byte
       message.time = (MST << 8) + LST
 
