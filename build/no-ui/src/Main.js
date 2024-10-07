@@ -75,6 +75,7 @@ function Main(electron) {
                     (0, config_1.onConfigUpdated)(function () { return (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app); });
                     connection = new WebsocketP2P_1.WebsocketP2P();
                     connection.connect();
+                    connection.listen(function (m) { return (m === null || m === void 0 ? void 0 : m.type) === 'ping' && console.log('Received ping'); });
                     if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) return [3 /*break*/, 5];
                     _a.label = 1;
                 case 1:
@@ -139,7 +140,7 @@ function Main(electron) {
                     if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) {
                         rgbStrip_1 = new RbgStrip_1.RgbStrip();
                         connection.listen(function (message) {
-                            console.log(message);
+                            message.type !== 'ping' && console.log(message);
                             if ((message === null || message === void 0 ? void 0 : message.type) === 'midi') {
                                 rgbStrip_1.handleNotePress(message.data);
                             }

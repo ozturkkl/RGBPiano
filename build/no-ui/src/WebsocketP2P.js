@@ -46,6 +46,7 @@ var config_1 = require("../util/config");
 var WebsocketP2P = /** @class */ (function () {
     function WebsocketP2P() {
         this.onConnectionEstablishedListeners = [];
+        this.serverPingInterval = null;
         this.server = null;
         this.client = null;
         this.connectingPromise = null;
@@ -77,6 +78,8 @@ var WebsocketP2P = /** @class */ (function () {
                                     case 0:
                                         this.client = null;
                                         this.server = null;
+                                        if (this.serverPingInterval)
+                                            clearInterval(this.serverPingInterval);
                                         return [4 /*yield*/, this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')];
                                     case 1:
                                         device = _b.sent();
@@ -162,6 +165,9 @@ var WebsocketP2P = /** @class */ (function () {
                             ssdpServer.start();
                             console.log('WebSocket server created, waiting for clients...');
                             _this.server = wss;
+                            _this.serverPingInterval = setInterval(function () {
+                                _this.send({ type: 'ping' });
+                            }, 500);
                         });
                         wss.on('close', function () {
                             try {
@@ -179,7 +185,7 @@ var WebsocketP2P = /** @class */ (function () {
         });
     };
     WebsocketP2P.prototype.send = function (message) {
-        console.log("Sending message: ".concat(JSON.stringify(message, null, 2)));
+        message.type !== 'ping' && console.log("Sending message: ".concat(JSON.stringify(message, null, 2)));
         if (this.server) {
             this.server.clients.forEach(function (client) {
                 client.send(JSON.stringify(message));
