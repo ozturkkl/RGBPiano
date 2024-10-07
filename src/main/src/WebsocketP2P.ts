@@ -214,4 +214,15 @@ export class WebsocketP2P {
       }
     }, 20000 + Math.random() * 50000)
   }
+
+  waitForConnection(): Promise<void> {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if ((this.server || this.client) && this.connectingPromise === null) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 1000)
+    })
+  }
 }

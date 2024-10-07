@@ -85,14 +85,16 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
   if (!electron?.ipcMain) {
     const rgbStrip = new RgbStrip()
 
-    connection.listen((message: WebsocketMessage) => {
-      console.log(message)
-      if (message?.type === 'midi') {
-        rgbStrip.handleNotePress(message.data)
-      }
-      if (message?.type === 'config') {
-        updateConfig(message.data)
-      }
+    connection.waitForConnection().then(() => {
+      connection.listen((message: WebsocketMessage) => {
+        console.log(message)
+        if (message?.type === 'midi') {
+          rgbStrip.handleNotePress(message.data)
+        }
+        if (message?.type === 'config') {
+          updateConfig(message.data)
+        }
+      })
     })
   }
 }
