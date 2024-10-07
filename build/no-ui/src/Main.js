@@ -70,14 +70,9 @@ function Main(electron) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    electron === null || electron === void 0 ? void 0 : electron.ipcMain.handle('config', function (_, config) {
-                        (0, config_1.updateConfig)(config);
-                    });
+                    electron === null || electron === void 0 ? void 0 : electron.ipcMain.handle('config', function (_, config) { return (0, config_1.updateConfig)(config); });
                     (0, config_1.getSavedConfig)(electron === null || electron === void 0 ? void 0 : electron.app);
-                    (0, config_1.onConfigUpdated)(function () {
-                        console.log('Config updated');
-                        (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app);
-                    });
+                    (0, config_1.onConfigUpdated)(function () { return (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app); });
                     connection = new WebsocketP2P_1.WebsocketP2P();
                     connection.connect();
                     if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) return [3 /*break*/, 5];

@@ -55,7 +55,6 @@ export class WebsocketP2P {
 
         ws.on('error', async (err) => {
           console.error(`Client error: ${err}`)
-          console.log('Remote server errored, trying to reconnect...')
           resolve()
           setTimeout(this.connect.bind(this), 0)
         })
@@ -105,7 +104,6 @@ export class WebsocketP2P {
           console.error(`Could not stop ssdp server: ${err}`)
         }
         resolve()
-        console.log('WebSocket server error, trying to reconnect...')
         console.error(err)
         setTimeout(this.connect.bind(this), 0)
       })
@@ -146,26 +144,28 @@ export class WebsocketP2P {
 
   async listen(callback: (message: WebsocketMessage) => void): Promise<void> {
     if (this.server) {
+      this.server.clients.forEach((client) => {
+        client.on('message', (message) => {
+          const data = JSON.parse(message.toString())
+          callback(data)
+        })
+      })
+
       this.server.on('connection', (ws) => {
         ws.on('message', (message) => {
           const data = JSON.parse(message.toString())
           callback(data)
         })
-
-        ws.on('error', (err) => {
-          console.error(`Listen error: WebSocket server connection error: ${err}`)
-          this.onConnectionEstablished = () => this.listen(callback)
-        })
       })
 
       this.server.on('error', (err) => {
         console.error(`Listen error: WebSocket server error: ${err}`)
-        this.onConnectionEstablished = () => this.listen(callback)
+        this.waitForConnection().then(() => this.listen(callback))
       })
 
       this.server.on('close', async () => {
         console.log('Listen rerun: WebSocket server closed')
-        this.onConnectionEstablished = () => this.listen(callback)
+        this.waitForConnection().then(() => this.listen(callback))
       })
     } else if (this.client) {
       this.client.on('message', (message) => {
@@ -175,16 +175,16 @@ export class WebsocketP2P {
 
       this.client.on('error', (err) => {
         console.error(`Listen error: WebSocket client error: ${err}`)
-        this.onConnectionEstablished = () => this.listen(callback)
+        this.waitForConnection().then(() => this.listen(callback))
       })
 
       this.client.on('close', async () => {
         console.log('Listen rerun: WebSocket client closed')
-        this.onConnectionEstablished = () => this.listen(callback)
+        this.waitForConnection().then(() => this.listen(callback))
       })
     } else {
       console.log('Listening failed: No WebSocket connection, waiting for connection...')
-      this.onConnectionEstablished = () => this.listen(callback)
+      this.waitForConnection().then(() => this.listen(callback))
     }
   }
 

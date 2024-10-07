@@ -10,6 +10,7 @@
     "pi:build": "tsc -p tsconfig.no-ui.json",
     "pi:start": "node ./build/no-ui/index-no-ui.js",
     "pi:install": "npm install --only=prod",
+    "pi:test": "npm run pi:build && git add . && git commit -m \"test\" && git push",
     "electron": "set NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true && electron-vite dev --watch",
     "electron:preview": "electron-vite preview",
     "electron:install": "npm install && npm run electron:postinstall && npm run electron:build",

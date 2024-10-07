@@ -11,14 +11,9 @@ import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
 
 export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron.App }) {
-  electron?.ipcMain.handle('config', (_, config: ConfigType) => {
-    updateConfig(config)
-  })
+  electron?.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
   getSavedConfig(electron?.app)
-  onConfigUpdated(() => {
-    console.log('Config updated')
-    saveConfigToFile(electron?.app)
-  })
+  onConfigUpdated(() => saveConfigToFile(electron?.app))
 
   const connection = new WebsocketP2P()
   connection.connect()
