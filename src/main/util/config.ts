@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import { HSLToRGB } from './colors'
 import { debounce, throttleWithTrailing } from './timeThrottleDebounce'
+import { App } from 'electron'
 
 export type ConfigType = typeof config
 const configEmitter = new EventEmitter()
@@ -48,14 +49,14 @@ let config: {
   ]
 }
 
-function getConfigPath(app?: Electron.App) {
+function getConfigPath(app?: App) {
   if (app) {
     return path.join(app.getAppPath(), 'RGBPiano-config.json')
   } else {
     return path.join(__dirname, 'RGBPiano-config.json')
   }
 }
-export function getSavedConfig(app?: Electron.App) {
+export function getSavedConfig(app?: App) {
   try {
     config = {
       ...config,
