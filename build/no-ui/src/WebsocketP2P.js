@@ -200,13 +200,16 @@ var WebsocketP2P = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log('Listening for messages...', callback.toString());
                 if (this.server) {
+                    console.log('Server listen');
                     this.server.clients.forEach(function (client) {
+                        console.log('Client found, listening...');
                         client.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
                         });
                     });
                     this.server.on('connection', function (ws) {
+                        console.log('Client connected, listening...');
                         ws.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
@@ -226,6 +229,7 @@ var WebsocketP2P = /** @class */ (function () {
                     }); });
                 }
                 else if (this.client) {
+                    console.log('Client listen');
                     this.client.on('message', function (message) {
                         var data = JSON.parse(message.toString());
                         callback(data);

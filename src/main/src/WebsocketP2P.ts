@@ -147,7 +147,9 @@ export class WebsocketP2P {
   async listen(callback: (message: WebsocketMessage) => void): Promise<void> {
     console.log('Listening for messages...', callback.toString())
     if (this.server) {
+      console.log('Server listen')
       this.server.clients.forEach((client) => {
+        console.log('Client found, listening...')
         client.on('message', (message) => {
           const data = JSON.parse(message.toString())
           callback(data)
@@ -155,6 +157,7 @@ export class WebsocketP2P {
       })
 
       this.server.on('connection', (ws) => {
+        console.log('Client connected, listening...')
         ws.on('message', (message) => {
           const data = JSON.parse(message.toString())
           callback(data)
@@ -171,6 +174,7 @@ export class WebsocketP2P {
         this.onConnectionEstablished = () => this.listen.bind(this, callback)
       })
     } else if (this.client) {
+      console.log('Client listen')
       this.client.on('message', (message) => {
         const data = JSON.parse(message.toString())
         callback(data)
