@@ -93,7 +93,6 @@ var WebsocketP2P = /** @class */ (function () {
                                             ws_2.on('error', function (err) { return __awaiter(_this, void 0, void 0, function () {
                                                 return __generator(this, function (_a) {
                                                     console.error("Client error: ".concat(err));
-                                                    console.log('Remote server errored, trying to reconnect...');
                                                     resolve();
                                                     setTimeout(this.connect.bind(this), 0);
                                                     return [2 /*return*/];
@@ -155,7 +154,6 @@ var WebsocketP2P = /** @class */ (function () {
                                 console.error("Could not stop ssdp server: ".concat(err));
                             }
                             resolve();
-                            console.log('WebSocket server error, trying to reconnect...');
                             console.error(err);
                             setTimeout(_this.connect.bind(_this), 0);
                         });
@@ -198,18 +196,14 @@ var WebsocketP2P = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                console.log('Listening for messages...', callback.toString());
                 if (this.server) {
-                    console.log('Server listen');
                     this.server.clients.forEach(function (client) {
-                        console.log('Client found, listening...');
                         client.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
                         });
                     });
                     this.server.on('connection', function (ws) {
-                        console.log('Client connected, listening...');
                         ws.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
@@ -217,39 +211,38 @@ var WebsocketP2P = /** @class */ (function () {
                     });
                     this.server.on('error', function (err) {
                         console.error("Listen error: WebSocket server error: ".concat(err));
-                        _this.onConnectionEstablished = function () { return _this.listen(callback); };
+                        _this.waitForConnection().then(function () { return _this.listen(callback); });
                     });
                     this.server.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             console.log('Listen rerun: WebSocket server closed');
-                            this.onConnectionEstablished = function () { return _this.listen(callback); };
+                            this.waitForConnection().then(function () { return _this.listen(callback); });
                             return [2 /*return*/];
                         });
                     }); });
                 }
                 else if (this.client) {
-                    console.log('Client listen');
                     this.client.on('message', function (message) {
                         var data = JSON.parse(message.toString());
                         callback(data);
                     });
                     this.client.on('error', function (err) {
                         console.error("Listen error: WebSocket client error: ".concat(err));
-                        _this.onConnectionEstablished = function () { return _this.listen(callback); };
+                        _this.waitForConnection().then(function () { return _this.listen(callback); });
                     });
                     this.client.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             console.log('Listen rerun: WebSocket client closed');
-                            this.onConnectionEstablished = function () { return _this.listen(callback); };
+                            this.waitForConnection().then(function () { return _this.listen(callback); });
                             return [2 /*return*/];
                         });
                     }); });
                 }
                 else {
                     console.log('Listening failed: No WebSocket connection, waiting for connection...');
-                    this.onConnectionEstablished = function () { return _this.listen(callback); };
+                    this.waitForConnection().then(function () { return _this.listen(callback); });
                 }
                 return [2 /*return*/];
             });
