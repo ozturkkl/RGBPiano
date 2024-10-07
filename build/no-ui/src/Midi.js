@@ -122,7 +122,12 @@ var Midi = /** @class */ (function () {
             console.error("Could not find output device with name ".concat(this._deviceName));
             return;
         }
-        output.send(message);
+        try {
+            output.send(message);
+        }
+        catch (e) {
+            console.error(e);
+        }
     };
     Midi.prototype.listenToInputIfNeeded = function () {
         var _this = this;

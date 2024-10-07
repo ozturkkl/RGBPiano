@@ -14,12 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.getSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = exports.configPath = void 0;
+exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.getSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = void 0;
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
 var colors_1 = require("./colors");
-exports.configPath = path_1.default.join(__dirname, 'RGBPiano-config.json');
 var configEmitter = new events_1.default();
 var hue = 18;
 exports.PORT = 3192;
@@ -48,9 +47,17 @@ var config = {
         }
     ]
 };
-function getSavedConfig() {
+function getConfigPath(app) {
+    if (app) {
+        return path_1.default.join(app.getAppPath(), 'RGBPiano-config.json');
+    }
+    else {
+        return path_1.default.join(__dirname, 'RGBPiano-config.json');
+    }
+}
+function getSavedConfig(app) {
     try {
-        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(exports.configPath, 'utf8')));
+        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(getConfigPath(app), 'utf8')));
     }
     catch (error) {
         console.log('Could not load config file, using default config');
@@ -58,8 +65,22 @@ function getSavedConfig() {
     return config;
 }
 exports.getSavedConfig = getSavedConfig;
-function saveConfigToFile() {
-    (0, fs_1.writeFileSync)(exports.configPath, JSON.stringify(config, null, 2));
+var debounceTimeout;
+function saveConfigToFile(app) {
+    var saveConfig = function () {
+        console.log("Saving config to ".concat(getConfigPath(app)));
+        try {
+            (0, fs_1.writeFileSync)(getConfigPath(app), JSON.stringify(config, null, 2));
+        }
+        catch (error) {
+            console.error('Could not save config file');
+            console.error(error);
+        }
+    };
+    // add debounce logic before saving the config
+    if (debounceTimeout)
+        clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(saveConfig, 1000);
 }
 exports.saveConfigToFile = saveConfigToFile;
 function getConfig() {

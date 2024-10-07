@@ -64,27 +64,29 @@ var WebsocketP2P_1 = require("./WebsocketP2P");
 var config_1 = require("../util/config");
 var RbgStrip_1 = require("./RbgStrip");
 var Midi_1 = require("./Midi");
-function Main(ipcMain) {
+function Main(electron) {
     return __awaiter(this, void 0, void 0, function () {
-        var connection, config, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
+        var connection, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    connection = new WebsocketP2P_1.WebsocketP2P();
-                    return [4 /*yield*/, connection.connect()];
-                case 1:
-                    _a.sent();
-                    config = (0, config_1.getSavedConfig)();
-                    (0, config_1.onConfigUpdated)(function () {
-                        (0, config_1.saveConfigToFile)();
+                    electron === null || electron === void 0 ? void 0 : electron.ipcMain.handle('config', function (_, config) {
+                        (0, config_1.updateConfig)(config);
                     });
-                    if (!ipcMain) return [3 /*break*/, 6];
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 5, , 6]);
+                    (0, config_1.getSavedConfig)(electron === null || electron === void 0 ? void 0 : electron.app);
+                    (0, config_1.onConfigUpdated)(function () {
+                        console.log('Config updated');
+                        (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app);
+                    });
+                    connection = new WebsocketP2P_1.WebsocketP2P();
+                    connection.connect();
+                    if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) return [3 /*break*/, 5];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
                     // SETUP MIDI
                     return [4 /*yield*/, Midi_1.Midi.init()];
-                case 3:
+                case 2:
                     // SETUP MIDI
                     _a.sent();
                     console.log('Midi initialized');
@@ -97,13 +99,12 @@ function Main(ipcMain) {
                         });
                     });
                     // SETUP CONFIG
-                    connection.send({
-                        type: 'config',
-                        data: config
-                    });
-                    ipcMain.handle('config', function (_, config) {
-                        (0, config_1.updateConfig)(config);
-                    });
+                    connection.onDeviceUpdate = function () {
+                        connection.send({
+                            type: 'config',
+                            data: (0, config_1.getConfig)()
+                        });
+                    };
                     (0, config_1.onConfigUpdated)(function (config) {
                         connection.send({
                             type: 'config',
@@ -111,7 +112,7 @@ function Main(ipcMain) {
                         });
                     });
                     return [4 /*yield*/, Promise.resolve().then(function () { return __importStar(require('./BluetoothMidi')); })];
-                case 4:
+                case 3:
                     BluetoothMidi_1 = (_a.sent()).BluetoothMidi;
                     connectBleDevices_1 = function () {
                         var autoConnectDevices = (0, config_1.getConfig)().AUTO_CONNECT_BLE_DEVICES;
@@ -132,14 +133,14 @@ function Main(ipcMain) {
                         connectBleDevices_1();
                     });
                     connectBleDevices_1();
-                    return [3 /*break*/, 6];
-                case 5:
+                    return [3 /*break*/, 5];
+                case 4:
                     e_1 = _a.sent();
                     console.error(e_1);
-                    return [3 /*break*/, 6];
-                case 6:
+                    return [3 /*break*/, 5];
+                case 5:
                     // IF NOT ELECTRON => RASPBERRY PI - LED STRIP
-                    if (!ipcMain) {
+                    if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) {
                         rgbStrip_1 = new RbgStrip_1.RgbStrip();
                         connection.listen(function (message) {
                             console.log(message);

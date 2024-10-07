@@ -45,11 +45,19 @@ var node_ssdp_1 = require("node-ssdp");
 var config_1 = require("../util/config");
 var WebsocketP2P = /** @class */ (function () {
     function WebsocketP2P() {
+        this._onConnectionEstablished = function () { };
         this.server = null;
         this.client = null;
         this.connectingPromise = null;
         this.setupDelinquentServerCleanup();
     }
+    Object.defineProperty(WebsocketP2P.prototype, "onDeviceUpdate", {
+        set: function (callback) {
+            this._onConnectionEstablished = callback;
+        },
+        enumerable: false,
+        configurable: true
+    });
     WebsocketP2P.prototype.connect = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
@@ -60,8 +68,8 @@ var WebsocketP2P = /** @class */ (function () {
                         return [4 /*yield*/, this.connectingPromise];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
-                        this.connectingPromise = new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                            var device, url, ws_2, err_1;
+                        this.connectingPromise = new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                            var device, url, ws_2;
                             var _this = this;
                             var _a;
                             return __generator(this, function (_b) {
@@ -69,32 +77,33 @@ var WebsocketP2P = /** @class */ (function () {
                                     case 0:
                                         this.client = null;
                                         this.server = null;
-                                        _b.label = 1;
-                                    case 1:
-                                        _b.trys.push([1, 4, , 5]);
                                         return [4 /*yield*/, this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')];
-                                    case 2:
+                                    case 1:
                                         device = _b.sent();
                                         if (device) {
                                             url = "ws://".concat((_a = device === null || device === void 0 ? void 0 : device.LOCATION) === null || _a === void 0 ? void 0 : _a.split('//')[1]);
-                                            console.log("Connecting to ".concat(url));
+                                            console.log("Connecting to ws server: ".concat(url));
                                             ws_2 = new ws_1.default(url);
                                             ws_2.on('open', function () {
-                                                console.log('Connected');
+                                                console.log('Connected to remote server');
                                                 _this.client = ws_2;
                                                 resolve();
+                                                _this._onConnectionEstablished();
                                             });
                                             ws_2.on('error', function (err) { return __awaiter(_this, void 0, void 0, function () {
                                                 return __generator(this, function (_a) {
-                                                    console.error("WebSocket error: ".concat(err));
-                                                    this.client = null;
+                                                    console.error("Client error: ".concat(err));
+                                                    console.log('Remote server errored, trying to reconnect...');
                                                     resolve();
+                                                    setTimeout(this.connect.bind(this), 0);
                                                     return [2 /*return*/];
                                                 });
                                             }); });
                                             ws_2.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
                                                 return __generator(this, function (_a) {
-                                                    console.log('Client closed');
+                                                    console.log('Remote server closed, trying to reconnect...');
+                                                    resolve();
+                                                    setTimeout(this.connect.bind(this), 0);
                                                     return [2 /*return*/];
                                                 });
                                             }); });
@@ -103,17 +112,11 @@ var WebsocketP2P = /** @class */ (function () {
                                         console.log("No WebSocket servers with port ".concat(config_1.PORT, " found, creating one..."));
                                         // If no WebSocket servers were found, create one
                                         return [4 /*yield*/, this.createWebSocketServer()];
-                                    case 3:
+                                    case 2:
                                         // If no WebSocket servers were found, create one
                                         _b.sent();
                                         resolve();
-                                        return [3 /*break*/, 5];
-                                    case 4:
-                                        err_1 = _b.sent();
-                                        console.error("Error searching/creating WebSocket servers: ".concat(err_1));
-                                        reject(err_1);
-                                        return [3 /*break*/, 5];
-                                    case 5: return [2 /*return*/];
+                                        return [2 /*return*/];
                                 }
                             });
                         }); });
@@ -123,6 +126,57 @@ var WebsocketP2P = /** @class */ (function () {
                         this.connectingPromise = null;
                         return [2 /*return*/];
                 }
+            });
+        });
+    };
+    WebsocketP2P.prototype.createWebSocketServer = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) {
+                        var wss = new ws_1.default.Server({ port: config_1.PORT });
+                        // Advertise the WebSocket server via SSDP
+                        var ssdpServer = new node_ssdp_1.Server({
+                            location: {
+                                port: config_1.PORT,
+                                path: '/'
+                            }
+                        });
+                        wss.on('connection', function () {
+                            console.log('Client connected');
+                            resolve();
+                            _this._onConnectionEstablished();
+                        });
+                        wss.on('error', function (err) {
+                            try {
+                                ssdpServer.stop();
+                            }
+                            catch (err) {
+                                console.error("Could not stop ssdp server: ".concat(err));
+                            }
+                            resolve();
+                            console.log('WebSocket server error, trying to reconnect...');
+                            console.error(err);
+                            setTimeout(_this.connect.bind(_this), 0);
+                        });
+                        wss.on('listening', function () {
+                            ssdpServer.addUSN('urn:schemas-upnp-org:service:WebSocket:1');
+                            ssdpServer.start();
+                            console.log('WebSocket server created, waiting for clients...');
+                            _this.server = wss;
+                        });
+                        wss.on('close', function () {
+                            try {
+                                ssdpServer.stop();
+                            }
+                            catch (e) {
+                                console.log("Could not stop ssdp server.");
+                            }
+                            resolve();
+                            console.log('WebSocket server closed, trying to reconnect...');
+                            setTimeout(_this.connect.bind(_this), 0);
+                        });
+                    })];
             });
         });
     };
@@ -137,129 +191,59 @@ var WebsocketP2P = /** @class */ (function () {
             this.client.send(JSON.stringify(message));
         }
         else {
-            console.log('Sending failed: No WebSocket connection, trying to connect again...');
-            this.connect();
+            console.warn('Sending failed: No WebSocket connection, message not sent!');
         }
     };
     WebsocketP2P.prototype.listen = function (callback) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.server) return [3 /*break*/, 1];
-                        this.server.on('connection', function (ws) {
-                            ws.on('message', function (message) {
-                                var data = JSON.parse(message.toString());
-                                callback(data);
-                            });
-                            ws.on('error', function (err) {
-                                console.error("Listen error: WebSocket client error: ".concat(err));
-                                _this.server = null;
-                                _this.listen(callback);
-                            });
-                        });
-                        this.server.on('error', function (err) {
-                            console.error("Listen error: WebSocket server error: ".concat(err));
-                            _this.server = null;
-                            _this.listen(callback);
-                        });
-                        this.server.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        console.log('WebSocket server closed, trying to reconnect...');
-                                        return [4 /*yield*/, this.connect()];
-                                    case 1:
-                                        _a.sent();
-                                        this.listen(callback);
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); });
-                        return [3 /*break*/, 4];
-                    case 1:
-                        if (!this.client) return [3 /*break*/, 2];
-                        this.client.on('message', function (message) {
+                if (this.server) {
+                    this.server.on('connection', function (ws) {
+                        ws.on('message', function (message) {
                             var data = JSON.parse(message.toString());
                             callback(data);
                         });
-                        this.client.on('error', function (err) {
-                            console.error("Listen error: WebSocket error: ".concat(err));
-                            _this.client = null;
-                            _this.listen(callback);
+                        ws.on('error', function (err) {
+                            console.error("Listen error: WebSocket server connection error: ".concat(err));
+                            setTimeout(_this.listen.bind(_this, callback), 1000);
                         });
-                        this.client.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                console.log('Connection closed, trying to reconnect...');
-                                this.client = null;
-                                this.listen(callback);
-                                return [2 /*return*/];
-                            });
-                        }); });
-                        return [3 /*break*/, 4];
-                    case 2:
-                        console.log('Listening failed: No WebSocket connection, trying to connect...');
-                        return [4 /*yield*/, this.connect()];
-                    case 3:
-                        _a.sent();
-                        this.listen(callback);
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
+                    });
+                    this.server.on('error', function (err) {
+                        console.error("Listen error: WebSocket server error: ".concat(err));
+                        setTimeout(_this.listen.bind(_this, callback), 1000);
+                    });
+                    this.server.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            console.log('Listen rerun: WebSocket server closed');
+                            setTimeout(this.listen.bind(this, callback), 1000);
+                            return [2 /*return*/];
+                        });
+                    }); });
                 }
+                else if (this.client) {
+                    this.client.on('message', function (message) {
+                        var data = JSON.parse(message.toString());
+                        callback(data);
+                    });
+                    this.client.on('error', function (err) {
+                        console.error("Listen error: WebSocket client error: ".concat(err));
+                        setTimeout(_this.listen.bind(_this, callback), 1000);
+                    });
+                    this.client.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            console.log('Listen rerun: WebSocket client closed');
+                            setTimeout(this.listen.bind(this, callback), 1000);
+                            return [2 /*return*/];
+                        });
+                    }); });
+                }
+                else {
+                    console.log('Listening failed: No WebSocket connection, retrying in 1s...');
+                    setTimeout(this.listen.bind(this, callback), 1000);
+                }
+                return [2 /*return*/];
             });
-        });
-    };
-    WebsocketP2P.prototype.createWebSocketServer = function () {
-        var _this = this;
-        return new Promise(function (resolve) {
-            try {
-                var wss_1 = new ws_1.default.Server({ port: config_1.PORT });
-                // Advertise the WebSocket server via SSDP
-                var ssdpServer_1 = new node_ssdp_1.Server({
-                    location: {
-                        port: config_1.PORT,
-                        path: '/'
-                    }
-                });
-                wss_1.on('connection', function () {
-                    console.log('Client connected');
-                });
-                wss_1.on('error', function (err) {
-                    console.error("WebSocket server error: ".concat(err));
-                    _this.server = null;
-                    try {
-                        ssdpServer_1.stop();
-                    }
-                    catch (e) {
-                        console.log("Could not stop ssdp server.");
-                    }
-                    resolve();
-                });
-                wss_1.on('listening', function () {
-                    ssdpServer_1.addUSN('urn:schemas-upnp-org:service:WebSocket:1');
-                    ssdpServer_1.start();
-                    console.log('WebSocket server created');
-                    _this.server = wss_1;
-                    resolve();
-                });
-                wss_1.on('close', function () {
-                    console.log('WebSocket server closed');
-                    _this.server = null;
-                    try {
-                        ssdpServer_1.stop();
-                    }
-                    catch (e) {
-                        console.log("Could not stop ssdp server.");
-                    }
-                    resolve();
-                });
-            }
-            catch (err) {
-                console.error("Error creating WebSocket server: ".concat(err));
-                _this.server = null;
-                resolve();
-            }
         });
     };
     WebsocketP2P.prototype.searchForServer = function (searchTarget) {
