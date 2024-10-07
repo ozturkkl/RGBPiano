@@ -124,8 +124,9 @@ function Main(electron) {
                             });
                         }, 1000);
                     };
-                    (0, config_1.onConfigUpdated)(function () {
-                        connectBleDevices_1();
+                    (0, config_1.onConfigUpdated)(function (config) {
+                        if (config.AUTO_CONNECT_BLE_DEVICES)
+                            connectBleDevices_1();
                     });
                     connectBleDevices_1();
                     return [3 /*break*/, 5];

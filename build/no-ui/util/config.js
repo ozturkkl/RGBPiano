@@ -19,6 +19,7 @@ var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
 var colors_1 = require("./colors");
+var timeThrottleDebounce_1 = require("./timeThrottleDebounce");
 var configEmitter = new events_1.default();
 var hue = 18;
 exports.PORT = 3192;
@@ -65,24 +66,16 @@ function getSavedConfig(app) {
     return config;
 }
 exports.getSavedConfig = getSavedConfig;
-var debounceTimeout;
-function saveConfigToFile(app) {
-    var saveConfig = function () {
-        console.log("Saving config to ".concat(getConfigPath(app)));
-        try {
-            (0, fs_1.writeFileSync)(getConfigPath(app), JSON.stringify(config, null, 2));
-        }
-        catch (error) {
-            console.error('Could not save config file');
-            console.error(error);
-        }
-    };
-    // add debounce logic before saving the config
-    if (debounceTimeout)
-        clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(saveConfig, 1000);
-}
-exports.saveConfigToFile = saveConfigToFile;
+exports.saveConfigToFile = (0, timeThrottleDebounce_1.debounce)(function (app) {
+    console.log("Saving config to ".concat(getConfigPath(app)));
+    try {
+        (0, fs_1.writeFileSync)(getConfigPath(app), JSON.stringify(config, null, 2));
+    }
+    catch (error) {
+        console.error('Could not save config file');
+        console.error(error);
+    }
+}, 1000);
 function getConfig() {
     return config;
 }
@@ -99,8 +92,9 @@ function updateConfig(newConfig) {
 }
 exports.updateConfig = updateConfig;
 function onConfigUpdated(listener) {
+    var throttled = (0, timeThrottleDebounce_1.throttleWithTrailing)(listener, 22); // 45 FPS
     configEmitter.on('configUpdated', function (updatedProperties) {
-        listener(updatedProperties);
+        throttled(updatedProperties);
     });
 }
 exports.onConfigUpdated = onConfigUpdated;
