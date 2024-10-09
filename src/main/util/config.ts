@@ -51,16 +51,18 @@ let config: {
 
 function getConfigPath(app?: App) {
   if (app) {
-    return path.join(app.getAppPath(), 'RGBPiano-config.json')
+    return path.join(app.getPath('exe'), '..', 'user-config.json')
   } else {
     return path.join(__dirname, 'RGBPiano-config.json')
   }
 }
 export function getSavedConfig(app?: App) {
   try {
+    const configPath = getConfigPath(app)
+    console.log(`Loading config from ${configPath}`)
     config = {
       ...config,
-      ...JSON.parse(readFileSync(getConfigPath(app), 'utf8'))
+      ...JSON.parse(readFileSync(configPath, 'utf8'))
     }
   } catch (error) {
     console.log('Could not load config file, using default config')
@@ -70,9 +72,10 @@ export function getSavedConfig(app?: App) {
 }
 
 export const saveConfigToFile = debounce((app?: Electron.App) => {
-  console.log(`Saving config to ${getConfigPath(app)}`)
+  const configPath = getConfigPath(app)
+  console.log(`Saving config to ${configPath}`)
   try {
-    writeFileSync(getConfigPath(app), JSON.stringify(config, null, 2))
+    writeFileSync(configPath, JSON.stringify(config, null, 2))
   } catch (error) {
     console.error('Could not save config file')
     console.error(error)

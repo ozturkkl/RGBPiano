@@ -4,4 +4,4 @@ out
 package-lock.json
 *.log*
 *cred.json*
-RGBPiano-config.json
+user-config.json
