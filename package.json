@@ -71,11 +71,5 @@
   "bugs": {
     "url": "https://github.com/ozturkkl/RGBPiano/issues"
   },
-  "homepage": "https://github.com/ozturkkl/RGBPiano#readme",
-  "pkg": {
-    "scripts": "path-to-your-node-binary-on-pi",
-    "targets": [
-      "node16-linux-armv6"
-    ]
-  }
+  "homepage": "https://github.com/ozturkkl/RGBPiano#readme"
 }
