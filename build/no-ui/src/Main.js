@@ -75,7 +75,6 @@ function Main(electron) {
                     (0, config_1.onConfigUpdated)(function () { return (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app); });
                     connection = new WebsocketP2P_1.WebsocketP2P();
                     connection.connect();
-                    connection.listen(function (m) { return (m === null || m === void 0 ? void 0 : m.type) === 'ping' && console.log('Received ping'); });
                     if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) return [3 /*break*/, 5];
                     _a.label = 1;
                 case 1:
@@ -130,6 +129,10 @@ function Main(electron) {
                             connectBleDevices_1();
                     });
                     connectBleDevices_1();
+                    // DEBUG LISTENER
+                    connection.listen(function (message) {
+                        message.type !== 'ping' && console.log(message);
+                    });
                     return [3 /*break*/, 5];
                 case 4:
                     e_1 = _a.sent();

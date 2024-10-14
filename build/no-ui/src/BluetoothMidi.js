@@ -100,11 +100,11 @@ var BluetoothMidi = /** @class */ (function () {
         var MST = dataArray[0]; // most significant time byte
         var errorParsing = false;
         var messages = [];
-        var message = {
-            time: 0,
-            data: []
-        };
         for (var i = 1; i < dataArray.length; i++) {
+            var message = {
+                time: 0,
+                data: []
+            };
             var LST = dataArray[i]; // least significant time byte
             message.time = (MST << 8) + LST;
             var status_1 = dataArray[i + 1];

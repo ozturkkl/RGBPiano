@@ -50,7 +50,7 @@ var config = {
 };
 function getConfigPath(app) {
     if (app) {
-        return path_1.default.join(app.getAppPath(), 'RGBPiano-config.json');
+        return path_1.default.join(app.getPath('exe'), '..', 'user-config.json');
     }
     else {
         return path_1.default.join(__dirname, 'RGBPiano-config.json');
@@ -58,7 +58,9 @@ function getConfigPath(app) {
 }
 function getSavedConfig(app) {
     try {
-        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(getConfigPath(app), 'utf8')));
+        var configPath = getConfigPath(app);
+        console.log("Loading config from ".concat(configPath));
+        config = __assign(__assign({}, config), JSON.parse((0, fs_1.readFileSync)(configPath, 'utf8')));
     }
     catch (error) {
         console.log('Could not load config file, using default config');
@@ -67,9 +69,10 @@ function getSavedConfig(app) {
 }
 exports.getSavedConfig = getSavedConfig;
 exports.saveConfigToFile = (0, timeThrottleDebounce_1.debounce)(function (app) {
-    console.log("Saving config to ".concat(getConfigPath(app)));
+    var configPath = getConfigPath(app);
+    console.log("Saving config to ".concat(configPath));
     try {
-        (0, fs_1.writeFileSync)(getConfigPath(app), JSON.stringify(config, null, 2));
+        (0, fs_1.writeFileSync)(configPath, JSON.stringify(config, null, 2));
     }
     catch (error) {
         console.error('Could not save config file');
