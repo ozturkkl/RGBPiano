@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBlendedRGB = exports.RGBToHex = exports.hexToRgb = exports.HSLToRGB = exports.RGBToHSL = void 0;
+exports.RGBToHSL = RGBToHSL;
+exports.HSLToRGB = HSLToRGB;
+exports.hexToRgb = hexToRgb;
+exports.RGBToHex = RGBToHex;
+exports.getBlendedRGB = getBlendedRGB;
 function RGBToHSL(r, g, b) {
     r /= 255;
     g /= 255;
@@ -14,7 +18,6 @@ function RGBToHSL(r, g, b) {
         (100 * (2 * l - s)) / 2
     ];
 }
-exports.RGBToHSL = RGBToHSL;
 function HSLToRGB(h, s, l) {
     s /= 100;
     l /= 100;
@@ -23,7 +26,6 @@ function HSLToRGB(h, s, l) {
     var f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); };
     return [255 * f(0), 255 * f(8), 255 * f(4)];
 }
-exports.HSLToRGB = HSLToRGB;
 function hexToRgb(hex) {
     var _a, _b;
     return ((_b = (_a = hex
@@ -31,7 +33,6 @@ function hexToRgb(hex) {
         .substring(1)
         .match(/.{2}/g)) === null || _a === void 0 ? void 0 : _a.map(function (x) { return parseInt(x, 16); })) !== null && _b !== void 0 ? _b : [0, 0, 0]);
 }
-exports.hexToRgb = hexToRgb;
 function RGBToHex(r, g, b) {
     return ('#' +
         [r, g, b]
@@ -41,7 +42,6 @@ function RGBToHex(r, g, b) {
         })
             .join(''));
 }
-exports.RGBToHex = RGBToHex;
 function getBlendedRGB(_a, _b, ratio) {
     var c1r = _a[0], c1g = _a[1], c1b = _a[2];
     var c2r = _b[0], c2g = _b[1], c2b = _b[2];
@@ -51,4 +51,3 @@ function getBlendedRGB(_a, _b, ratio) {
         Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio))
     ];
 }
-exports.getBlendedRGB = getBlendedRGB;

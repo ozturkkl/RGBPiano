@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.debounce = exports.throttleWithTrailing = void 0;
+exports.throttleWithTrailing = throttleWithTrailing;
+exports.debounce = debounce;
 function throttleWithTrailing(fn, wait) {
     var lastArgs = null;
     var lastCallTime = 0;
@@ -33,7 +34,6 @@ function throttleWithTrailing(fn, wait) {
         }
     };
 }
-exports.throttleWithTrailing = throttleWithTrailing;
 function debounce(fn, wait) {
     var timeout = null;
     return function debounced(arg) {
@@ -46,4 +46,3 @@ function debounce(fn, wait) {
         }, wait);
     };
 }
-exports.debounce = debounce;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.execJsOnClient = void 0;
+exports.execJsOnClient = execJsOnClient;
 var electron_1 = require("electron");
 function execJsOnClient(func) {
     var args = [];
@@ -13,4 +13,3 @@ function execJsOnClient(func) {
     }
     return mainWindow.webContents.executeJavaScript("(".concat(func, ")(").concat(args.map(function (arg) { return JSON.stringify(arg); }).join(','), ")"), true);
 }
-exports.execJsOnClient = execJsOnClient;

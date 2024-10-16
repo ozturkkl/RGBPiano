@@ -14,7 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onConfigUpdated = exports.updateConfig = exports.getConfig = exports.saveConfigToFile = exports.getSavedConfig = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = void 0;
+exports.saveConfigToFile = exports.INPUT_DEVICE_REFRESH_INTERVAL = exports.MAX_NOTE = exports.MIN_NOTE = exports.DATA_PIN = exports.PORT = void 0;
+exports.getSavedConfig = getSavedConfig;
+exports.getConfig = getConfig;
+exports.updateConfig = updateConfig;
+exports.onConfigUpdated = onConfigUpdated;
 var events_1 = __importDefault(require("events"));
 var fs_1 = require("fs");
 var path_1 = __importDefault(require("path"));
@@ -67,7 +71,6 @@ function getSavedConfig(app) {
     }
     return config;
 }
-exports.getSavedConfig = getSavedConfig;
 exports.saveConfigToFile = (0, timeThrottleDebounce_1.debounce)(function (app) {
     var configPath = getConfigPath(app);
     console.log("Saving config to ".concat(configPath));
@@ -82,7 +85,6 @@ exports.saveConfigToFile = (0, timeThrottleDebounce_1.debounce)(function (app) {
 function getConfig() {
     return config;
 }
-exports.getConfig = getConfig;
 function updateConfig(newConfig) {
     var updatedProperties = {};
     getUpdatedProperties(config, newConfig).forEach(function (property) {
@@ -93,14 +95,12 @@ function updateConfig(newConfig) {
         configEmitter.emit('configUpdated', updatedProperties);
     }
 }
-exports.updateConfig = updateConfig;
 function onConfigUpdated(listener) {
     var throttled = (0, timeThrottleDebounce_1.throttleWithTrailing)(listener, 22); // 45 FPS
     configEmitter.on('configUpdated', function (updatedProperties) {
         throttled(updatedProperties);
     });
 }
-exports.onConfigUpdated = onConfigUpdated;
 function isDeepEqual(obj1, obj2) {
     // Check if both are primitives (string, number, boolean, etc.) or functions
     if (obj1 === obj2)
