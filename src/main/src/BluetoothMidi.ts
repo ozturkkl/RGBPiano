@@ -160,7 +160,9 @@ export class BluetoothMidi {
           .requestDevice({
             filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
           })
-          .catch(() => {})
+          .catch(() => {
+            // noop
+          })
       })
     }
     setInterval(requestDeviceClient, 20000)
@@ -258,13 +260,13 @@ export class BluetoothMidi {
         )
         await characteristic.startNotifications()
 
-        window.electron.ipcRenderer.send('ble-midi-connected', deviceId)
+        window.ipcRenderer.send('ble-midi-connected', deviceId)
         device.addEventListener('gattserverdisconnected', () => {
-          window.electron.ipcRenderer.send('ble-midi-disconnected', deviceId)
+          window.ipcRenderer.send('ble-midi-disconnected', deviceId)
         })
         characteristic.addEventListener('characteristicvaluechanged', (event) => {
           const data = new Uint8Array(event.target.value.buffer)
-          window.electron.ipcRenderer.send('ble-midi-data', {
+          window.ipcRenderer.send('ble-midi-data', {
             deviceId,
             data
           })

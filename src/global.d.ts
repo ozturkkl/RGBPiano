@@ -1,9 +1,10 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
 declare global {
   interface Window {
-    electron: ElectronAPI
-    api: unknown
+    ipcRenderer: {
+      send: (channel: string, data: unknown) => void
+      on: (channel: string, func: () => void) => void
+      invoke: (channel: string, data: unknown) => Promise<void>
+    }
   }
 
   interface Navigator {
@@ -54,3 +55,5 @@ declare global {
     }
   }
 }
+
+export {}

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { HSLToRGB, hexToRgb } from '../../../main/util/colors'
-  import { RGBToHSL } from '../../../main/util/colors'
-  import type { ConfigType } from '../../../main/util/config'
+  import { hexToRgb, HSLToRGB, RGBToHSL } from '../../../main/util/colors'
+  import { ConfigType } from '../../../main/util/config'
 
   function changeColor(e: Event & { currentTarget: HTMLInputElement }) {
     const [red, green, blue] = hexToRgb(e.currentTarget.value)
@@ -12,7 +11,7 @@
       NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri)
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   function changeBrightness(e: Event & { currentTarget: HTMLInputElement }) {
@@ -20,14 +19,14 @@
       BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
   function changeBackgroundBrightness(e: Event & { currentTarget: HTMLInputElement }) {
     const config: Partial<ConfigType> = {
       BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   function changeConstantVelocity(e: Event & { currentTarget: HTMLInputElement }) {
@@ -35,7 +34,7 @@
       CONSTANT_VELOCITY: e.currentTarget.checked
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   function changeLEDInvert(e: Event & { currentTarget: HTMLInputElement }) {
@@ -43,7 +42,7 @@
       LED_INVERT: e.currentTarget.checked
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   function changeLEDStartCount(e: Event & { currentTarget: HTMLInputElement }) {
@@ -51,7 +50,7 @@
       LED_START_COUNT: parseInt(e.currentTarget.value)
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   function changeLEDEndCount(e: Event & { currentTarget: HTMLInputElement }) {
@@ -59,7 +58,7 @@
       LED_END_COUNT: parseInt(e.currentTarget.value)
     }
 
-    window.electron.ipcRenderer.invoke('config', config)
+    window.ipcRenderer.invoke('config', config)
   }
 
   onMount(() => {
@@ -71,22 +70,33 @@
   })
 </script>
 
-<div class="Home">
+<div class="App p-8">
   <h1>Settings</h1>
   <h2>Color</h2>
   <input type="color" on:input={changeColor} />
 
+  <div class="divider"></div>
+
   <h2>LED Brightness</h2>
-  <input type="range" min="0" max="100" on:input={changeBrightness} />
+  <input type="range" min="0" max="100" on:input={changeBrightness} class="range" />
 
   <h2>Background Brightness</h2>
-  <input type="range" min="0" max="100" on:input={changeBackgroundBrightness} />
+  <input type="range" min="0" max="100" on:input={changeBackgroundBrightness} class="range" />
 
-  <h2>Constant Velocity</h2>
-  <input type="checkbox" on:change={changeConstantVelocity} />
+  <div class="form-control">
+    <label class="label cursor-pointer">
+      <span class="label-text">Constant Velocity</span>
+      <input type="checkbox" checked={true} class="checkbox" on:change={changeConstantVelocity} />
+    </label>
+  </div>
+  <div class="form-control">
+    <label class="label cursor-pointer">
+      <span class="label-text">LED Invert</span>
+      <input type="checkbox" checked={true} class="checkbox" on:change={changeLEDInvert} />
+    </label>
+  </div>
 
-  <h2>LED Invert</h2>
-  <input type="checkbox" on:change={changeLEDInvert} />
+  <div class="divider">Start End</div>
 
   <h2>LED Start/End Count</h2>
   <input type="number" min="0" max="177" value="0" on:input={changeLEDStartCount} />
@@ -94,7 +104,7 @@
 </div>
 
 <style>
-  .Home {
+  .App {
     display: flex;
     flex-direction: column;
   }

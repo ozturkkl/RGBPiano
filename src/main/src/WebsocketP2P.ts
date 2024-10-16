@@ -39,45 +39,47 @@ export class WebsocketP2P {
       return await this.connectingPromise
     }
 
-    this.connectingPromise = new Promise(async (resolve) => {
-      this.client = null
-      this.server = null
-      if (this.serverPingInterval) clearInterval(this.serverPingInterval)
+    this.connectingPromise = new Promise((resolve) => {
+      ;(async () => {
+        this.client = null
+        this.server = null
+        if (this.serverPingInterval) clearInterval(this.serverPingInterval)
 
-      const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
+        const device = await this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')
 
-      if (device) {
-        const url = `ws://${device?.LOCATION?.split('//')[1]}`
-        console.log(`Connecting to ws server: ${url}`)
-        const ws = new WebSocket(url)
+        if (device) {
+          const url = `ws://${device?.LOCATION?.split('//')[1]}`
+          console.log(`Connecting to ws server: ${url}`)
+          const ws = new WebSocket(url)
 
-        ws.on('open', () => {
-          console.log('Connected to remote server')
-          this.client = ws
-          resolve()
-          this.onConnectionEstablishedListeners.forEach((listener) => listener())
-        })
+          ws.on('open', () => {
+            console.log('Connected to remote server')
+            this.client = ws
+            resolve()
+            this.onConnectionEstablishedListeners.forEach((listener) => listener())
+          })
 
-        ws.on('error', async (err) => {
-          console.error(`Client error: ${err}`)
-          resolve()
-          setTimeout(this.connect.bind(this), 0)
-        })
+          ws.on('error', async (err) => {
+            console.error(`Client error: ${err}`)
+            resolve()
+            setTimeout(this.connect.bind(this), 0)
+          })
 
-        ws.on('close', async () => {
-          console.log('Remote server closed, trying to reconnect...')
-          resolve()
-          setTimeout(this.connect.bind(this), 0)
-        })
+          ws.on('close', async () => {
+            console.log('Remote server closed, trying to reconnect...')
+            resolve()
+            setTimeout(this.connect.bind(this), 0)
+          })
 
-        return
-      }
+          return
+        }
 
-      console.log(`No WebSocket servers with port ${PORT} found, creating one...`)
+        console.log(`No WebSocket servers with port ${PORT} found, creating one...`)
 
-      // If no WebSocket servers were found, create one
-      await this.createWebSocketServer()
-      resolve()
+        // If no WebSocket servers were found, create one
+        await this.createWebSocketServer()
+        resolve()
+      })()
     })
 
     await this.connectingPromise
