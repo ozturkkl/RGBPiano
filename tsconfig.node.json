@@ -3,13 +3,10 @@
   "include": [
     "electron.vite.config.*",
     "src/main/**/*",
-    "src/preload/*",
-    "src/main/types",
-    "src/**/*.d.ts",
+    "src/preload/**/*"
   ],
   "compilerOptions": {
     "composite": true,
-    "esModuleInterop": true,
     "types": [
       "electron-vite/node"
     ]
