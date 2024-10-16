@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { hexToRgb, HSLToRGB, RGBToHSL } from '../../../main/util/colors'
-  import { ConfigType } from '../../../main/util/config'
 
   function changeColor(e: Event & { currentTarget: HTMLInputElement }) {
     const [red, green, blue] = hexToRgb(e.currentTarget.value)
     const [hue, sat, bri] = RGBToHSL(red, green, blue)
-    const config: Partial<ConfigType> = {
+    const config = {
       BACKGROUND_COLOR_RGB: HSLToRGB(hue, sat, bri),
       NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri)
     }
@@ -15,14 +14,14 @@
   }
 
   function changeBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
     window.ipcRenderer.invoke('config', config)
   }
   function changeBackgroundBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100
     }
 
@@ -30,7 +29,7 @@
   }
 
   function changeConstantVelocity(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       CONSTANT_VELOCITY: e.currentTarget.checked
     }
 
@@ -38,7 +37,7 @@
   }
 
   function changeLEDInvert(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       LED_INVERT: e.currentTarget.checked
     }
 
@@ -46,7 +45,7 @@
   }
 
   function changeLEDStartCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       LED_START_COUNT: parseInt(e.currentTarget.value)
     }
 
@@ -54,7 +53,7 @@
   }
 
   function changeLEDEndCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const config: Partial<ConfigType> = {
+    const config = {
       LED_END_COUNT: parseInt(e.currentTarget.value)
     }
 

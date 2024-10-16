@@ -6,9 +6,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.node.json --composite false && svelte-check --tsconfig ./tsconfig.json",
     "clean": "rm -rf package-lock.json node_modules out dist",
-    "pi": "npm run pi:build && npm run pi:start",
-    "pi:build": "tsc -p tsconfig.no-ui.json && git add . && git commit -m \"pi-build\" && git push",
-    "pi:start": "node ./build/no-ui/index-no-ui.js",
+    "pi": "node ./build/no-ui/index-no-ui.js",
+    "pi:build": "tsc -p tsconfig.no-ui.json",
+    "pi:push": "npm run pi:build && git add . && git commit -m \"pi-build\" && git push",
     "pi:install": "npm install --only=prod",
     "electron": "set NODE_OPTIONS=--force-node-api-uncaught-exceptions-policy=true && electron-vite dev --watch",
     "electron:preview": "electron-vite preview",
