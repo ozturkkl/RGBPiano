@@ -1,7 +1,7 @@
 singleQuote: true
 semi: false
-printWidth: 100
-trailingComma: none
+printWidth: 125
+trailingComma: 'all'
 plugins:
   - prettier-plugin-svelte
 overrides:

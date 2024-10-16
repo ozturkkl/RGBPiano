@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Main } from './src/Main'
 
-function createWindow(): void {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -14,8 +14,8 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: true
-    }
+      sandbox: true,
+    },
   })
 
   mainWindow.webContents.openDevTools()
@@ -56,7 +56,7 @@ app.whenReady().then(() => {
   createWindow()
   Main({
     ipcMain,
-    app
+    app,
   })
 
   app.on('activate', function () {

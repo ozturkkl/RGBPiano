@@ -40,13 +40,13 @@ let config: {
   AUTO_CONNECT_BLE_DEVICES: [
     {
       id: '48:B6:20:19:80:CE',
-      port: 'Springbeats vMIDI2'
+      port: 'Springbeats vMIDI2',
     },
     {
       id: '48:B6:20:22:01:4A',
-      port: 'Springbeats vMIDI3'
-    }
-  ]
+      port: 'Springbeats vMIDI3',
+    },
+  ],
 }
 
 function getConfigPath(app?: App) {
@@ -62,7 +62,7 @@ export function getSavedConfig(app?: App) {
     console.log(`Loading config from ${configPath}`)
     config = {
       ...config,
-      ...JSON.parse(readFileSync(configPath, 'utf8'))
+      ...JSON.parse(readFileSync(configPath, 'utf8')),
     }
   } catch (error) {
     console.log('Could not load config file, using default config')
@@ -96,7 +96,7 @@ export function updateConfig(newConfig: Partial<ConfigType>) {
   if (Object.keys(updatedProperties).length > 0) {
     config = {
       ...config,
-      ...newConfig
+      ...newConfig,
     }
     configEmitter.emit('configUpdated', updatedProperties)
   }
@@ -143,8 +143,9 @@ function isDeepEqual(obj1: unknown, obj2: unknown): boolean {
     if (
       !keys2.includes(key) ||
       !isDeepEqual((obj1 as Record<string, unknown>)[key], (obj2 as Record<string, unknown>)[key])
-    )
+    ) {
       return false
+    }
   }
 
   return true
@@ -154,10 +155,7 @@ function getUpdatedProperties(currentConfig: ConfigType, newConfig: Partial<Conf
   const updatedProperties: (keyof ConfigType)[] = []
 
   for (const key in newConfig) {
-    const isDeepEqualResult = isDeepEqual(
-      currentConfig[key as keyof ConfigType],
-      newConfig[key as keyof ConfigType]
-    )
+    const isDeepEqualResult = isDeepEqual(currentConfig[key as keyof ConfigType], newConfig[key as keyof ConfigType])
     if (!isDeepEqualResult) {
       updatedProperties.push(key as keyof ConfigType)
     }

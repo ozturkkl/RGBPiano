@@ -7,7 +7,7 @@
     const [hue, sat, bri] = RGBToHSL(red, green, blue)
     const config = {
       BACKGROUND_COLOR_RGB: HSLToRGB(hue, sat, bri),
-      NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri)
+      NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri),
     }
 
     window.ipcRenderer.invoke('config', config)
@@ -15,14 +15,14 @@
 
   function changeBrightness(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      BRIGHTNESS: parseInt(e.currentTarget.value) / 100
+      BRIGHTNESS: parseInt(e.currentTarget.value) / 100,
     }
 
     window.ipcRenderer.invoke('config', config)
   }
   function changeBackgroundBrightness(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100
+      BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100,
     }
 
     window.ipcRenderer.invoke('config', config)
@@ -30,7 +30,7 @@
 
   function changeConstantVelocity(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      CONSTANT_VELOCITY: e.currentTarget.checked
+      CONSTANT_VELOCITY: e.currentTarget.checked,
     }
 
     window.ipcRenderer.invoke('config', config)
@@ -38,7 +38,7 @@
 
   function changeLEDInvert(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      LED_INVERT: e.currentTarget.checked
+      LED_INVERT: e.currentTarget.checked,
     }
 
     window.ipcRenderer.invoke('config', config)
@@ -46,7 +46,7 @@
 
   function changeLEDStartCount(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      LED_START_COUNT: parseInt(e.currentTarget.value)
+      LED_START_COUNT: parseInt(e.currentTarget.value),
     }
 
     window.ipcRenderer.invoke('config', config)
@@ -54,7 +54,7 @@
 
   function changeLEDEndCount(e: Event & { currentTarget: HTMLInputElement }) {
     const config = {
-      LED_END_COUNT: parseInt(e.currentTarget.value)
+      LED_END_COUNT: parseInt(e.currentTarget.value),
     }
 
     window.ipcRenderer.invoke('config', config)
