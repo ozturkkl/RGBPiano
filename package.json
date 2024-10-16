@@ -60,7 +60,7 @@
     "rgb",
     "led",
     "controller",
-    "addressible"
+    "addressable"
   ],
   "license": "ISC",
   "bugs": {
