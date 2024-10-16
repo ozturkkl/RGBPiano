@@ -178,7 +178,9 @@ var BluetoothMidi = /** @class */ (function () {
                     .requestDevice({
                     filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
                 })
-                    .catch(function () { });
+                    .catch(function () {
+                    // noop
+                });
             });
         };
         setInterval(requestDeviceClient, 20000);
@@ -275,13 +277,13 @@ var BluetoothMidi = /** @class */ (function () {
                                             return [4 /*yield*/, characteristic.startNotifications()];
                                         case 5:
                                             _a.sent();
-                                            window.electron.ipcRenderer.send('ble-midi-connected', deviceId);
+                                            window.ipcRenderer.send('ble-midi-connected', deviceId);
                                             device.addEventListener('gattserverdisconnected', function () {
-                                                window.electron.ipcRenderer.send('ble-midi-disconnected', deviceId);
+                                                window.ipcRenderer.send('ble-midi-disconnected', deviceId);
                                             });
                                             characteristic.addEventListener('characteristicvaluechanged', function (event) {
                                                 var data = new Uint8Array(event.target.value.buffer);
-                                                window.electron.ipcRenderer.send('ble-midi-data', {
+                                                window.ipcRenderer.send('ble-midi-data', {
                                                     deviceId: deviceId,
                                                     data: data
                                                 });

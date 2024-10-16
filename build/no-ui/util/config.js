@@ -101,22 +101,50 @@ function onConfigUpdated(listener) {
     });
 }
 exports.onConfigUpdated = onConfigUpdated;
-function isObject(value) {
-    return typeof value === 'object' && value !== null;
+function isDeepEqual(obj1, obj2) {
+    // Check if both are primitives (string, number, boolean, etc.) or functions
+    if (obj1 === obj2)
+        return true;
+    // If either is null or undefined, or if their types differ, they are not equal
+    if (obj1 == null || obj2 == null || typeof obj1 !== typeof obj2)
+        return false;
+    // If they are not objects (i.e., they are functions or other non-object non-primitive types), return false
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object')
+        return false;
+    // Handle Arrays
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+        if (obj1.length !== obj2.length)
+            return false;
+        for (var i = 0; i < obj1.length; i++) {
+            if (!isDeepEqual(obj1[i], obj2[i]))
+                return false;
+        }
+        return true;
+    }
+    // If one is array and the other is not, they are not equal
+    if (Array.isArray(obj1) !== Array.isArray(obj2))
+        return false;
+    // Handle Objects
+    var keys1 = Object.keys(obj1);
+    var keys2 = Object.keys(obj2);
+    // If number of keys is different, they are not equal
+    if (keys1.length !== keys2.length)
+        return false;
+    // Check recursively for each key
+    for (var _i = 0, keys1_1 = keys1; _i < keys1_1.length; _i++) {
+        var key = keys1_1[_i];
+        if (!keys2.includes(key) ||
+            !isDeepEqual(obj1[key], obj2[key]))
+            return false;
+    }
+    return true;
 }
 function getUpdatedProperties(currentConfig, newConfig) {
     var updatedProperties = [];
     for (var key in newConfig) {
-        if (!isObject(newConfig[key])) {
-            if (currentConfig[key] !== newConfig[key]) {
-                updatedProperties.push(key);
-            }
-        }
-        else {
-            var nestedUpdatedProperties = getUpdatedProperties(currentConfig[key], newConfig[key]);
-            if (nestedUpdatedProperties.length > 0) {
-                updatedProperties.push(key);
-            }
+        var isDeepEqualResult = isDeepEqual(currentConfig[key], newConfig[key]);
+        if (!isDeepEqualResult) {
+            updatedProperties.push(key);
         }
     }
     return updatedProperties;

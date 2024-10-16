@@ -69,59 +69,62 @@ var WebsocketP2P = /** @class */ (function () {
                         return [4 /*yield*/, this.connectingPromise];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
-                        this.connectingPromise = new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
-                            var device, url, ws_2;
-                            var _this = this;
-                            var _a;
-                            return __generator(this, function (_b) {
-                                switch (_b.label) {
-                                    case 0:
-                                        this.client = null;
-                                        this.server = null;
-                                        if (this.serverPingInterval)
-                                            clearInterval(this.serverPingInterval);
-                                        return [4 /*yield*/, this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')];
-                                    case 1:
-                                        device = _b.sent();
-                                        if (device) {
-                                            url = "ws://".concat((_a = device === null || device === void 0 ? void 0 : device.LOCATION) === null || _a === void 0 ? void 0 : _a.split('//')[1]);
-                                            console.log("Connecting to ws server: ".concat(url));
-                                            ws_2 = new ws_1.default(url);
-                                            ws_2.on('open', function () {
-                                                console.log('Connected to remote server');
-                                                _this.client = ws_2;
-                                                resolve();
-                                                _this.onConnectionEstablishedListeners.forEach(function (listener) { return listener(); });
-                                            });
-                                            ws_2.on('error', function (err) { return __awaiter(_this, void 0, void 0, function () {
-                                                return __generator(this, function (_a) {
-                                                    console.error("Client error: ".concat(err));
+                        this.connectingPromise = new Promise(function (resolve) {
+                            ;
+                            (function () { return __awaiter(_this, void 0, void 0, function () {
+                                var device, url, ws_2;
+                                var _this = this;
+                                var _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            this.client = null;
+                                            this.server = null;
+                                            if (this.serverPingInterval)
+                                                clearInterval(this.serverPingInterval);
+                                            return [4 /*yield*/, this.searchForServer('urn:schemas-upnp-org:service:WebSocket:1')];
+                                        case 1:
+                                            device = _b.sent();
+                                            if (device) {
+                                                url = "ws://".concat((_a = device === null || device === void 0 ? void 0 : device.LOCATION) === null || _a === void 0 ? void 0 : _a.split('//')[1]);
+                                                console.log("Connecting to ws server: ".concat(url));
+                                                ws_2 = new ws_1.default(url);
+                                                ws_2.on('open', function () {
+                                                    console.log('Connected to remote server');
+                                                    _this.client = ws_2;
                                                     resolve();
-                                                    setTimeout(this.connect.bind(this), 0);
-                                                    return [2 /*return*/];
+                                                    _this.onConnectionEstablishedListeners.forEach(function (listener) { return listener(); });
                                                 });
-                                            }); });
-                                            ws_2.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
-                                                return __generator(this, function (_a) {
-                                                    console.log('Remote server closed, trying to reconnect...');
-                                                    resolve();
-                                                    setTimeout(this.connect.bind(this), 0);
-                                                    return [2 /*return*/];
-                                                });
-                                            }); });
+                                                ws_2.on('error', function (err) { return __awaiter(_this, void 0, void 0, function () {
+                                                    return __generator(this, function (_a) {
+                                                        console.error("Client error: ".concat(err));
+                                                        resolve();
+                                                        setTimeout(this.connect.bind(this), 0);
+                                                        return [2 /*return*/];
+                                                    });
+                                                }); });
+                                                ws_2.on('close', function () { return __awaiter(_this, void 0, void 0, function () {
+                                                    return __generator(this, function (_a) {
+                                                        console.log('Remote server closed, trying to reconnect...');
+                                                        resolve();
+                                                        setTimeout(this.connect.bind(this), 0);
+                                                        return [2 /*return*/];
+                                                    });
+                                                }); });
+                                                return [2 /*return*/];
+                                            }
+                                            console.log("No WebSocket servers with port ".concat(config_1.PORT, " found, creating one..."));
+                                            // If no WebSocket servers were found, create one
+                                            return [4 /*yield*/, this.createWebSocketServer()];
+                                        case 2:
+                                            // If no WebSocket servers were found, create one
+                                            _b.sent();
+                                            resolve();
                                             return [2 /*return*/];
-                                        }
-                                        console.log("No WebSocket servers with port ".concat(config_1.PORT, " found, creating one..."));
-                                        // If no WebSocket servers were found, create one
-                                        return [4 /*yield*/, this.createWebSocketServer()];
-                                    case 2:
-                                        // If no WebSocket servers were found, create one
-                                        _b.sent();
-                                        resolve();
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); });
+                                    }
+                                });
+                            }); })();
+                        });
                         return [4 /*yield*/, this.connectingPromise];
                     case 3:
                         _a.sent();

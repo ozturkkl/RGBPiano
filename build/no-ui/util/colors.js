@@ -25,11 +25,11 @@ function HSLToRGB(h, s, l) {
 }
 exports.HSLToRGB = HSLToRGB;
 function hexToRgb(hex) {
-    return hex
+    var _a, _b;
+    return ((_b = (_a = hex
         .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, function (_m, r, g, b) { return '#' + r + r + g + g + b + b; })
         .substring(1)
-        .match(/.{2}/g)
-        .map(function (x) { return parseInt(x, 16); });
+        .match(/.{2}/g)) === null || _a === void 0 ? void 0 : _a.map(function (x) { return parseInt(x, 16); })) !== null && _b !== void 0 ? _b : [0, 0, 0]);
 }
 exports.hexToRgb = hexToRgb;
 function RGBToHex(r, g, b) {
