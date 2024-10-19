@@ -7,9 +7,9 @@ import { Main } from './src/Main'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    x: 3400,
-    y: 100,
-    width: 852,
+    x: 3410,
+    y: 0,
+    width: 768,
     minWidth: 430,
     minHeight: 1300,
     height: 1300,
