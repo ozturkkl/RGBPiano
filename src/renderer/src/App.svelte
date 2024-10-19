@@ -1,16 +1,15 @@
 <script lang="ts">
   import Bluetooth from './components/Bluetooth.svelte'
   import LedVisualizer from './components/LedVisualizer.svelte'
+  import Settings from './components/Settings.svelte'
+  import WindowControls from './components/WindowControls.svelte'
+  import SvgPiano from './svg/SvgPiano.svelte'
+  import SvgSettings from './svg/SvgSettings.svelte'
 
   let sidebarToggled = false
   let activeTab: 'bluetooth' | 'led-visualizer' | 'settings' = 'bluetooth'
   const settingsButtonAnim =
     'hover:bg-transparent w-9 p-0 fill-neutral-content hover:fill-primary hover:active:rotate-180 hover:rotate-180 duration-500 ease-in-out hover:active:scale-75'
-
-  // import LedVisualizer from './components/LedVisualizer.svelte'
-  import WindowControls from './components/WindowControls.svelte'
-  import Piano from './svg/Piano.svelte'
-  import Settings from './svg/Settings.svelte'
 </script>
 
 <div class="App flex w-full h-full">
@@ -32,7 +31,7 @@
         </div>
         <div class="mx-2 px-2 justify-self-start">
           <div class="flex w-14 mr-5">
-            <Piano />
+            <SvgPiano />
           </div>
           <h1>RGB Piano</h1>
         </div>
@@ -54,7 +53,7 @@
           <button
             class="btn btn-sm btn-ghost h-full sm:ml-2 sm:mr-3 {settingsButtonAnim}"
             class:fill-primary={activeTab === 'settings'}
-            on:click={() => (activeTab = 'settings')}><Settings /></button
+            on:click={() => (activeTab = 'settings')}><SvgSettings /></button
           >
           <WindowControls />
         </div>
@@ -62,23 +61,29 @@
 
       <!-- Page content here -->
       {#if activeTab === 'bluetooth'}
-        <div class="flex-1 flex items-center justify-center">
-          <Bluetooth />
-        </div>
+        <Bluetooth />
       {:else if activeTab === 'led-visualizer'}
         <LedVisualizer />
       {:else}
-        <div class="flex-1 flex items-center justify-center">
-          <Settings />
-        </div>
+        <Settings />
       {/if}
     </div>
 
     <div class="drawer-side">
       <label for="app-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-      <ul class="menu bg-base-200 min-h-full w-80 p-4 max-w-full">
-        <button class="btn m-2">ghost</button>
-        <button class="btn m-2">Neutral</button>
+      <ul class="menu bg-base-200 min-h-full p-4 max-w-full">
+        <button
+          class="btn btn-sm btn-ghost"
+          class:text-primary={activeTab === 'bluetooth'}
+          class:hover:bg-transparent={activeTab === 'bluetooth'}
+          on:click={() => ((activeTab = 'bluetooth'), (sidebarToggled = false))}>Bluetooth</button
+        >
+        <button
+          class="btn btn-sm btn-ghost"
+          class:text-primary={activeTab === 'led-visualizer'}
+          class:hover:bg-transparent={activeTab === 'led-visualizer'}
+          on:click={() => ((activeTab = 'led-visualizer'), (sidebarToggled = false))}>LED Visualizer</button
+        >
       </ul>
     </div>
   </div>

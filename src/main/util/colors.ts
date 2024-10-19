@@ -45,7 +45,7 @@ export function getBlendedRGB(
   [c1r, c1g, c1b]: [number, number, number],
   [c2r, c2g, c2b]: [number, number, number],
   ratio: number,
-) {
+): [number, number, number] {
   return [
     Math.round(c1r * ratio) + Math.round(c2r * (1 - ratio)),
     Math.round(c1g * ratio) + Math.round(c2g * (1 - ratio)),

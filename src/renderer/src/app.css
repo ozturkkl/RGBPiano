@@ -2,13 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+html:has(.drawer-toggle:checked) {
+  scrollbar-gutter: auto;
+}
+
 body {
   user-select: none;
   -webkit-user-select: none;
 }
 
+/* fixes app drag misbehaving after transition ends, using width animation instead of transform */
+.drawer-side > *:not(.drawer-overlay) {
+  position: absolute;
+  left: 0;
+  transform: translateX(-300px);
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  width: 0px;
+  transition:
+    width 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+.drawer-toggle:checked ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(0);
+  width: 300px;
+}
+
 .app-drag {
-  z-index: 0;
   -webkit-app-region: drag;
 }
 
