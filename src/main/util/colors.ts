@@ -8,7 +8,7 @@ export function RGBToHSL(r: number, g: number, b: number): [number, number, numb
   return [
     60 * h < 0 ? 60 * h + 360 : 60 * h,
     100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-    (100 * (2 * l - s)) / 2
+    (100 * (2 * l - s)) / 2,
   ]
 }
 
@@ -32,25 +32,23 @@ export function hexToRgb(hex: string) {
 }
 
 export function RGBToHex(r: number, g: number, b: number) {
-  return (
-    '#' +
-    [r, g, b]
-      .map((x) => {
-        const hex = x.toString(16)
-        return hex.length === 1 ? '0' + hex : hex
-      })
-      .join('')
-  )
+  const clamp = (value: number) => Math.max(0, Math.min(255, Math.round(value)))
+
+  const redHex = clamp(r).toString(16).padStart(2, '0')
+  const greenHex = clamp(g).toString(16).padStart(2, '0')
+  const blueHex = clamp(b).toString(16).padStart(2, '0')
+
+  return `#${redHex}${greenHex}${blueHex}`
 }
 
 export function getBlendedRGB(
   [c1r, c1g, c1b]: [number, number, number],
   [c2r, c2g, c2b]: [number, number, number],
-  ratio: number
-): [number, number, number] {
+  ratio: number,
+) {
   return [
     Math.round(c1r * ratio) + Math.round(c2r * (1 - ratio)),
     Math.round(c1g * ratio) + Math.round(c2g * (1 - ratio)),
-    Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio))
+    Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio)),
   ]
 }

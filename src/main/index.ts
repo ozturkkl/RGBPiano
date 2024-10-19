@@ -7,10 +7,14 @@ import { Main } from './src/Main'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    x: 3400,
+    y: 100,
+    width: 852,
+    minWidth: 430,
+    minHeight: 1300,
+    height: 1300,
     show: true,
-    autoHideMenuBar: true,
+    titleBarStyle: 'hidden',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -53,11 +57,12 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  createWindow()
   Main({
     ipcMain,
     app,
+    BrowserWindow,
   })
+  createWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

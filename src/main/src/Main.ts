@@ -1,19 +1,17 @@
 import { WebsocketMessage, WebsocketP2P } from './WebsocketP2P'
-import {
-  ConfigType,
-  getConfig,
-  getSavedConfig,
-  onConfigUpdated,
-  saveConfigToFile,
-  updateConfig
-} from '../util/config'
+import { getConfig, getSavedConfig, onConfigUpdated, saveConfigToFile, updateConfig } from '../util/config'
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
+import { ConfigType } from '../util/consts'
 
-export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron.App }) {
-  electron?.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
+export async function Main(electron?: {
+  ipcMain: Electron.IpcMain
+  app: Electron.App
+  BrowserWindow: typeof Electron.BrowserWindow
+}) {
   getSavedConfig(electron?.app)
-  onConfigUpdated(() => saveConfigToFile(electron?.app))
+
+  onConfigUpdated((c) => saveConfigToFile(electron?.app, c))
 
   const connection = new WebsocketP2P()
   connection.connect()
@@ -21,15 +19,25 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
   // IF ELECTRON
   if (electron?.ipcMain) {
     try {
+      // SETUP IPC LISTENERS
+      electron?.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
+      electron?.ipcMain.handle('config:get', () => getSavedConfig(electron?.app))
+      electron?.ipcMain.handle('window:minimize', () => electron?.BrowserWindow?.getFocusedWindow()?.minimize())
+      electron?.ipcMain.handle('window:maximize', () => {
+        const win = electron?.BrowserWindow?.getFocusedWindow()
+        win?.isMaximized() ? win?.unmaximize() : win?.maximize()
+      })
+      electron?.ipcMain.handle('window:close', () => electron?.BrowserWindow?.getFocusedWindow()?.close())
+
       // SETUP MIDI
       await Midi.init()
       console.log('Midi initialized')
-      console.log(`Midi inputs:\n  ${Midi.inputs.join('\n  ')}`)
-      console.log(`Midi outputs:\n  ${Midi.outputs.join('\n  ')}`)
+      console.log(`Inputs:\n  ${Midi.inputs.join('\n  ')}`)
+      console.log(`Outputs:\n  ${Midi.outputs.join('\n  ')}`)
       new Midi(getConfig().SELECTED_DEVICE, (msg) => {
         connection.send({
           type: 'midi',
-          data: msg
+          data: msg,
         })
       })
 
@@ -37,13 +45,13 @@ export async function Main(electron?: { ipcMain: Electron.IpcMain; app: Electron
       connection.onConnectionEstablished = () => {
         connection.send({
           type: 'config',
-          data: getConfig()
+          data: getConfig(),
         })
       }
       onConfigUpdated((config) => {
         connection.send({
           type: 'config',
-          data: config
+          data: config,
         })
       })
 

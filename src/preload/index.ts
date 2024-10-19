@@ -6,15 +6,13 @@ import { contextBridge, ipcRenderer } from 'electron'
 if (process.contextIsolated) {
   // Expose a method to the renderer process
   contextBridge.exposeInMainWorld('ipcRenderer', {
-    send: ipcRenderer.send,
     on: ipcRenderer.on,
-    invoke: ipcRenderer.invoke
+    invoke: ipcRenderer.invoke,
   })
 } else {
   // Add to the DOM global
   window.ipcRenderer = {
-    send: ipcRenderer.send,
     on: ipcRenderer.on,
-    invoke: ipcRenderer.invoke
+    invoke: ipcRenderer.invoke,
   }
 }

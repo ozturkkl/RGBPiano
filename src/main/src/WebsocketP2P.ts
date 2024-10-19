@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
 import { Server, Client, SsdpHeaders } from 'node-ssdp'
-import { ConfigType, PORT } from '../util/config'
+import { ConfigType, PORT } from '../util/consts'
 
 export type WebsocketMessage =
   | {
@@ -94,8 +94,8 @@ export class WebsocketP2P {
       const ssdpServer = new Server({
         location: {
           port: PORT,
-          path: '/'
-        }
+          path: '/',
+        },
       })
 
       wss.on('connection', () => {
@@ -217,12 +217,15 @@ export class WebsocketP2P {
   }
 
   private setupDelinquentServerCleanup(): void {
-    setInterval(() => {
-      if (this.server && this.server.clients.size === 0) {
-        console.log('WebSocket server has no clients, closing...')
-        this.server.close()
-      }
-    }, 20000 + Math.random() * 50000)
+    setInterval(
+      () => {
+        if (this.server && this.server.clients.size === 0) {
+          console.log('WebSocket server has no clients, closing...')
+          this.server.close()
+        }
+      },
+      20000 + Math.random() * 50000,
+    )
   }
 
   waitForConnection(): Promise<void> {

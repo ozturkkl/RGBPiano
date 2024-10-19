@@ -1,5 +1,5 @@
-import { INPUT_DEVICE_REFRESH_INTERVAL } from '../util/config'
 import JZZ from 'jzz'
+import { MIDI_INPUT_DEVICE_IDLE_REFRESH_INTERVAL } from '../util/consts'
 
 export class Midi {
   private static _inputs: string[] = []
@@ -81,7 +81,7 @@ export class Midi {
       if (inputDeviceRefreshTimeout) clearTimeout(inputDeviceRefreshTimeout)
       inputDeviceRefreshTimeout = setTimeout(() => {
         this._inputActive = false
-      }, INPUT_DEVICE_REFRESH_INTERVAL)
+      }, MIDI_INPUT_DEVICE_IDLE_REFRESH_INTERVAL)
     }
 
     ito()

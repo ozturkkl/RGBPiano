@@ -23,17 +23,17 @@ export class BluetoothMidi {
       throw new Error('No main window web contents found')
     }
 
-    ipcMain.on('ble-midi-connected', (_, deviceId) => {
+    ipcMain.handle('ble-midi-connected', (_, deviceId) => {
       const device = BluetoothMidi.getDevice(deviceId)
       device.connected = true
       console.log('Connected to device: ', deviceId)
     })
-    ipcMain.on('ble-midi-disconnected', (_, deviceId) => {
+    ipcMain.handle('ble-midi-disconnected', (_, deviceId) => {
       const device = BluetoothMidi.getDevice(deviceId)
       device.connected = false
       console.log('Disconnected from device: ', deviceId)
     })
-    ipcMain.on('ble-midi-data', (_, { deviceId, data }) => {
+    ipcMain.handle('ble-midi-data', (_, { deviceId, data }) => {
       const device = BluetoothMidi.getDevice(deviceId)
       const parsed = BluetoothMidi.parseMIDIData(data)
       parsed.messages.forEach((msg) => {
@@ -83,7 +83,7 @@ export class BluetoothMidi {
     for (let i = 1; i < dataArray.length; i++) {
       const message: MidiMessage = {
         time: 0,
-        data: []
+        data: [],
       }
 
       const LST = dataArray[i] // least significant time byte
@@ -148,7 +148,7 @@ export class BluetoothMidi {
 
     return {
       messages,
-      errorParsing
+      errorParsing,
     }
   }
 
@@ -158,7 +158,7 @@ export class BluetoothMidi {
       execJsOnClient(() => {
         window.navigator.bluetooth
           .requestDevice({
-            filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
+            filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }],
           })
           .catch(() => {
             // noop
@@ -175,12 +175,11 @@ export class BluetoothMidi {
 
       for (const device of deviceList) {
         this.midiDevices.set(device.deviceId, {
-          name: device.deviceName
+          name: device.deviceName,
         })
       }
 
-      const diffHappened =
-        JSON.stringify(Array.from(this.midiDevices)) !== JSON.stringify(Array.from(prevMidiDevices))
+      const diffHappened = JSON.stringify(Array.from(this.midiDevices)) !== JSON.stringify(Array.from(prevMidiDevices))
       if (diffHappened) {
         this.deviceListUpdateSubscribers.forEach((handler) => handler(this.midiDevices))
       }
@@ -222,19 +221,14 @@ export class BluetoothMidi {
   }
 
   async connect() {
-    if (
-      !BluetoothMidi.devices.has(this.deviceId) ||
-      this.connected ||
-      BluetoothMidi.connectionInProgress
-    )
-      return
+    if (!BluetoothMidi.devices.has(this.deviceId) || this.connected || BluetoothMidi.connectionInProgress) return
     BluetoothMidi.connectionInProgress = true
 
     console.log('Connecting to device: ', this.deviceId)
     const connectHandlerFunc: (
       event: Electron.Event,
       devices: Electron.BluetoothDevice[],
-      callback: (deviceId: string) => void
+      callback: (deviceId: string) => void,
     ) => void = (event, deviceList, callback) => {
       event.preventDefault()
       const device = deviceList.find((d) => d.deviceId === this.deviceId)
@@ -250,30 +244,28 @@ export class BluetoothMidi {
 
       await execJsOnClient(async (deviceId) => {
         const device = await window.navigator.bluetooth.requestDevice({
-          filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
+          filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }],
         })
 
         const server = await device.gatt.connect()
         const service = await server.getPrimaryService('03b80e5a-ede8-4b33-a751-6ce34ec4c700')
-        const characteristic = await service.getCharacteristic(
-          '7772e5db-3868-4112-a1a9-f2669d106bf3'
-        )
+        const characteristic = await service.getCharacteristic('7772e5db-3868-4112-a1a9-f2669d106bf3')
         await characteristic.startNotifications()
 
-        window.ipcRenderer.send('ble-midi-connected', deviceId)
+        window.ipcRenderer.invoke('ble-midi-connected', deviceId)
         device.addEventListener('gattserverdisconnected', () => {
-          window.ipcRenderer.send('ble-midi-disconnected', deviceId)
+          window.ipcRenderer.invoke('ble-midi-disconnected', deviceId)
         })
         characteristic.addEventListener('characteristicvaluechanged', (event) => {
           const data = new Uint8Array(event.target.value.buffer)
-          window.ipcRenderer.send('ble-midi-data', {
+          window.ipcRenderer.invoke('ble-midi-data', {
             deviceId,
-            data
+            data,
           })
         })
       }, this.deviceId)
     } catch (error) {
-      console.error('Error connecting to device: ', this.deviceId, error)
+      console.error('Could not connect to device: ', this.deviceId)
     } finally {
       BluetoothMidi.webContents.off('select-bluetooth-device', connectHandlerFunc)
       BluetoothMidi.connectionInProgress = false

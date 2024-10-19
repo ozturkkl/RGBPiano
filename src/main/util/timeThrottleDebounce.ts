@@ -1,9 +1,9 @@
-export function throttleWithTrailing<T>(fn: (arg: T) => void, wait: number): (arg: T) => void {
+export function throttleWithTrailing<T extends unknown[]>(fn: (...args: T) => void, wait: number): (...args: T) => void {
   let lastArgs: T | null = null
   let lastCallTime = 0
   let timeout: NodeJS.Timeout | null = null
 
-  return function throttled(arg: T) {
+  return function throttled(...args: T) {
     const now = Date.now()
     const remainingTime = wait - (now - lastCallTime)
 
@@ -14,17 +14,17 @@ export function throttleWithTrailing<T>(fn: (arg: T) => void, wait: number): (ar
         timeout = null
       }
       lastCallTime = now
-      fn(arg)
+      fn(...args)
     } else {
       // Store the latest args and set up a trailing call
-      lastArgs = arg
+      lastArgs = args
 
       if (!timeout) {
         timeout = setTimeout(() => {
           timeout = null
           lastCallTime = Date.now()
           if (lastArgs) {
-            fn(lastArgs)
+            fn(...lastArgs)
             lastArgs = null
           }
         }, remainingTime)
@@ -33,16 +33,16 @@ export function throttleWithTrailing<T>(fn: (arg: T) => void, wait: number): (ar
   }
 }
 
-export function debounce<T>(fn: (arg: T) => void, wait: number): (arg: T) => void {
+export function debounce<T extends unknown[]>(fn: (...args: T) => void, wait: number): (...args: T) => void {
   let timeout: NodeJS.Timeout | null = null
 
-  return function debounced(arg: T) {
+  return function debounced(...args: T) {
     if (timeout) {
       clearTimeout(timeout)
     }
     timeout = setTimeout(() => {
       timeout = null
-      fn(arg)
+      fn(...args)
     }, wait)
   }
 }
