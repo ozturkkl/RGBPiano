@@ -21,13 +21,13 @@ export function HSLToRGB(h: number, s: number, l: number): [number, number, numb
   return [255 * f(0), 255 * f(8), 255 * f(4)]
 }
 
-export function hexToRgb(hex: string) {
+export function hexToRgb(hex: string): [number, number, number] {
   return (
-    hex
+    (hex
       .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (_m, r, g, b) => '#' + r + r + g + g + b + b)
       .substring(1)
       .match(/.{2}/g)
-      ?.map((x) => parseInt(x, 16)) ?? [0, 0, 0]
+      ?.map((x) => parseInt(x, 16)) as [number, number, number]) ?? [0, 0, 0]
   )
 }
 

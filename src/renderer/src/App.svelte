@@ -5,9 +5,12 @@
   import WindowControls from './components/WindowControls.svelte'
   import SvgPiano from './svg/SvgPiano.svelte'
   import SvgSettings from './svg/SvgSettings.svelte'
+  import { Store } from './util/store'
 
   let sidebarToggled = false
-  let activeTab: 'bluetooth' | 'led-visualizer' | 'settings' = 'bluetooth'
+  type ActiveTab = 'bluetooth' | 'led-visualizer' | 'settings'
+  const activeTab = Store.getPersistent<ActiveTab>('activeTab', 'led-visualizer', (v) => v !== 'settings')
+
   const settingsButtonAnim =
     'hover:fill-primary hover:active:rotate-180 hover:rotate-180 duration-500 ease-in-out hover:active:scale-75'
 </script>
@@ -37,22 +40,22 @@
       <div class="hidden sm:flex h-full flex-1 justify-center">
         <button
           class="btn btn-sm btn-ghost h-5/6"
-          class:text-primary={activeTab === 'bluetooth'}
-          class:hover:bg-transparent={activeTab === 'bluetooth'}
-          on:click={() => (activeTab = 'bluetooth')}>Bluetooth</button
+          class:text-primary={$activeTab === 'bluetooth'}
+          class:hover:bg-transparent={$activeTab === 'bluetooth'}
+          on:click={() => ($activeTab = 'bluetooth')}>Bluetooth</button
         >
         <button
           class="btn btn-sm btn-ghost h-5/6"
-          class:text-primary={activeTab === 'led-visualizer'}
-          class:hover:bg-transparent={activeTab === 'led-visualizer'}
-          on:click={() => (activeTab = 'led-visualizer')}>LED Visualizer</button
+          class:text-primary={$activeTab === 'led-visualizer'}
+          class:hover:bg-transparent={$activeTab === 'led-visualizer'}
+          on:click={() => ($activeTab = 'led-visualizer')}>LED Visualizer</button
         >
       </div>
       <div class="ml-auto justify-self-end">
         <button
           class="btn btn-sm btn-ghost h-full hover:bg-transparent w-9 p-0 fill-neutral-content sm:ml-2 sm:mr-3 {settingsButtonAnim}"
-          class:fill-primary={activeTab === 'settings'}
-          on:click={() => (activeTab = 'settings')}><SvgSettings /></button
+          class:fill-primary={$activeTab === 'settings'}
+          on:click={() => ($activeTab = 'settings')}><SvgSettings /></button
         >
         <WindowControls />
       </div>
@@ -60,9 +63,9 @@
 
     <div class="absolute w-screen h-screen max-h-screen pt-11 overflow-hidden *:overflow-auto *:h-full">
       <!-- Page content here -->
-      {#if activeTab === 'bluetooth'}
+      {#if $activeTab === 'bluetooth'}
         <Bluetooth />
-      {:else if activeTab === 'led-visualizer'}
+      {:else if $activeTab === 'led-visualizer'}
         <LedVisualizer />
       {:else}
         <Settings />
@@ -75,15 +78,15 @@
     <ul class="menu bg-base-200 h-screen pt-14 p-4 max-w-screen">
       <button
         class="btn btn-sm btn-ghost"
-        class:text-primary={activeTab === 'bluetooth'}
-        class:hover:bg-transparent={activeTab === 'bluetooth'}
-        on:click={() => ((activeTab = 'bluetooth'), (sidebarToggled = false))}>Bluetooth</button
+        class:text-primary={$activeTab === 'bluetooth'}
+        class:hover:bg-transparent={$activeTab === 'bluetooth'}
+        on:click={() => (($activeTab = 'bluetooth'), (sidebarToggled = false))}>Bluetooth</button
       >
       <button
         class="btn btn-sm btn-ghost"
-        class:text-primary={activeTab === 'led-visualizer'}
-        class:hover:bg-transparent={activeTab === 'led-visualizer'}
-        on:click={() => ((activeTab = 'led-visualizer'), (sidebarToggled = false))}>LED Visualizer</button
+        class:text-primary={$activeTab === 'led-visualizer'}
+        class:hover:bg-transparent={$activeTab === 'led-visualizer'}
+        on:click={() => (($activeTab = 'led-visualizer'), (sidebarToggled = false))}>LED Visualizer</button
       >
     </ul>
   </div>

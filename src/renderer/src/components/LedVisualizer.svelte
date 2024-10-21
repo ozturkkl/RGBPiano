@@ -1,95 +1,79 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { hexToRgb, HSLToRGB, RGBToHex, RGBToHSL } from '../../../main/util/colors'
-  import { defaultConfig, type ConfigType } from '../../../main/util/consts'
+  import { hexToRgb, RGBToHex } from '../../../main/util/colors'
+  import { defaultConfig } from '../../../main/util/consts'
+  import { Store } from '../util/store'
 
   // Variables for each config setting
-  let config = defaultConfig
-  $: brightness = config.BRIGHTNESS * 100
-  $: backgroundBrightness = config.BACKGROUND_BRIGHTNESS * 100
-  $: notePressColorHex = RGBToHex(...config.NOTE_PRESS_COLOR_RGB)
+  const config = Store.getPersistent('config', defaultConfig)
+  const useColorForBackground = Store.getPersistent<boolean>('useColorForBackground', true)
 
-  // Request the initial config and set the UI elements accordingly
-  const requestConfig = async () => {
-    config = (await window.ipcRenderer.invoke('config:get', {})) as ConfigType
-  }
+  $: brightness = $config.BRIGHTNESS * 100
+  $: backgroundBrightness = $config.BACKGROUND_BRIGHTNESS * 100
+
+  $: notePressColorHex = RGBToHex(...$config.NOTE_PRESS_COLOR_RGB)
+  $: notePressBgColorHex = RGBToHex(...$config.BACKGROUND_COLOR_RGB)
+
+  $: $useColorForBackground && ($config.BACKGROUND_COLOR_RGB = $config.NOTE_PRESS_COLOR_RGB)
+
+  $: window.ipcRenderer.invoke('config', $config)
 
   function changeColor(e: Event & { currentTarget: HTMLInputElement }) {
-    const [red, green, blue] = hexToRgb(e.currentTarget.value)
-    const [hue, sat, bri] = RGBToHSL(red, green, blue)
-    const configUpdate = {
-      BACKGROUND_COLOR_RGB: HSLToRGB(hue, sat, bri),
-      NOTE_PRESS_COLOR_RGB: HSLToRGB(hue, sat, bri),
-    }
+    const rgb = hexToRgb(e.currentTarget.value)
+    $config.NOTE_PRESS_COLOR_RGB = rgb
+  }
 
-    window.ipcRenderer.invoke('config', configUpdate)
+  function changeColorBg(e: Event & { currentTarget: HTMLInputElement }) {
+    const rgb = hexToRgb(e.currentTarget.value)
+    $config.BACKGROUND_COLOR_RGB = rgb
   }
 
   function changeBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      BRIGHTNESS: parseInt(e.currentTarget.value) / 100,
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.BRIGHTNESS = parseInt(e.currentTarget.value) / 100
   }
 
   function changeBackgroundBrightness(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      BACKGROUND_BRIGHTNESS: parseInt(e.currentTarget.value) / 100,
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.BACKGROUND_BRIGHTNESS = parseInt(e.currentTarget.value) / 100
   }
 
   function changeConstantVelocity(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      CONSTANT_VELOCITY: e.currentTarget.checked,
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.CONSTANT_VELOCITY = e.currentTarget.checked
   }
 
   function changeLEDInvert(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      LED_INVERT: e.currentTarget.checked,
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.LED_INVERT = e.currentTarget.checked
   }
 
   function changeLEDStartCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      LED_START_COUNT: parseInt(e.currentTarget.value),
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.LED_START_COUNT = parseInt(e.currentTarget.value)
   }
 
   function changeLEDEndCount(e: Event & { currentTarget: HTMLInputElement }) {
-    const configUpdate = {
-      LED_END_COUNT: parseInt(e.currentTarget.value),
-    }
-
-    window.ipcRenderer.invoke('config', configUpdate)
+    $config.LED_END_COUNT = parseInt(e.currentTarget.value)
   }
-
-  onMount(() => {
-    requestConfig() // Request the existing config on mount
-  })
 </script>
 
 <div class="p-8">
-  <h1 class="text-3xl font-bold mb-4">Led Visualizer</h1>
-  <h2 class="text-xl font-semibold mb-2">Color</h2>
+  <p class="text-3xl font-bold mb-4">Led Visualizer</p>
 
+  <p class="text-xl font-semibold mb-2">Color</p>
   <input type="color" value={notePressColorHex} on:input={changeColor} />
 
-  <div class="divider"></div>
+  <p class="text-xl font-semibold mb-2">Background Color</p>
+  <label class="label cursor-pointer">
+    <span class="label-text">Use same color as Color</span>
+    <input
+      type="checkbox"
+      checked={$useColorForBackground}
+      class="checkbox"
+      on:change={() => ($useColorForBackground = !$useColorForBackground)}
+    />
+  </label>
+  <input type="color" value={notePressBgColorHex} on:input={changeColorBg} disabled={$useColorForBackground} />
 
-  <h2 class="text-xl font-semibold mb-2">LED Brightness</h2>
+  <p class="text-xl font-semibold mb-2">Brightness</p>
   <input type="range" min="0" max="100" value={brightness} on:input={changeBrightness} class="range mb-4" />
 
-  <h2 class="text-xl font-semibold mb-2">Background Brightness</h2>
+  <p class="text-xl font-semibold mb-2">Background Brightness</p>
   <input
     type="range"
     min="0"
@@ -99,28 +83,24 @@
     class="range mb-4"
   />
 
-  <div class="form-control mb-4">
-    <label class="label cursor-pointer">
-      <span class="label-text">Constant Velocity</span>
-      <input type="checkbox" checked={config.CONSTANT_VELOCITY} class="checkbox" on:change={changeConstantVelocity} />
-    </label>
-  </div>
+  <div class="divider">Other</div>
 
-  <div class="form-control mb-4">
-    <label class="label cursor-pointer">
-      <span class="label-text">LED Invert</span>
-      <input type="checkbox" checked={config.LED_INVERT} class="checkbox" on:change={changeLEDInvert} />
-    </label>
-  </div>
+  <label class="label cursor-pointer">
+    <span class="label-text">Constant Velocity</span>
+    <input type="checkbox" checked={$config.CONSTANT_VELOCITY} class="checkbox" on:change={changeConstantVelocity} />
+  </label>
 
-  <div class="divider">Start / End</div>
+  <label class="label cursor-pointer">
+    <span class="label-text">LED Invert</span>
+    <input type="checkbox" checked={$config.LED_INVERT} class="checkbox" on:change={changeLEDInvert} />
+  </label>
 
-  <h2 class="text-xl font-semibold mb-2">LED Start/End Count</h2>
+  <p class="text-xl font-semibold mb-2">LED Start/End Count</p>
   <input
     type="number"
     min="0"
     max="177"
-    value={config.LED_START_COUNT}
+    value={$config.LED_START_COUNT}
     on:input={changeLEDStartCount}
     class="input input-bordered w-full max-w-xs mb-4"
   />
@@ -128,7 +108,7 @@
     type="number"
     min="0"
     max="177"
-    value={config.LED_END_COUNT}
+    value={$config.LED_END_COUNT}
     on:input={changeLEDEndCount}
     class="input input-bordered w-full max-w-xs mb-4"
   />
@@ -141,12 +121,12 @@
     appearance: none;
     background-color: transparent;
     width: 40px;
-    height: 40px;
+    height: 44px;
     border: none;
     cursor: pointer;
   }
   input[type='color']::-webkit-color-swatch {
-    border-radius: 999px;
-    border: 3px solid #000000;
+    border-radius: 10px;
+    border: 2px solid oklch(var(--b3));
   }
 </style>
