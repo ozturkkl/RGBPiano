@@ -66,44 +66,65 @@ var RbgStrip_1 = require("./RbgStrip");
 var Midi_1 = require("./Midi");
 function Main(electron) {
     return __awaiter(this, void 0, void 0, function () {
-        var connection, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
+        var connection, ledReceiveFrom_1, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    electron === null || electron === void 0 ? void 0 : electron.ipcMain.handle('config', function (_, config) { return (0, config_1.updateConfig)(config); });
                     (0, config_1.getSavedConfig)(electron === null || electron === void 0 ? void 0 : electron.app);
-                    (0, config_1.onConfigUpdated)(function () { return (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app); });
+                    (0, config_1.onConfigUpdated)(function (c) { return (0, config_1.saveConfigToFile)(electron === null || electron === void 0 ? void 0 : electron.app, c); });
                     connection = new WebsocketP2P_1.WebsocketP2P();
                     connection.connect();
-                    if (!(electron === null || electron === void 0 ? void 0 : electron.ipcMain)) return [3 /*break*/, 5];
+                    if (!electron) return [3 /*break*/, 5];
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 4, , 5]);
+                    // SETUP IPC LISTENERS
+                    electron.ipcMain.handle('config', function (_, config) { return (0, config_1.updateConfig)(config); });
+                    electron.ipcMain.handle('connected', function () { return connection.isConnected; });
+                    electron.ipcMain.handle('window:minimize', function () { var _a; return (_a = electron.BrowserWindow.getFocusedWindow()) === null || _a === void 0 ? void 0 : _a.minimize(); });
+                    electron.ipcMain.handle('window:maximize', function () {
+                        var win = electron.BrowserWindow.getFocusedWindow();
+                        (win === null || win === void 0 ? void 0 : win.isMaximized()) ? win === null || win === void 0 ? void 0 : win.unmaximize() : win === null || win === void 0 ? void 0 : win.maximize();
+                    });
+                    electron.ipcMain.handle('window:close', function () { var _a, _b; return (_b = (_a = electron === null || electron === void 0 ? void 0 : electron.BrowserWindow) === null || _a === void 0 ? void 0 : _a.getFocusedWindow()) === null || _b === void 0 ? void 0 : _b.close(); });
                     // SETUP MIDI
                     return [4 /*yield*/, Midi_1.Midi.init()];
                 case 2:
                     // SETUP MIDI
                     _a.sent();
                     console.log('Midi initialized');
-                    console.log("Midi inputs:\n  ".concat(Midi_1.Midi.inputs.join('\n  ')));
-                    console.log("Midi outputs:\n  ".concat(Midi_1.Midi.outputs.join('\n  ')));
-                    new Midi_1.Midi((0, config_1.getConfig)().SELECTED_DEVICE, function (msg) {
-                        connection.send({
-                            type: 'midi',
-                            data: msg
+                    console.log("Inputs:\n  ".concat(Midi_1.Midi.inputs.join('\n  ')));
+                    console.log("Outputs:\n  ".concat(Midi_1.Midi.outputs.join('\n  ')));
+                    electron.ipcMain.handle('midi:get-devices', function () { return ({ inputs: Midi_1.Midi.inputs, outputs: Midi_1.Midi.outputs }); });
+                    Midi_1.Midi.onStateChanged(function () {
+                        return electron.ipcMain.emit('midi:devices-changed', {
+                            inputs: Midi_1.Midi.inputs,
+                            outputs: Midi_1.Midi.outputs,
                         });
                     });
+                    (0, config_1.onConfigUpdated)(function (config) {
+                        if (config.LED_RECEIVE_FROM) {
+                            ledReceiveFrom_1 === null || ledReceiveFrom_1 === void 0 ? void 0 : ledReceiveFrom_1.onMessage(undefined);
+                            ledReceiveFrom_1 = new Midi_1.Midi(config.LED_RECEIVE_FROM);
+                            ledReceiveFrom_1.onMessage(function (msg) {
+                                connection.send({
+                                    type: 'midi',
+                                    data: msg,
+                                });
+                            });
+                        }
+                    }, true);
                     // SETUP CONFIG
                     connection.onConnectionEstablished = function () {
                         connection.send({
                             type: 'config',
-                            data: (0, config_1.getConfig)()
+                            data: (0, config_1.getConfig)(),
                         });
                     };
                     (0, config_1.onConfigUpdated)(function (config) {
                         connection.send({
                             type: 'config',
-                            data: config
+                            data: config,
                         });
                     });
                     return [4 /*yield*/, Promise.resolve().then(function () { return __importStar(require('./BluetoothMidi')); })];

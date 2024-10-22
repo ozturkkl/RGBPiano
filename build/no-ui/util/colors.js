@@ -15,7 +15,7 @@ function RGBToHSL(r, g, b) {
     return [
         60 * h < 0 ? 60 * h + 360 : 60 * h,
         100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-        (100 * (2 * l - s)) / 2
+        (100 * (2 * l - s)) / 2,
     ];
 }
 function HSLToRGB(h, s, l) {
@@ -34,13 +34,11 @@ function hexToRgb(hex) {
         .match(/.{2}/g)) === null || _a === void 0 ? void 0 : _a.map(function (x) { return parseInt(x, 16); })) !== null && _b !== void 0 ? _b : [0, 0, 0]);
 }
 function RGBToHex(r, g, b) {
-    return ('#' +
-        [r, g, b]
-            .map(function (x) {
-            var hex = x.toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        })
-            .join(''));
+    var clamp = function (value) { return Math.max(0, Math.min(255, Math.round(value))); };
+    var redHex = clamp(r).toString(16).padStart(2, '0');
+    var greenHex = clamp(g).toString(16).padStart(2, '0');
+    var blueHex = clamp(b).toString(16).padStart(2, '0');
+    return "#".concat(redHex).concat(greenHex).concat(blueHex);
 }
 function getBlendedRGB(_a, _b, ratio) {
     var c1r = _a[0], c1g = _a[1], c1b = _a[2];
@@ -48,6 +46,6 @@ function getBlendedRGB(_a, _b, ratio) {
     return [
         Math.round(c1r * ratio) + Math.round(c2r * (1 - ratio)),
         Math.round(c1g * ratio) + Math.round(c2g * (1 - ratio)),
-        Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio))
+        Math.round(c1b * ratio) + Math.round(c2b * (1 - ratio)),
     ];
 }

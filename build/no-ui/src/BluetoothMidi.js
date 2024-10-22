@@ -52,17 +52,17 @@ var BluetoothMidi = /** @class */ (function () {
         if (!this.webContents) {
             throw new Error('No main window web contents found');
         }
-        electron_1.ipcMain.on('ble-midi-connected', function (_, deviceId) {
+        electron_1.ipcMain.handle('ble-midi-connected', function (_, deviceId) {
             var device = BluetoothMidi.getDevice(deviceId);
             device.connected = true;
             console.log('Connected to device: ', deviceId);
         });
-        electron_1.ipcMain.on('ble-midi-disconnected', function (_, deviceId) {
+        electron_1.ipcMain.handle('ble-midi-disconnected', function (_, deviceId) {
             var device = BluetoothMidi.getDevice(deviceId);
             device.connected = false;
             console.log('Disconnected from device: ', deviceId);
         });
-        electron_1.ipcMain.on('ble-midi-data', function (_, _a) {
+        electron_1.ipcMain.handle('ble-midi-data', function (_, _a) {
             var deviceId = _a.deviceId, data = _a.data;
             var device = BluetoothMidi.getDevice(deviceId);
             var parsed = BluetoothMidi.parseMIDIData(data);
@@ -103,7 +103,7 @@ var BluetoothMidi = /** @class */ (function () {
         for (var i = 1; i < dataArray.length; i++) {
             var message = {
                 time: 0,
-                data: []
+                data: [],
             };
             var LST = dataArray[i]; // least significant time byte
             message.time = (MST << 8) + LST;
@@ -166,7 +166,7 @@ var BluetoothMidi = /** @class */ (function () {
         }
         return {
             messages: messages,
-            errorParsing: errorParsing
+            errorParsing: errorParsing,
         };
     };
     BluetoothMidi.startEnumeration = function () {
@@ -176,7 +176,7 @@ var BluetoothMidi = /** @class */ (function () {
             (0, execJsOnClient_1.execJsOnClient)(function () {
                 window.navigator.bluetooth
                     .requestDevice({
-                    filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
+                    filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }],
                 })
                     .catch(function () {
                     // noop
@@ -191,7 +191,7 @@ var BluetoothMidi = /** @class */ (function () {
             for (var _i = 0, deviceList_1 = deviceList; _i < deviceList_1.length; _i++) {
                 var device = deviceList_1[_i];
                 _this.midiDevices.set(device.deviceId, {
-                    name: device.deviceName
+                    name: device.deviceName,
                 });
             }
             var diffHappened = JSON.stringify(Array.from(_this.midiDevices)) !== JSON.stringify(Array.from(prevMidiDevices));
@@ -237,9 +237,7 @@ var BluetoothMidi = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!BluetoothMidi.devices.has(this.deviceId) ||
-                            this.connected ||
-                            BluetoothMidi.connectionInProgress)
+                        if (!BluetoothMidi.devices.has(this.deviceId) || this.connected || BluetoothMidi.connectionInProgress)
                             return [2 /*return*/];
                         BluetoothMidi.connectionInProgress = true;
                         console.log('Connecting to device: ', this.deviceId);
@@ -261,7 +259,7 @@ var BluetoothMidi = /** @class */ (function () {
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0: return [4 /*yield*/, window.navigator.bluetooth.requestDevice({
-                                                filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }]
+                                                filters: [{ services: ['03b80e5a-ede8-4b33-a751-6ce34ec4c700'] }],
                                             })];
                                         case 1:
                                             device = _a.sent();
@@ -277,15 +275,15 @@ var BluetoothMidi = /** @class */ (function () {
                                             return [4 /*yield*/, characteristic.startNotifications()];
                                         case 5:
                                             _a.sent();
-                                            window.ipcRenderer.send('ble-midi-connected', deviceId);
+                                            window.ipcRenderer.invoke('ble-midi-connected', deviceId);
                                             device.addEventListener('gattserverdisconnected', function () {
-                                                window.ipcRenderer.send('ble-midi-disconnected', deviceId);
+                                                window.ipcRenderer.invoke('ble-midi-disconnected', deviceId);
                                             });
                                             characteristic.addEventListener('characteristicvaluechanged', function (event) {
                                                 var data = new Uint8Array(event.target.value.buffer);
-                                                window.ipcRenderer.send('ble-midi-data', {
+                                                window.ipcRenderer.invoke('ble-midi-data', {
                                                     deviceId: deviceId,
-                                                    data: data
+                                                    data: data,
                                                 });
                                             });
                                             return [2 /*return*/];
@@ -297,7 +295,7 @@ var BluetoothMidi = /** @class */ (function () {
                         return [3 /*break*/, 5];
                     case 3:
                         error_1 = _a.sent();
-                        console.error('Error connecting to device: ', this.deviceId, error_1);
+                        console.error('Could not connect to device: ', this.deviceId);
                         return [3 /*break*/, 5];
                     case 4:
                         BluetoothMidi.webContents.off('select-bluetooth-device', connectHandlerFunc);

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RgbStrip = void 0;
 var config_1 = require("../util/config");
 var colors_1 = require("../util/colors");
+var consts_1 = require("../util/consts");
 var RgbStrip = /** @class */ (function () {
     function RgbStrip() {
         var _this = this;
@@ -13,8 +14,7 @@ var RgbStrip = /** @class */ (function () {
             if (updatedProperties.BRIGHTNESS !== undefined) {
                 _this.setBrightness(updatedProperties.BRIGHTNESS);
             }
-            if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined ||
-                updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
+            if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined || updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
                 _this.fillColors();
             }
             if (updatedProperties.LED_END_COUNT !== undefined) {
@@ -32,8 +32,8 @@ var RgbStrip = /** @class */ (function () {
     }
     RgbStrip.prototype.initializeWS281x = function () {
         return this.ws281x((0, config_1.getConfig)().LED_END_COUNT, {
-            gpio: config_1.DATA_PIN,
-            brightness: (0, config_1.getConfig)().BRIGHTNESS * 255
+            gpio: consts_1.DATA_PIN,
+            brightness: (0, config_1.getConfig)().BRIGHTNESS * 255,
         });
     };
     RgbStrip.prototype.setBrightness = function (brightness) {
@@ -65,8 +65,7 @@ var RgbStrip = /** @class */ (function () {
         var blendedColor = (0, colors_1.getBlendedRGB)([red, green, blue], (0, config_1.getConfig)().BACKGROUND_COLOR_RGB.map(function (c) { return c * (0, config_1.getConfig)().BACKGROUND_BRIGHTNESS; }), velocityRatio);
         var colorPosition = positionRatio === 1
             ? (0, config_1.getConfig)().LED_END_COUNT - 1
-            : Math.floor(positionRatio * ((0, config_1.getConfig)().LED_END_COUNT - (0, config_1.getConfig)().LED_START_COUNT) +
-                (0, config_1.getConfig)().LED_START_COUNT);
+            : Math.floor(positionRatio * ((0, config_1.getConfig)().LED_END_COUNT - (0, config_1.getConfig)().LED_START_COUNT) + (0, config_1.getConfig)().LED_START_COUNT);
         this.setColor(colorPosition, blendedColor);
         this.render();
     };
@@ -84,9 +83,7 @@ var RgbStrip = /** @class */ (function () {
         }
     };
     RgbStrip.prototype.getNotePositionRatio = function (note) {
-        return (0, config_1.getConfig)().LED_INVERT
-            ? 1 - (note - config_1.MIN_NOTE) / (config_1.MAX_NOTE - config_1.MIN_NOTE)
-            : (note - config_1.MIN_NOTE) / (config_1.MAX_NOTE - config_1.MIN_NOTE);
+        return (0, config_1.getConfig)().LED_INVERT ? 1 - (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE) : (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE);
     };
     return RgbStrip;
 }());

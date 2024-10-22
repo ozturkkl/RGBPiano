@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebsocketP2P = void 0;
 var ws_1 = __importDefault(require("ws"));
 var node_ssdp_1 = require("node-ssdp");
-var config_1 = require("../util/config");
+var consts_1 = require("../util/consts");
 var WebsocketP2P = /** @class */ (function () {
     function WebsocketP2P() {
         this.onConnectionEstablishedListeners = [];
@@ -55,6 +55,14 @@ var WebsocketP2P = /** @class */ (function () {
     Object.defineProperty(WebsocketP2P.prototype, "onConnectionEstablished", {
         set: function (callback) {
             this.onConnectionEstablishedListeners.push(callback);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(WebsocketP2P.prototype, "isConnected", {
+        get: function () {
+            var _a, _b, _c, _d;
+            return ((_c = (_b = (_a = this.server) === null || _a === void 0 ? void 0 : _a.clients) === null || _b === void 0 ? void 0 : _b.size) !== null && _c !== void 0 ? _c : 0) > 0 || ((_d = this.client) === null || _d === void 0 ? void 0 : _d.readyState) === ws_1.default.OPEN;
         },
         enumerable: false,
         configurable: true
@@ -113,7 +121,7 @@ var WebsocketP2P = /** @class */ (function () {
                                                 }); });
                                                 return [2 /*return*/];
                                             }
-                                            console.log("No WebSocket servers with port ".concat(config_1.PORT, " found, creating one..."));
+                                            console.log("No WebSocket servers with port ".concat(consts_1.PORT, " found, creating one..."));
                                             // If no WebSocket servers were found, create one
                                             return [4 /*yield*/, this.createWebSocketServer()];
                                         case 2:
@@ -139,13 +147,13 @@ var WebsocketP2P = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve) {
-                        var wss = new ws_1.default.Server({ port: config_1.PORT });
+                        var wss = new ws_1.default.Server({ port: consts_1.PORT });
                         // Advertise the WebSocket server via SSDP
                         var ssdpServer = new node_ssdp_1.Server({
                             location: {
-                                port: config_1.PORT,
-                                path: '/'
-                            }
+                                port: consts_1.PORT,
+                                path: '/',
+                            },
                         });
                         wss.on('connection', function () {
                             console.log('Client connected');
@@ -263,7 +271,7 @@ var WebsocketP2P = /** @class */ (function () {
             var client = new node_ssdp_1.Client();
             client.on('response', function (headers) {
                 var _a;
-                if ((_a = headers === null || headers === void 0 ? void 0 : headers.LOCATION) === null || _a === void 0 ? void 0 : _a.includes(":".concat(config_1.PORT, "/")))
+                if ((_a = headers === null || headers === void 0 ? void 0 : headers.LOCATION) === null || _a === void 0 ? void 0 : _a.includes(":".concat(consts_1.PORT, "/")))
                     resolve(headers);
             });
             client.search(searchTarget);

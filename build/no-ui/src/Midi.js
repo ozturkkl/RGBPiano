@@ -40,25 +40,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Midi = void 0;
-var config_1 = require("../util/config");
 var jzz_1 = __importDefault(require("jzz"));
+var consts_1 = require("../util/consts");
 var Midi = /** @class */ (function () {
-    function Midi(deviceName, onMessage) {
+    function Midi(deviceName) {
         var _this = this;
         this._inputActive = false;
         if (!Midi._initialized) {
             throw new Error('Midi not initialized, call Midi.init() first');
         }
         this._deviceName = deviceName;
-        this._onMessage = onMessage;
         if (this._deviceName === undefined) {
             throw new Error('No midi device name provided when creating midi input/output!');
         }
-        if (this._onMessage) {
-            setInterval(function () {
-                _this.listenToInputIfNeeded();
-            }, 1000);
-        }
+        setInterval(function () {
+            _this.listenToInputIfNeeded();
+        }, 1000);
     }
     Object.defineProperty(Midi.prototype, "deviceName", {
         get: function () {
@@ -106,6 +103,7 @@ var Midi = /** @class */ (function () {
                     case 2:
                         this._jzz.onstatechange = function () {
                             _this.populateDevices();
+                            _this.onStateChangedListeners.forEach(function (cb) { return cb(); });
                         };
                         return [4 /*yield*/, this.populateDevices()];
                     case 3:
@@ -115,6 +113,9 @@ var Midi = /** @class */ (function () {
                 }
             });
         });
+    };
+    Midi.onStateChanged = function (callback) {
+        this.onStateChangedListeners.push(callback);
     };
     Midi.prototype.sendMessage = function (message) {
         var output = Midi._jzz.outputs.get(this._deviceName);
@@ -129,9 +130,12 @@ var Midi = /** @class */ (function () {
             console.error(e);
         }
     };
+    Midi.prototype.onMessage = function (callback) {
+        this._onMessage = callback;
+    };
     Midi.prototype.listenToInputIfNeeded = function () {
         var _this = this;
-        if (this._inputActive)
+        if (this._inputActive || !this._deviceName || !this._onMessage)
             return;
         var selectedDevice = Midi._jzz.inputs.get(this._deviceName);
         if (!selectedDevice)
@@ -143,7 +147,7 @@ var Midi = /** @class */ (function () {
                 clearTimeout(inputDeviceRefreshTimeout);
             inputDeviceRefreshTimeout = setTimeout(function () {
                 _this._inputActive = false;
-            }, config_1.INPUT_DEVICE_REFRESH_INTERVAL);
+            }, consts_1.MIDI_INPUT_DEVICE_IDLE_REFRESH_INTERVAL);
         };
         ito();
         selectedDevice.onmidimessage = function (msg) {
@@ -164,6 +168,7 @@ var Midi = /** @class */ (function () {
     Midi._inputs = [];
     Midi._outputs = [];
     Midi._initialized = false;
+    Midi.onStateChangedListeners = [];
     return Midi;
 }());
 exports.Midi = Midi;

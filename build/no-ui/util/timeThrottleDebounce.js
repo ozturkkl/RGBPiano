@@ -6,7 +6,11 @@ function throttleWithTrailing(fn, wait) {
     var lastArgs = null;
     var lastCallTime = 0;
     var timeout = null;
-    return function throttled(arg) {
+    return function throttled() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         var now = Date.now();
         var remainingTime = wait - (now - lastCallTime);
         if (remainingTime <= 0) {
@@ -16,17 +20,17 @@ function throttleWithTrailing(fn, wait) {
                 timeout = null;
             }
             lastCallTime = now;
-            fn(arg);
+            fn.apply(void 0, args);
         }
         else {
             // Store the latest args and set up a trailing call
-            lastArgs = arg;
+            lastArgs = args;
             if (!timeout) {
                 timeout = setTimeout(function () {
                     timeout = null;
                     lastCallTime = Date.now();
                     if (lastArgs) {
-                        fn(lastArgs);
+                        fn.apply(void 0, lastArgs);
                         lastArgs = null;
                     }
                 }, remainingTime);
@@ -36,13 +40,17 @@ function throttleWithTrailing(fn, wait) {
 }
 function debounce(fn, wait) {
     var timeout = null;
-    return function debounced(arg) {
+    return function debounced() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         if (timeout) {
             clearTimeout(timeout);
         }
         timeout = setTimeout(function () {
             timeout = null;
-            fn(arg);
+            fn.apply(void 0, args);
         }, wait);
     };
 }
