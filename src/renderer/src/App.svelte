@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <div class="absolute w-screen h-screen max-h-screen pt-11 overflow-hidden *:overflow-auto *:h-full">
+    <div class="absolute w-screen h-screen max-h-screen pt-11 overflow-hidden *:overflow-auto *:h-full *:p-3 *:sm:p-8">
       <!-- Page content here -->
       {#if $activeTab === 'bluetooth'}
         <Bluetooth />

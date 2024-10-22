@@ -17,29 +17,44 @@ export async function Main(electron?: {
   connection.connect()
 
   // IF ELECTRON
-  if (electron?.ipcMain) {
+  if (electron) {
     try {
       // SETUP IPC LISTENERS
-      electron?.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
-      electron?.ipcMain.handle('config:get', () => getSavedConfig(electron?.app))
-      electron?.ipcMain.handle('window:minimize', () => electron?.BrowserWindow?.getFocusedWindow()?.minimize())
-      electron?.ipcMain.handle('window:maximize', () => {
-        const win = electron?.BrowserWindow?.getFocusedWindow()
+      electron.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
+      electron.ipcMain.handle('connected', () => connection.isConnected)
+      electron.ipcMain.handle('window:minimize', () => electron.BrowserWindow.getFocusedWindow()?.minimize())
+      electron.ipcMain.handle('window:maximize', () => {
+        const win = electron.BrowserWindow.getFocusedWindow()
         win?.isMaximized() ? win?.unmaximize() : win?.maximize()
       })
-      electron?.ipcMain.handle('window:close', () => electron?.BrowserWindow?.getFocusedWindow()?.close())
+      electron.ipcMain.handle('window:close', () => electron?.BrowserWindow?.getFocusedWindow()?.close())
 
       // SETUP MIDI
       await Midi.init()
       console.log('Midi initialized')
       console.log(`Inputs:\n  ${Midi.inputs.join('\n  ')}`)
       console.log(`Outputs:\n  ${Midi.outputs.join('\n  ')}`)
-      new Midi(getConfig().SELECTED_DEVICE, (msg) => {
-        connection.send({
-          type: 'midi',
-          data: msg,
-        })
-      })
+      electron.ipcMain.handle('midi:get-devices', () => ({ inputs: Midi.inputs, outputs: Midi.outputs }))
+      Midi.onStateChanged(() =>
+        electron.ipcMain.emit('midi:devices-changed', {
+          inputs: Midi.inputs,
+          outputs: Midi.outputs,
+        }),
+      )
+
+      let ledReceiveFrom: Midi | undefined
+      onConfigUpdated((config) => {
+        if (config.LED_RECEIVE_FROM) {
+          ledReceiveFrom?.onMessage(undefined)
+          ledReceiveFrom = new Midi(config.LED_RECEIVE_FROM)
+          ledReceiveFrom.onMessage((msg) => {
+            connection.send({
+              type: 'midi',
+              data: msg,
+            })
+          })
+        }
+      }, true)
 
       // SETUP CONFIG
       connection.onConnectionEstablished = () => {

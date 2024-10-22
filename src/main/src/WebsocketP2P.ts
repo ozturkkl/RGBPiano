@@ -25,6 +25,9 @@ export class WebsocketP2P {
   set onConnectionEstablished(callback: () => void) {
     this.onConnectionEstablishedListeners.push(callback)
   }
+  get isConnected() {
+    return (this.server?.clients?.size ?? 0) > 0 || this.client?.readyState === WebSocket.OPEN
+  }
 
   constructor() {
     this.server = null

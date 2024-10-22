@@ -7,7 +7,7 @@ export const defaultConfig = {
   BACKGROUND_COLOR_RGB: HSLToRGB(18, 100, 50),
   NOTE_PRESS_COLOR_RGB: HSLToRGB(18, 100, 50),
   CONSTANT_VELOCITY: true,
-  SELECTED_DEVICE: 'Springbeats vMIDI1',
+  LED_RECEIVE_FROM: 'Springbeats vMIDI1',
   LED_INVERT: true,
   LED_END_COUNT: 177,
   LED_START_COUNT: 0,

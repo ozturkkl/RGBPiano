@@ -57,8 +57,11 @@ export function updateConfig(newConfig: Partial<ConfigType>) {
   }
 }
 
-export function onConfigUpdated(listener: (conf: Partial<ConfigType>) => void) {
+export function onConfigUpdated(listener: (conf: Partial<ConfigType>) => void, invokeImmediately = false) {
   const throttled = throttleWithTrailing(listener, 22) // 45 FPS
+  if (invokeImmediately) {
+    listener(config)
+  }
   configEmitter.on('configUpdated', (updatedProperties: Partial<ConfigType>) => {
     throttled(updatedProperties)
   })

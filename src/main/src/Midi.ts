@@ -6,6 +6,7 @@ export class Midi {
   private static _outputs: string[] = []
   private static _jzz: WebMidi.MIDIAccess
   private static _initialized = false
+  private static onStateChangedListeners: (() => void)[] = []
 
   private _deviceName: string
   private _inputActive = false
@@ -30,28 +31,30 @@ export class Midi {
 
     this._jzz.onstatechange = () => {
       this.populateDevices()
+      this.onStateChangedListeners.forEach((cb) => cb())
     }
     await this.populateDevices()
     this._initialized = true
   }
 
-  constructor(deviceName: string, onMessage?: (payload: number[]) => void) {
+  static onStateChanged(callback: () => void) {
+    this.onStateChangedListeners.push(callback)
+  }
+
+  constructor(deviceName: string) {
     if (!Midi._initialized) {
       throw new Error('Midi not initialized, call Midi.init() first')
     }
 
     this._deviceName = deviceName
-    this._onMessage = onMessage
 
     if (this._deviceName === undefined) {
       throw new Error('No midi device name provided when creating midi input/output!')
     }
 
-    if (this._onMessage) {
-      setInterval(() => {
-        this.listenToInputIfNeeded()
-      }, 1000)
-    }
+    setInterval(() => {
+      this.listenToInputIfNeeded()
+    }, 1000)
   }
 
   sendMessage(message: number[]): void {
@@ -68,8 +71,12 @@ export class Midi {
     }
   }
 
+  onMessage(callback?: (payload: number[]) => void) {
+    this._onMessage = callback
+  }
+
   private listenToInputIfNeeded(): void {
-    if (this._inputActive) return
+    if (this._inputActive || !this._deviceName || !this._onMessage) return
 
     const selectedDevice = Midi._jzz.inputs.get(this._deviceName)
     if (!selectedDevice) return
