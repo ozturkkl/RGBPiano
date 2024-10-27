@@ -7,6 +7,7 @@
   // Variables for each config setting
   const config = Store.getPersistent('config', defaultConfig)
   const useColorForBackground = Store.getPersistent<boolean>('useColorForBackground', true)
+  let midiInputPorts: string[] = []
   let connected: boolean
 
   $: brightness = $config.BRIGHTNESS * 100
@@ -20,15 +21,21 @@
   $: window.ipcRenderer.invoke('config', $config)
 
   onMount(() => {
-    const checkConnected = async () => {
-      if (window.ipcRenderer) {
-        connected = (await window.ipcRenderer.invoke('connected', {})) as boolean
-      }
-    }
+    const checkConnected = async () =>
+      (connected = (await window.ipcRenderer?.invoke('connected')) as boolean)
     const connectedCheckInterval = setInterval(checkConnected, 500)
     checkConnected()
 
-    return () => clearInterval(connectedCheckInterval)
+    const deviceChangeHandler = (data: unknown) => {
+      midiInputPorts = (data as { inputs: string[] }).inputs
+    }
+    window.ipcRenderer.invoke('midi:get-devices').then(deviceChangeHandler)
+    window.ipcRenderer.on('midi:state-changed', deviceChangeHandler)
+
+    return () => {
+      clearInterval(connectedCheckInterval)
+      window.ipcRenderer.off('midi:state-changed', deviceChangeHandler)
+    }
   })
 
   function changeColor(e: Event & { currentTarget: HTMLInputElement }) {
@@ -84,6 +91,18 @@
     {/if}
   </div>
 
+  <p class="text-xl font-semibold mb-2">Port</p>
+  <select
+    class="select select-bordered w-full max-w-xs"
+    value={$config.LED_RECEIVE_FROM}
+    on:change={(e) => ($config.LED_RECEIVE_FROM = e.currentTarget.value)}
+  >
+    <option>None</option>
+    {#each midiInputPorts as port}
+      <option>{port}</option>
+    {/each}
+  </select>
+
   <p class="text-xl font-semibold mb-2">Color</p>
   <input type="color" value={notePressColorHex} on:input={changeColor} />
 
@@ -97,10 +116,22 @@
       on:change={() => ($useColorForBackground = !$useColorForBackground)}
     />
   </label>
-  <input type="color" value={notePressBgColorHex} on:input={changeColorBg} disabled={$useColorForBackground} />
+  <input
+    type="color"
+    value={notePressBgColorHex}
+    on:input={changeColorBg}
+    disabled={$useColorForBackground}
+  />
 
   <p class="text-xl font-semibold mb-2">Brightness</p>
-  <input type="range" min="0" max="100" value={brightness} on:input={changeBrightness} class="range mb-4" />
+  <input
+    type="range"
+    min="0"
+    max="100"
+    value={brightness}
+    on:input={changeBrightness}
+    class="range mb-4"
+  />
 
   <p class="text-xl font-semibold mb-2">Background Brightness</p>
   <input
@@ -116,12 +147,22 @@
 
   <label class="label cursor-pointer">
     <span class="label-text">Constant Velocity</span>
-    <input type="checkbox" checked={$config.CONSTANT_VELOCITY} class="checkbox" on:change={changeConstantVelocity} />
+    <input
+      type="checkbox"
+      checked={$config.CONSTANT_VELOCITY}
+      class="checkbox"
+      on:change={changeConstantVelocity}
+    />
   </label>
 
   <label class="label cursor-pointer">
     <span class="label-text">LED Invert</span>
-    <input type="checkbox" checked={$config.LED_INVERT} class="checkbox" on:change={changeLEDInvert} />
+    <input
+      type="checkbox"
+      checked={$config.LED_INVERT}
+      class="checkbox"
+      on:change={changeLEDInvert}
+    />
   </label>
 
   <p class="text-xl font-semibold mb-2">LED Start/End Count</p>

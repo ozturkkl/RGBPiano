@@ -4,8 +4,9 @@
 declare global {
   interface Window {
     ipcRenderer: {
-      on: (channel: string, func: () => void) => void
-      invoke: (channel: string, data: unknown) => Promise<void | unknown>
+      on: (channel: string, func: (...args: unknown[]) => void) => void
+      invoke: (channel: string, data?: unknown) => Promise<void | unknown>
+      off: (channel: string, listener: (...args: unknown[]) => void) => void
     }
   }
 
@@ -39,7 +40,9 @@ declare global {
   }
 
   interface BluetoothRemoteGATTService {
-    getCharacteristic(characteristic: BluetoothCharacteristicUUID): Promise<BluetoothRemoteGATTCharacteristic>
+    getCharacteristic(
+      characteristic: BluetoothCharacteristicUUID,
+    ): Promise<BluetoothRemoteGATTCharacteristic>
   }
 
   type BluetoothCharacteristicUUID = number | string

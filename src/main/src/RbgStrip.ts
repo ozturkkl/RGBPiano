@@ -14,7 +14,10 @@ export class RgbStrip {
       if (updatedProperties.BRIGHTNESS !== undefined) {
         this.setBrightness(updatedProperties.BRIGHTNESS)
       }
-      if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined || updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
+      if (
+        updatedProperties.BACKGROUND_BRIGHTNESS !== undefined ||
+        updatedProperties.BACKGROUND_COLOR_RGB !== undefined
+      ) {
         this.fillColors()
       }
       if (updatedProperties.LED_END_COUNT !== undefined) {
@@ -49,7 +52,11 @@ export class RgbStrip {
   }
 
   private fillColors(
-    color = getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [number, number, number],
+    color = getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [
+      number,
+      number,
+      number,
+    ],
   ) {
     for (let i = getConfig().LED_START_COUNT; i < getConfig().LED_END_COUNT; i++) {
       this.setColor(i, color)
@@ -73,13 +80,20 @@ export class RgbStrip {
   ): void {
     const blendedColor = getBlendedRGB(
       [red, green, blue],
-      getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [number, number, number],
+      getConfig().BACKGROUND_COLOR_RGB.map((c) => c * getConfig().BACKGROUND_BRIGHTNESS) as [
+        number,
+        number,
+        number,
+      ],
       velocityRatio,
     )
     const colorPosition =
       positionRatio === 1
         ? getConfig().LED_END_COUNT - 1
-        : Math.floor(positionRatio * (getConfig().LED_END_COUNT - getConfig().LED_START_COUNT) + getConfig().LED_START_COUNT)
+        : Math.floor(
+            positionRatio * (getConfig().LED_END_COUNT - getConfig().LED_START_COUNT) +
+              getConfig().LED_START_COUNT,
+          )
 
     this.setColor(colorPosition, blendedColor)
     this.render()
@@ -101,6 +115,8 @@ export class RgbStrip {
   }
 
   getNotePositionRatio(note: number): number {
-    return getConfig().LED_INVERT ? 1 - (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE) : (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
+    return getConfig().LED_INVERT
+      ? 1 - (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
+      : (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
   }
 }

@@ -179,7 +179,8 @@ export class BluetoothMidi {
         })
       }
 
-      const diffHappened = JSON.stringify(Array.from(this.midiDevices)) !== JSON.stringify(Array.from(prevMidiDevices))
+      const diffHappened =
+        JSON.stringify(Array.from(this.midiDevices)) !== JSON.stringify(Array.from(prevMidiDevices))
       if (diffHappened) {
         this.deviceListUpdateSubscribers.forEach((handler) => handler(this.midiDevices))
       }
@@ -221,7 +222,12 @@ export class BluetoothMidi {
   }
 
   async connect() {
-    if (!BluetoothMidi.devices.has(this.deviceId) || this.connected || BluetoothMidi.connectionInProgress) return
+    if (
+      !BluetoothMidi.devices.has(this.deviceId) ||
+      this.connected ||
+      BluetoothMidi.connectionInProgress
+    )
+      return
     BluetoothMidi.connectionInProgress = true
 
     console.log('Connecting to device: ', this.deviceId)
@@ -249,7 +255,9 @@ export class BluetoothMidi {
 
         const server = await device.gatt.connect()
         const service = await server.getPrimaryService('03b80e5a-ede8-4b33-a751-6ce34ec4c700')
-        const characteristic = await service.getCharacteristic('7772e5db-3868-4112-a1a9-f2669d106bf3')
+        const characteristic = await service.getCharacteristic(
+          '7772e5db-3868-4112-a1a9-f2669d106bf3',
+        )
         await characteristic.startNotifications()
 
         window.ipcRenderer.invoke('ble-midi-connected', deviceId)

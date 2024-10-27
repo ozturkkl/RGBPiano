@@ -1,16 +1,22 @@
 import { WebsocketMessage, WebsocketP2P } from './WebsocketP2P'
-import { getConfig, getSavedConfig, onConfigUpdated, saveConfigToFile, updateConfig } from '../util/config'
+import {
+  getConfig,
+  getSavedConfig,
+  onConfigUpdated,
+  saveConfigToFile,
+  updateConfig,
+} from '../util/config'
 import { RgbStrip } from './RbgStrip'
 import { Midi } from './Midi'
 import { ConfigType } from '../util/consts'
+import { setupWinMinMaximize } from '../util/setupWinMinMaximize'
 
 export async function Main(electron?: {
   ipcMain: Electron.IpcMain
   app: Electron.App
-  BrowserWindow: typeof Electron.BrowserWindow
+  mainWindow: Electron.BrowserWindow
 }) {
   getSavedConfig(electron?.app)
-
   onConfigUpdated((c) => saveConfigToFile(electron?.app, c))
 
   const connection = new WebsocketP2P()
@@ -22,25 +28,20 @@ export async function Main(electron?: {
       // SETUP IPC LISTENERS
       electron.ipcMain.handle('config', (_, config: ConfigType) => updateConfig(config))
       electron.ipcMain.handle('connected', () => connection.isConnected)
-      electron.ipcMain.handle('window:minimize', () => electron.BrowserWindow.getFocusedWindow()?.minimize())
-      electron.ipcMain.handle('window:maximize', () => {
-        const win = electron.BrowserWindow.getFocusedWindow()
-        win?.isMaximized() ? win?.unmaximize() : win?.maximize()
-      })
-      electron.ipcMain.handle('window:close', () => electron?.BrowserWindow?.getFocusedWindow()?.close())
+      setupWinMinMaximize(electron.ipcMain, electron.mainWindow)
 
-      // SETUP MIDI
+      // SETUP MIDI PORT
       await Midi.init()
-      console.log('Midi initialized')
-      console.log(`Inputs:\n  ${Midi.inputs.join('\n  ')}`)
-      console.log(`Outputs:\n  ${Midi.outputs.join('\n  ')}`)
-      electron.ipcMain.handle('midi:get-devices', () => ({ inputs: Midi.inputs, outputs: Midi.outputs }))
-      Midi.onStateChanged(() =>
-        electron.ipcMain.emit('midi:devices-changed', {
+      electron.ipcMain.handle('midi:get-devices', () => ({
+        inputs: Midi.inputs,
+        outputs: Midi.outputs,
+      }))
+      Midi.onStateChanged(() => {
+        electron.mainWindow.webContents.send('midi:state-changed', {
           inputs: Midi.inputs,
           outputs: Midi.outputs,
-        }),
-      )
+        })
+      })
 
       let ledReceiveFrom: Midi | undefined
       onConfigUpdated((config) => {
@@ -92,8 +93,7 @@ export async function Main(electron?: {
       }
       onConfigUpdated((config) => {
         if (config.AUTO_CONNECT_BLE_DEVICES) connectBleDevices()
-      })
-      connectBleDevices()
+      }, true)
 
       // DEBUG LISTENER
       connection.listen((message: WebsocketMessage) => {

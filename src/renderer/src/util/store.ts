@@ -13,10 +13,15 @@ export abstract class Store {
     return w
   }
 
-  static getPersistent<T>(key: string, defaultValue?: T, persistentFilterFunc?: (v: T) => boolean): Writable<T> {
+  static getPersistent<T>(
+    key: string,
+    defaultValue?: T,
+    persistentFilterFunc?: (v: T) => boolean,
+  ): Writable<T> {
     const w = this.get(key, defaultValue)
     const v = localStorage.getItem(key)
     if (v !== undefined && v !== null) {
+      console.log('loading', key, v)
       w.set(JSON.parse(v).value)
     }
     w.subscribe((value) => {

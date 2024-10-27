@@ -41,6 +41,12 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  Main({
+    ipcMain,
+    app,
+    mainWindow,
+  })
 }
 
 // This method will be called when Electron has finished
@@ -57,11 +63,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  Main({
-    ipcMain,
-    app,
-    BrowserWindow,
-  })
   createWindow()
 
   app.on('activate', function () {
