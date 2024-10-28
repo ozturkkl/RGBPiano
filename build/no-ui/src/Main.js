@@ -64,6 +64,7 @@ var WebsocketP2P_1 = require("./WebsocketP2P");
 var config_1 = require("../util/config");
 var RbgStrip_1 = require("./RbgStrip");
 var Midi_1 = require("./Midi");
+var setupWinMinMaximize_1 = require("../util/setupWinMinMaximize");
 function Main(electron) {
     return __awaiter(this, void 0, void 0, function () {
         var connection, ledReceiveFrom_1, BluetoothMidi_1, connectBleDevicesInterval_1, connectBleDevices_1, e_1, rgbStrip_1;
@@ -81,23 +82,18 @@ function Main(electron) {
                     // SETUP IPC LISTENERS
                     electron.ipcMain.handle('config', function (_, config) { return (0, config_1.updateConfig)(config); });
                     electron.ipcMain.handle('connected', function () { return connection.isConnected; });
-                    electron.ipcMain.handle('window:minimize', function () { var _a; return (_a = electron.BrowserWindow.getFocusedWindow()) === null || _a === void 0 ? void 0 : _a.minimize(); });
-                    electron.ipcMain.handle('window:maximize', function () {
-                        var win = electron.BrowserWindow.getFocusedWindow();
-                        (win === null || win === void 0 ? void 0 : win.isMaximized()) ? win === null || win === void 0 ? void 0 : win.unmaximize() : win === null || win === void 0 ? void 0 : win.maximize();
-                    });
-                    electron.ipcMain.handle('window:close', function () { var _a, _b; return (_b = (_a = electron === null || electron === void 0 ? void 0 : electron.BrowserWindow) === null || _a === void 0 ? void 0 : _a.getFocusedWindow()) === null || _b === void 0 ? void 0 : _b.close(); });
-                    // SETUP MIDI
+                    (0, setupWinMinMaximize_1.setupWinMinMaximize)(electron.ipcMain, electron.mainWindow);
+                    // SETUP MIDI PORT
                     return [4 /*yield*/, Midi_1.Midi.init()];
                 case 2:
-                    // SETUP MIDI
+                    // SETUP MIDI PORT
                     _a.sent();
-                    console.log('Midi initialized');
-                    console.log("Inputs:\n  ".concat(Midi_1.Midi.inputs.join('\n  ')));
-                    console.log("Outputs:\n  ".concat(Midi_1.Midi.outputs.join('\n  ')));
-                    electron.ipcMain.handle('midi:get-devices', function () { return ({ inputs: Midi_1.Midi.inputs, outputs: Midi_1.Midi.outputs }); });
+                    electron.ipcMain.handle('midi:get-devices', function () { return ({
+                        inputs: Midi_1.Midi.inputs,
+                        outputs: Midi_1.Midi.outputs,
+                    }); });
                     Midi_1.Midi.onStateChanged(function () {
-                        return electron.ipcMain.emit('midi:devices-changed', {
+                        electron.mainWindow.webContents.send('midi:state-changed', {
                             inputs: Midi_1.Midi.inputs,
                             outputs: Midi_1.Midi.outputs,
                         });
@@ -148,8 +144,7 @@ function Main(electron) {
                     (0, config_1.onConfigUpdated)(function (config) {
                         if (config.AUTO_CONNECT_BLE_DEVICES)
                             connectBleDevices_1();
-                    });
-                    connectBleDevices_1();
+                    }, true);
                     // DEBUG LISTENER
                     connection.listen(function (message) {
                         message.type !== 'ping' && console.log(message);

@@ -8,7 +8,7 @@ exports.defaultConfig = {
     BACKGROUND_COLOR_RGB: (0, colors_1.HSLToRGB)(18, 100, 50),
     NOTE_PRESS_COLOR_RGB: (0, colors_1.HSLToRGB)(18, 100, 50),
     CONSTANT_VELOCITY: true,
-    LED_RECEIVE_FROM: 'Springbeats vMIDI1',
+    LED_RECEIVE_FROM: 'None',
     LED_INVERT: true,
     LED_END_COUNT: 177,
     LED_START_COUNT: 0,
@@ -20,6 +20,10 @@ exports.defaultConfig = {
         {
             id: '48:B6:20:22:01:4A',
             port: 'Springbeats vMIDI3',
+        },
+        {
+            id: 'C0:35:75:68:13:F9',
+            port: 'Springbeats vMIDI4',
         },
     ],
 };

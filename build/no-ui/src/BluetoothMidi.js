@@ -237,7 +237,9 @@ var BluetoothMidi = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!BluetoothMidi.devices.has(this.deviceId) || this.connected || BluetoothMidi.connectionInProgress)
+                        if (!BluetoothMidi.devices.has(this.deviceId) ||
+                            this.connected ||
+                            BluetoothMidi.connectionInProgress)
                             return [2 /*return*/];
                         BluetoothMidi.connectionInProgress = true;
                         console.log('Connecting to device: ', this.deviceId);

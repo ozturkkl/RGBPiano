@@ -14,7 +14,8 @@ var RgbStrip = /** @class */ (function () {
             if (updatedProperties.BRIGHTNESS !== undefined) {
                 _this.setBrightness(updatedProperties.BRIGHTNESS);
             }
-            if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined || updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
+            if (updatedProperties.BACKGROUND_BRIGHTNESS !== undefined ||
+                updatedProperties.BACKGROUND_COLOR_RGB !== undefined) {
                 _this.fillColors();
             }
             if (updatedProperties.LED_END_COUNT !== undefined) {
@@ -65,7 +66,8 @@ var RgbStrip = /** @class */ (function () {
         var blendedColor = (0, colors_1.getBlendedRGB)([red, green, blue], (0, config_1.getConfig)().BACKGROUND_COLOR_RGB.map(function (c) { return c * (0, config_1.getConfig)().BACKGROUND_BRIGHTNESS; }), velocityRatio);
         var colorPosition = positionRatio === 1
             ? (0, config_1.getConfig)().LED_END_COUNT - 1
-            : Math.floor(positionRatio * ((0, config_1.getConfig)().LED_END_COUNT - (0, config_1.getConfig)().LED_START_COUNT) + (0, config_1.getConfig)().LED_START_COUNT);
+            : Math.floor(positionRatio * ((0, config_1.getConfig)().LED_END_COUNT - (0, config_1.getConfig)().LED_START_COUNT) +
+                (0, config_1.getConfig)().LED_START_COUNT);
         this.setColor(colorPosition, blendedColor);
         this.render();
     };
@@ -83,7 +85,9 @@ var RgbStrip = /** @class */ (function () {
         }
     };
     RgbStrip.prototype.getNotePositionRatio = function (note) {
-        return (0, config_1.getConfig)().LED_INVERT ? 1 - (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE) : (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE);
+        return (0, config_1.getConfig)().LED_INVERT
+            ? 1 - (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE)
+            : (note - consts_1.MIN_NOTE) / (consts_1.MAX_NOTE - consts_1.MIN_NOTE);
     };
     return RgbStrip;
 }());
