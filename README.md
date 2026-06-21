@@ -9,6 +9,8 @@ Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visu
 > for reference. Goals of the rewrite: kill Electron, drop Bluetooth, simplify the Pi
 > runtime, keep Svelte, modern typed code, minimal & DRY.
 
+![led-piano](https://github.com/ozturkkl/RGBPiano/assets/51798197/996cd7ff-adf1-42fd-bbfb-e13fc2055af6)
+
 ## Architecture
 
 ```
