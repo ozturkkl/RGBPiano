@@ -3,10 +3,17 @@ import { LedFrame } from './leds.js'
 import { MidiManager } from './midi.js'
 import { PiClient } from './pi-client.js'
 import { startServer } from './server.js'
+import { throttleWithTrailing } from './util/throttle.js'
+
+// Coalesce bursts of MIDI/config changes into one frame so a chord is a single send
+// instead of one frame per note (~80 fps cap; well under the Pi's render rate).
+const FRAME_INTERVAL_MS = 12
 
 const leds = new LedFrame()
 const pi = new PiClient()
 const midi = new MidiManager()
+
+const sendFrame = throttleWithTrailing(() => pi.send(leds.toFrame()), FRAME_INTERVAL_MS)
 
 const server = startServer({
   getState: () => ({
@@ -22,7 +29,7 @@ await midi.init()
 // MIDI in → update strip → stream to Pi.
 midi.onMessage((message) => {
   leds.handleMidi(message)
-  pi.send(leds.toFrame())
+  sendFrame()
 })
 midi.onStateChange(() => server.broadcast())
 
@@ -32,7 +39,7 @@ pi.onStatusChange(() => server.broadcast())
 onConfigUpdated((changed) => {
   pi.setHost(getConfig().PI_HOST)
   if (changed.MIDI_INPUT !== undefined) midi.select(getConfig().MIDI_INPUT)
-  pi.send(leds.toFrame())
+  sendFrame()
   server.broadcast()
 }, true)
 

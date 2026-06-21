@@ -29,6 +29,12 @@ MSG_FRAME = 0x01
 _strip: PixelStrip | None = None
 _strip_len = 0
 
+# Only ever draw the newest frame; if frames pile up while one is rendering, the
+# stale ones are dropped so the strip can never fall behind the host.
+# The Event is created inside the running loop (Python 3.7 binds it to a loop on init).
+_latest: bytes | None = None
+_new_frame: asyncio.Event | None = None
+
 
 def _ensure_strip(num_leds: int, brightness: int) -> PixelStrip:
     """(Re)create the strip when the LED count changes."""
@@ -59,15 +65,33 @@ def render(data: bytes) -> None:
 
 
 async def handler(websocket, *_args) -> None:
+    global _latest
     async for message in websocket:
         if isinstance(message, bytes):
-            render(message)
+            _latest = message
+            if _new_frame is not None:
+                _new_frame.set()
+
+
+async def render_loop(new_frame: asyncio.Event) -> None:
+    while True:
+        await new_frame.wait()
+        new_frame.clear()
+        frame = _latest
+        if frame is not None:
+            render(frame)
 
 
 async def main() -> None:
+    global _new_frame
+    _new_frame = asyncio.Event()
     print(f"RGBPiano LED server listening on :{PORT} (GPIO {GPIO})", flush=True)
-    async with serve(handler, "0.0.0.0", PORT, max_size=None):
-        await asyncio.Future()  # run forever
+    renderer = asyncio.ensure_future(render_loop(_new_frame))
+    try:
+        async with serve(handler, "0.0.0.0", PORT, max_size=None):
+            await asyncio.Future()  # run forever
+    finally:
+        renderer.cancel()
 
 
 if __name__ == "__main__":
