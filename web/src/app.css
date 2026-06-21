@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+@plugin 'daisyui' {
+  themes: dark --default;
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}

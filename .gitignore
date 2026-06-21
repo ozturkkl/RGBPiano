@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Pi
+pi/venv/
+__pycache__/
+
+.DS_Store
