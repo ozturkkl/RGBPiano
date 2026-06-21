@@ -8,6 +8,8 @@ Frame format (binary): [MSG_FRAME, brightness, r, g, b, r, g, b, ...]
 The strip is sized to the number of pixels in each frame.
 """
 
+from __future__ import annotations
+
 import asyncio
 import os
 

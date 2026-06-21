@@ -1,2 +1,3 @@
 rpi_ws281x>=5.0.0
-websockets>=12.0
+# Pinned below 12 because the Pi Zero (Raspbian Buster) ships Python 3.7; websockets 12+ needs 3.8+.
+websockets>=10,<12
