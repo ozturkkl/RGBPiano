@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { hexToRGB, RGBToHex } from '@rgbpiano/shared'
+  import { hexToRGB, RGBToHex } from '../util/colors.js'
   import { app, updateConfig } from './lib/host.svelte'
 
   let useSameColor = $state(localStorage.getItem('useSameColor') !== 'false')

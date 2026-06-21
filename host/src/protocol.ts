@@ -1,4 +1,4 @@
-import type { RGB } from '@rgbpiano/shared'
+import type { RGB } from './util/colors.js'
 
 /** Wire protocol between the host and the Pi LED server (binary WebSocket frames). */
 

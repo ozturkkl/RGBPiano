@@ -1,10 +1,16 @@
 import http from 'node:http'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
-import { HOST_PORT, type Config } from '@rgbpiano/shared'
+import type { ViteDevServer } from 'vite'
+import { HOST_PORT } from './util/constants.js'
+import type { BrowserMessage, BrowserState } from './util/messages.js'
+import type { Config } from './util/config.js'
+import { createViteDevServer } from './vite-dev.js'
 
-const WEB_DIR = path.resolve(import.meta.dirname, '../../web/dist')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const WEB_DIR = path.resolve(__dirname, '../dist')
 
 const MIME: Record<string, string> = {
   '.html': 'text/html',
@@ -16,11 +22,7 @@ const MIME: Record<string, string> = {
   '.json': 'application/json',
 }
 
-export interface BrowserState {
-  config: Config
-  devices: string[]
-  piConnected: boolean
-}
+export type { BrowserState }
 
 export interface ServerHooks {
   getState: () => BrowserState
@@ -32,15 +34,31 @@ export interface Server {
   broadcast: () => void
 }
 
-export function startServer(hooks: ServerHooks): Server {
-  const httpServer = http.createServer((req, res) => serveStatic(req, res))
+export interface ServerOptions {
+  dev?: boolean
+}
+
+export async function startServer(hooks: ServerHooks, options?: ServerOptions): Promise<Server> {
+  const httpServer = http.createServer()
+  const vite: ViteDevServer | undefined = options?.dev
+    ? await createViteDevServer(httpServer)
+    : undefined
+
+  httpServer.on('request', (req, res) => {
+    if (vite) {
+      vite.middlewares(req, res, () => serveStatic(req, res))
+    } else {
+      serveStatic(req, res)
+    }
+  })
+
   const wss = new WebSocketServer({ server: httpServer })
 
   wss.on('connection', (ws) => {
     sendState(ws, hooks.getState())
     ws.on('message', (raw) => {
       try {
-        const msg = JSON.parse(raw.toString())
+        const msg = JSON.parse(raw.toString()) as BrowserMessage
         if (msg.type === 'config') hooks.updateConfig(msg.data)
       } catch (error) {
         console.error('Bad message from browser:', error)
@@ -63,22 +81,24 @@ export function startServer(hooks: ServerHooks): Server {
 }
 
 function sendState(ws: WebSocket, state: BrowserState): void {
-  ws.send(JSON.stringify({ type: 'state', data: state }))
+  const msg: BrowserMessage = { type: 'state', data: state }
+  ws.send(JSON.stringify(msg))
 }
 
 async function serveStatic(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   const urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
-  const requested = path.join(WEB_DIR, urlPath)
+  const file = path.normalize(path.join(WEB_DIR, urlPath))
 
-  // Resolve to a file, falling back to index.html for SPA routes.
-  let file = requested
-  if (!path.extname(file) || !file.startsWith(WEB_DIR)) {
-    file = path.join(WEB_DIR, 'index.html')
+  if (!file.startsWith(WEB_DIR)) {
+    res.writeHead(403).end()
+    return
   }
 
+  const target = path.extname(file) ? file : path.join(WEB_DIR, 'index.html')
+
   try {
-    const body = await readFile(file)
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] ?? 'application/octet-stream' })
+    const body = await readFile(target)
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(target)] ?? 'application/octet-stream' })
     res.end(body)
   } catch {
     res.writeHead(404).end('Not found. Did you run `npm run build`?')

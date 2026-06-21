@@ -1,5 +1,5 @@
+import { PI_PORT } from './util/constants.js'
 import { WebSocket } from 'ws'
-import { PI_PORT } from '@rgbpiano/shared'
 
 const RECONNECT_MS = 2000
 

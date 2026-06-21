@@ -1,4 +1,5 @@
-import { defaultConfig, HOST_PORT, type Config } from '@rgbpiano/shared'
+import { defaultConfig, type Config } from '../../util/config.js'
+import type { BrowserMessage, BrowserState } from '../../util/messages.js'
 
 interface State {
   config: Config
@@ -17,7 +18,8 @@ export const app: State = $state({
 let ws: WebSocket | undefined
 
 function connect(): void {
-  ws = new WebSocket(`ws://${location.hostname}:${HOST_PORT}`)
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+  ws = new WebSocket(`${protocol}//${location.host}`)
 
   ws.onopen = () => (app.hostConnected = true)
   ws.onclose = () => {
@@ -26,11 +28,12 @@ function connect(): void {
     setTimeout(connect, 1000)
   }
   ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data)
+    const msg = JSON.parse(event.data) as BrowserMessage
     if (msg.type === 'state') {
-      app.config = msg.data.config
-      app.devices = msg.data.devices
-      app.piConnected = msg.data.piConnected
+      const state: BrowserState = msg.data
+      app.config = state.config
+      app.devices = state.devices
+      app.piConnected = state.piConnected
     }
   }
 }
@@ -41,6 +44,6 @@ connect()
 export function updateConfig(patch: Partial<Config>): void {
   Object.assign(app.config, patch)
   if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'config', data: patch }))
+    ws.send(JSON.stringify({ type: 'config', data: patch } satisfies BrowserMessage))
   }
 }

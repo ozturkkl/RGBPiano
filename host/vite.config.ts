@@ -4,6 +4,5 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
-  server: { port: 5173 },
   build: { outDir: 'dist', emptyOutDir: true },
 })

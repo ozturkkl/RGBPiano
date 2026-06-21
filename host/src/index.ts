@@ -14,14 +14,17 @@ const midi = new MidiManager()
 
 const sendFrame = throttleWithTrailing(() => pi.send(leds.toFrame()), FRAME_INTERVAL_MS)
 
-const server = startServer({
-  getState: () => ({
-    config: getConfig(),
-    devices: midi.inputs,
-    piConnected: pi.isConnected,
-  }),
-  updateConfig,
-})
+const server = await startServer(
+  {
+    getState: () => ({
+      config: getConfig(),
+      devices: midi.inputs,
+      piConnected: pi.isConnected,
+    }),
+    updateConfig,
+  },
+  { dev: process.env.NODE_ENV === 'development' },
+)
 
 await midi.init()
 

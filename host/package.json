@@ -1,23 +1,34 @@
 {
   "name": "@rgbpiano/host",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "RGBPiano host: MIDI in, LED frame compute, config UI, Pi streaming",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "dev": "NODE_ENV=development tsx watch src/index.ts",
+    "build": "vite build",
+    "start": "npm run build && tsx src/index.ts",
+    "typecheck": "tsc --noEmit && svelte-check --tsconfig tsconfig.json",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "@rgbpiano/shared": "*",
     "jzz": "^1.9.5",
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.10.0",
     "@types/webmidi": "^2.1.0",
     "@types/ws": "^8.5.13",
+    "daisyui": "^5.0.0",
+    "prettier": "^3.4.1",
+    "prettier-plugin-svelte": "^3.3.2",
+    "svelte": "^5.2.0",
+    "svelte-check": "^4.1.0",
+    "tailwindcss": "^4.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
   }
 }

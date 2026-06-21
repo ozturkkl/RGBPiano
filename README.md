@@ -28,8 +28,7 @@ Runs on your computer (Linux/macOS/Windows). Responsibilities:
 
 - Read MIDI from a selected input port (your piano, or a virtual DAW port).
 - Own **all** the interesting logic: note → LED position mapping, invert, start/end
-  range, velocity → color blending, background, brightness. (Ported from the old
-  `RgbStrip` + `colors` code.)
+  range, velocity → color blending, background, brightness.
 - Compute the final per-LED RGB frame and stream it to the Pi.
 - Serve the Svelte config UI on `http://localhost` and persist config to disk.
 
@@ -40,12 +39,6 @@ blits it to the strip via [`rpi_ws281x`](https://github.com/jgarff/rpi_ws281x). 
 logic, no color math — all of that lives on the host. This keeps the Pi side ~30 lines,
 avoids the old pain of running Node on ARMv6, and uses the Python that ships with
 Raspberry Pi OS.
-
-### `web/` — the config UI (Svelte 5 + Vite + Tailwind/daisyUI)
-
-A single-page app served by the host. Controls: MIDI input port, note color, background
-color + brightness, brightness, constant velocity, LED invert, LED start/end count, Pi
-address, connection status.
 
 ### Why "dumb Pi"?
 
@@ -59,9 +52,7 @@ all logic to the host and streaming finished frames instead, we get:
 ## Project layout
 
 ```
-host/    Node + TypeScript: MIDI in, frame compute, web server, Pi streaming
-web/     Svelte config UI (built and served by the host)
-shared/  Types shared between host and web (config shape, wire protocol)
+host/    Node + TypeScript + Svelte: MIDI, LED frames, config UI, Pi streaming
 pi/      Python LED driver + systemd unit for autostart
 .old/    Previous Electron implementation (reference only)
 ```
@@ -73,6 +64,7 @@ pi/      Python LED driver + systemd unit for autostart
 Requires Node 20+.
 
 ```bash
+cd host
 npm install
 npm start          # builds the web UI, then runs the host
 ```
@@ -80,10 +72,11 @@ npm start          # builds the web UI, then runs the host
 Then open http://localhost:3192, pick your MIDI input, set the Pi address, and play.
 Config is saved to `~/.rgbpiano/config.json`.
 
-For development with hot-reloading UI:
+For development with hot-reloading UI on the same port:
 
 ```bash
-npm run dev        # web on http://localhost:5173, host on :3192
+cd host
+npm run dev        # host + UI on http://localhost:3192
 ```
 
 ### Pi (the LED driver)

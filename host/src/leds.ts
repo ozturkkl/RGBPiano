@@ -1,4 +1,5 @@
-import { blendRGB, MAX_NOTE, MIN_NOTE, type RGB } from '@rgbpiano/shared'
+import { blendRGB, type RGB } from './util/colors.js'
+import { MAX_NOTE, MIN_NOTE } from './util/constants.js'
 import { getConfig, onConfigUpdated } from './config.js'
 import { encodeFrame } from './protocol.js'
 

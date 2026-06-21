@@ -1,9 +1,9 @@
+import { defaultConfig, type Config } from './util/config.js'
+import { debounce, throttleWithTrailing } from './util/throttle.js'
 import EventEmitter from 'node:events'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
-import { defaultConfig, type Config } from '@rgbpiano/shared'
-import { debounce, throttleWithTrailing } from './util/throttle.js'
 
 const CONFIG_DIR = path.join(homedir(), '.rgbpiano')
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json')
