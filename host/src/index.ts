@@ -5,9 +5,8 @@ import { PiClient } from './pi-client.js'
 import { startServer } from './server.js'
 import { throttleWithTrailing } from './util/throttle.js'
 
-// Coalesce bursts of MIDI/config changes into one frame so a chord is a single send
-// instead of one frame per note (~80 fps cap; well under the Pi's render rate).
-const FRAME_INTERVAL_MS = 12
+// Coalesce bursts of MIDI/config changes into one frame so a chord is a single send.
+const FRAME_INTERVAL_MS = 1
 
 const leds = new LedFrame()
 const pi = new PiClient()
