@@ -1,6 +1,9 @@
 /** Port the host serves the config web UI + browser WebSocket on. */
 export const HOST_PORT = 3192
 
+/** WebSocket path the config UI connects to (kept separate from Vite HMR in dev). */
+export const BROWSER_WS_PATH = '/ws'
+
 /** Port the Raspberry Pi LED server listens on. */
 export const PI_PORT = 3193
 

@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
 import type { ViteDevServer } from 'vite'
-import { HOST_PORT } from './util/constants.js'
+import { HOST_PORT, BROWSER_WS_PATH } from './util/constants.js'
 import type { BrowserMessage, BrowserState } from './util/messages.js'
 import type { Config } from './util/config.js'
 import { createViteDevServer } from './vite-dev.js'
@@ -52,9 +52,19 @@ export async function startServer(hooks: ServerHooks, options?: ServerOptions): 
     }
   })
 
-  const wss = new WebSocketServer({ server: httpServer })
+  const wss = new WebSocketServer({ noServer: true })
+
+  httpServer.on('upgrade', (req, socket, head) => {
+    const pathname = new URL(req.url ?? '/', `http://${req.headers.host}`).pathname
+    if (pathname !== BROWSER_WS_PATH) return
+
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req)
+    })
+  })
 
   wss.on('connection', (ws) => {
+    ws.on('error', (error) => console.error('Browser WS error:', error.message))
     sendState(ws, hooks.getState())
     ws.on('message', (raw) => {
       try {

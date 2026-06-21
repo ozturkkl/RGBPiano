@@ -4,8 +4,10 @@ import { createServer, type ViteDevServer } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export async function createViteDevServer(httpServer: import('node:http').Server): Promise<ViteDevServer> {
-  const vite = await createServer({
+export async function createViteDevServer(
+  httpServer: import('node:http').Server,
+): Promise<ViteDevServer> {
+  return createServer({
     configFile: path.resolve(__dirname, '../vite.config.ts'),
     server: {
       middlewareMode: true,
@@ -13,5 +15,4 @@ export async function createViteDevServer(httpServer: import('node:http').Server
     },
     appType: 'spa',
   })
-  return vite
 }

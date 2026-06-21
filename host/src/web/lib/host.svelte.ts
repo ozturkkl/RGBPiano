@@ -1,4 +1,5 @@
 import { defaultConfig, type Config } from '../../util/config.js'
+import { BROWSER_WS_PATH } from '../../util/constants.js'
 import type { BrowserMessage, BrowserState } from '../../util/messages.js'
 
 interface State {
@@ -19,7 +20,7 @@ let ws: WebSocket | undefined
 
 function connect(): void {
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-  ws = new WebSocket(`${protocol}//${location.host}`)
+  ws = new WebSocket(`${protocol}//${location.host}${BROWSER_WS_PATH}`)
 
   ws.onopen = () => (app.hostConnected = true)
   ws.onclose = () => {
