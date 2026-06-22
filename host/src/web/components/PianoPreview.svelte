@@ -75,7 +75,7 @@
     const config = app.config
     const ledIndex = noteToLedIndex(note, config)
     let max = 0
-    for (const [activeNote, envelope] of envelopes.values()) {
+    for (const [activeNote, envelope] of envelopes.values(config)) {
       if (envelope <= 0) continue
       const center = noteToLedIndex(activeNote, config)
       max = Math.max(

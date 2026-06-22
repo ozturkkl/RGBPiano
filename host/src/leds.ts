@@ -86,7 +86,7 @@ export class LedFrame {
     const background = this.backgroundColor()
     const intensities = new Float32Array(LED_END_COUNT)
 
-    for (const [note, envelope] of this.envelopes.values()) {
+    for (const [note, envelope] of this.envelopes.values(config)) {
       if (envelope <= 0) continue
       const center = noteToLedIndex(note, config)
       for (const offset of spreadOffsets(LED_SPREAD_COUNT)) {

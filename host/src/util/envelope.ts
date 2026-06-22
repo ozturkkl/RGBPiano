@@ -3,14 +3,14 @@ import type { Config } from './config.js'
 export type EnvelopeConfig = Pick<Config, 'NOTE_ATTACK_MS' | 'NOTE_RELEASE_MS' | 'NOTE_MIN_LENGTH_MS'>
 
 /** Frame rate for note envelope animation (host strip + preview). */
-export const ANIMATION_FPS = 240
+export const ANIMATION_FPS = 120
 export const ANIMATION_INTERVAL_MS = 1000 / ANIMATION_FPS
 
 type NoteState = {
   target: number
-  value: number
   pressed: boolean
   noteOnTime: number
+  releasedAt?: number
   phase: 'attack' | 'release'
   phaseStartTime: number
   phaseStartValue: number
@@ -31,11 +31,44 @@ function rampProgress(elapsed: number, durationMs: number): number {
   return Math.min(1, elapsed / durationMs)
 }
 
+function releaseAllowedAt(state: NoteState, config: EnvelopeConfig): number {
+  if (state.pressed || state.releasedAt === undefined) return Infinity
+  return config.NOTE_MIN_LENGTH_MS > 0
+    ? state.noteOnTime + config.NOTE_MIN_LENGTH_MS
+    : state.releasedAt
+}
+
 function canRelease(state: NoteState, config: EnvelopeConfig, now: number): boolean {
-  return (
-    !state.pressed &&
-    (config.NOTE_MIN_LENGTH_MS === 0 || now >= state.noteOnTime + config.NOTE_MIN_LENGTH_MS)
-  )
+  return !state.pressed && state.releasedAt !== undefined && now >= releaseAllowedAt(state, config)
+}
+
+function attackValue(state: NoteState, config: EnvelopeConfig, at: number): number {
+  if (config.NOTE_ATTACK_MS <= 0) return state.target
+  const t = rampProgress(at - state.phaseStartTime, config.NOTE_ATTACK_MS)
+  const v = state.phaseStartValue + (state.target - state.phaseStartValue) * t
+  return Math.min(v, state.target)
+}
+
+function latchRelease(state: NoteState, config: EnvelopeConfig): void {
+  if (state.phase === 'release') return
+  const t0 = releaseAllowedAt(state, config)
+  const releaseStartValue = attackValue(state, config, t0)
+  state.phase = 'release'
+  state.phaseStartTime = t0
+  state.phaseStartValue = releaseStartValue
+}
+
+function releaseValue(state: NoteState, config: EnvelopeConfig, at: number): number {
+  if (config.NOTE_RELEASE_MS <= 0) return 0
+  if (state.phase !== 'release') latchRelease(state, config)
+  const t = rampProgress(at - state.phaseStartTime, config.NOTE_RELEASE_MS)
+  return Math.max(0, state.phaseStartValue * (1 - t))
+}
+
+function valueAt(state: NoteState, config: EnvelopeConfig, now: number): number {
+  if (!canRelease(state, config, now)) return attackValue(state, config, now)
+  if (config.NOTE_RELEASE_MS <= 0) return 0
+  return releaseValue(state, config, now)
 }
 
 /** Per-note attack/release envelopes for note press lighting. */
@@ -45,26 +78,26 @@ export class NoteEnvelopes {
   noteOn(note: number, target: number, config: EnvelopeConfig, now = Date.now()): void {
     const existing = this.notes.get(note)
     if (existing) {
+      const current = valueAt(existing, config, now)
       existing.pressed = true
+      existing.releasedAt = undefined
       existing.target = target
-      if (existing.phase === 'release' || existing.value < target) {
+      if (existing.phase === 'release' || current < target) {
         existing.phase = 'attack'
         existing.phaseStartTime = now
-        existing.phaseStartValue = existing.value
+        existing.phaseStartValue = current
       }
-      if (isInstant(config)) existing.value = target
       return
     }
 
-    const value = isInstant(config) || config.NOTE_ATTACK_MS === 0 ? target : 0
+    const phaseStartValue = config.NOTE_ATTACK_MS === 0 ? target : 0
     this.notes.set(note, {
       target,
-      value,
       pressed: true,
       noteOnTime: now,
       phase: 'attack',
       phaseStartTime: now,
-      phaseStartValue: value,
+      phaseStartValue,
     })
   }
 
@@ -72,6 +105,7 @@ export class NoteEnvelopes {
     const state = this.notes.get(note)
     if (!state) return
     state.pressed = false
+    state.releasedAt = now
     if (isInstant(config)) {
       this.notes.delete(note)
       return
@@ -81,7 +115,7 @@ export class NoteEnvelopes {
     }
   }
 
-  /** Advance envelopes; returns whether another tick is needed. */
+  /** Drop finished notes; returns whether another tick is needed. */
   tick(config: EnvelopeConfig, now = Date.now()): boolean {
     if (this.notes.size === 0) return false
 
@@ -93,30 +127,10 @@ export class NoteEnvelopes {
     }
 
     for (const [note, state] of [...this.notes.entries()]) {
-      if (canRelease(state, config, now)) {
-        if (config.NOTE_RELEASE_MS <= 0) {
+      if (!state.pressed && canRelease(state, config, now)) {
+        if (config.NOTE_RELEASE_MS <= 0 || valueAt(state, config, now) <= ENVELOPE_EPS) {
           this.notes.delete(note)
-          continue
         }
-        if (state.phase !== 'release') {
-          state.phase = 'release'
-          state.phaseStartTime = now
-          state.phaseStartValue = state.value
-        }
-        const t = rampProgress(now - state.phaseStartTime, config.NOTE_RELEASE_MS)
-        state.value = state.phaseStartValue * (1 - t)
-        if (t >= 1 || state.value <= ENVELOPE_EPS) this.notes.delete(note)
-      } else if (state.value < state.target) {
-        if (state.phase === 'release') {
-          state.phase = 'attack'
-          state.phaseStartTime = now
-          state.phaseStartValue = state.value
-        }
-        const t = rampProgress(now - state.phaseStartTime, config.NOTE_ATTACK_MS)
-        state.value = state.phaseStartValue + (state.target - state.phaseStartValue) * t
-        if (t >= 1) state.value = state.target
-      } else {
-        state.value = state.target
       }
     }
 
@@ -128,22 +142,22 @@ export class NoteEnvelopes {
     if (isInstant(config)) return [...this.notes.values()].some((s) => s.pressed)
 
     for (const state of this.notes.values()) {
+      const value = valueAt(state, config, now)
       if (state.pressed) {
-        if (state.value < state.target) return true
+        if (value < state.target - ENVELOPE_EPS) return true
         continue
       }
-      if (config.NOTE_MIN_LENGTH_MS > 0 && now < state.noteOnTime + config.NOTE_MIN_LENGTH_MS) {
-        return true
-      }
-      if (state.value > ENVELOPE_EPS) return true
+      if (!canRelease(state, config, now)) return true
+      if (value > ENVELOPE_EPS) return true
     }
     return false
   }
 
-  /** Current envelope level (0–1) per active or fading note. */
-  *values(): IterableIterator<[note: number, value: number]> {
+  /** Current envelope level (0–1) per active or fading note, sampled at `now`. */
+  *values(config: EnvelopeConfig, now = Date.now()): IterableIterator<[note: number, value: number]> {
     for (const [note, state] of this.notes) {
-      yield [note, state.value]
+      const value = valueAt(state, config, now)
+      if (value > ENVELOPE_EPS) yield [note, value]
     }
   }
 }
