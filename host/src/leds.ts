@@ -1,10 +1,8 @@
 import { blendRGB, type RGB } from './util/colors.js'
-import { MAX_NOTE, MIN_NOTE } from './util/constants.js'
+import { MIDI_NOTE_OFF, MIDI_NOTE_ON } from './util/constants.js'
+import { noteToLedIndex } from './util/strip.js'
 import { getConfig, onConfigUpdated } from './config.js'
 import { encodeFrame } from './protocol.js'
-
-const NOTE_ON = 144
-const NOTE_OFF = 128
 
 /**
  * Holds the current color of every LED and turns MIDI events into a strip frame.
@@ -31,10 +29,10 @@ export class LedFrame {
   /** Apply a MIDI message to the strip state. */
   handleMidi(message: number[]): void {
     const [status, note, velocity] = message
-    if (status === NOTE_ON) {
+    if (status === MIDI_NOTE_ON) {
       const ratio = getConfig().CONSTANT_VELOCITY ? 1 : velocity / 127
       this.setNote(note, ratio)
-    } else if (status === NOTE_OFF) {
+    } else if (status === MIDI_NOTE_OFF) {
       this.setNote(note, 0)
     }
   }
@@ -59,15 +57,6 @@ export class LedFrame {
 
   private setNote(note: number, velocityRatio: number): void {
     const color = blendRGB(getConfig().NOTE_PRESS_COLOR_RGB, this.backgroundColor(), velocityRatio)
-    this.colors[this.notePosition(note)] = color
-  }
-
-  private notePosition(note: number): number {
-    const { LED_INVERT, LED_START_COUNT, LED_END_COUNT } = getConfig()
-    const ratio = (note - MIN_NOTE) / (MAX_NOTE - MIN_NOTE)
-    const position = LED_INVERT ? 1 - ratio : ratio
-    return position === 1
-      ? LED_END_COUNT - 1
-      : Math.floor(position * (LED_END_COUNT - LED_START_COUNT) + LED_START_COUNT)
+    this.colors[noteToLedIndex(note, getConfig())] = color
   }
 }

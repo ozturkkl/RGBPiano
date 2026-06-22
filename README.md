@@ -5,10 +5,6 @@ computer is streamed over WiFi to a Raspberry Pi Zero that drives the strip.
 
 Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visualizer).
 
-> This is a 2026 ground-up rewrite. The previous Electron-based version lives in `.old/`
-> for reference. Goals of the rewrite: kill Electron, drop Bluetooth, simplify the Pi
-> runtime, keep Svelte, modern typed code, minimal & DRY.
-
 ![led-piano](https://github.com/ozturkkl/RGBPiano/assets/51798197/996cd7ff-adf1-42fd-bbfb-e13fc2055af6)
 
 ## Architecture
@@ -38,14 +34,13 @@ Runs on your computer (Linux/macOS/Windows). Responsibilities:
 
 Runs on the Pi Zero. Deliberately **dumb**: it receives a finished pixel frame and
 blits it to the strip via [`rpi_ws281x`](https://github.com/jgarff/rpi_ws281x). No MIDI
-logic, no color math — all of that lives on the host. This keeps the Pi side ~30 lines,
-avoids the old pain of running Node on ARMv6, and uses the Python that ships with
-Raspberry Pi OS.
+logic, no color math — all of that lives on the host. This keeps the Pi side ~30 lines
+and uses the Python that ships with Raspberry Pi OS.
 
 ### Why "dumb Pi"?
 
-The old design ran the LED math on the Pi and shipped raw MIDI + config to it. By moving
-all logic to the host and streaming finished frames instead, we get:
+By moving all LED logic to the host and streaming finished frames instead of raw MIDI,
+we get:
 
 - One typed source of truth for all behavior (testable on the host).
 - A trivially simple, robust Pi script.
@@ -56,7 +51,6 @@ all logic to the host and streaming finished frames instead, we get:
 ```
 host/    Node + TypeScript + Svelte: MIDI, LED frames, config UI, Pi streaming
 pi/      Python LED driver + systemd unit for autostart
-.old/    Previous Electron implementation (reference only)
 ```
 
 ## Getting started

@@ -22,6 +22,10 @@ const server = await startServer(
       piConnected: pi.isConnected,
     }),
     updateConfig,
+    previewMidi: (message) => {
+      leds.handleMidi(message)
+      sendFrame()
+    },
   },
   { dev: process.env.NODE_ENV === 'development' },
 )

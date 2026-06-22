@@ -1,9 +1,77 @@
 @import 'tailwindcss';
+
 @plugin 'daisyui' {
-  themes: dark --default;
+  themes: rgbpiano --default;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'rgbpiano';
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: oklch(17% 0.012 265);
+  --color-base-200: oklch(21% 0.016 265);
+  --color-base-300: oklch(27% 0.02 265);
+  --color-base-content: oklch(93% 0.01 265);
+  --color-primary: oklch(74% 0.17 55);
+  --color-primary-content: oklch(16% 0.02 55);
+  --color-secondary: oklch(52% 0.06 265);
+  --color-secondary-content: oklch(90% 0.01 265);
+  --color-accent: oklch(68% 0.14 200);
+  --color-accent-content: oklch(16% 0.02 200);
+  --color-neutral: oklch(32% 0.02 265);
+  --color-neutral-content: oklch(88% 0.01 265);
+  --color-success: oklch(66% 0.16 145);
+  --color-success-content: oklch(16% 0.02 145);
+  --color-warning: oklch(76% 0.14 75);
+  --color-error: oklch(58% 0.19 25);
+  --color-info: oklch(64% 0.11 230);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.625rem;
+  --radius-box: 1rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 body {
   user-select: none;
   -webkit-user-select: none;
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(74% 0.17 55 / 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, oklch(68% 0.14 200 / 0.06), transparent),
+    var(--color-base-100);
+}
+
+#app {
+  min-height: 100dvh;
+}
+
+input[type='color'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type='color']::-webkit-color-swatch {
+  border: 2px solid var(--color-base-300);
+  border-radius: 0.5rem;
+}
+
+input[type='color']:disabled {
+  cursor: not-allowed;
 }

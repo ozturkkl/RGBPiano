@@ -11,5 +11,9 @@ export const PI_PORT = 3193
 export const MIN_NOTE = 21
 export const MAX_NOTE = 108
 
+/** MIDI channel-1 status bytes (note on / note off). */
+export const MIDI_NOTE_ON = 0x90
+export const MIDI_NOTE_OFF = 0x80
+
 /** GPIO data pin the LED strip is wired to on the Pi. Documented here; the Pi reads its own. */
 export const DATA_PIN = 18

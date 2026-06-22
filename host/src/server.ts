@@ -27,6 +27,7 @@ export type { BrowserState }
 export interface ServerHooks {
   getState: () => BrowserState
   updateConfig: (patch: Partial<Config>) => void
+  previewMidi: (message: number[]) => void
 }
 
 export interface Server {
@@ -70,6 +71,7 @@ export async function startServer(hooks: ServerHooks, options?: ServerOptions): 
       try {
         const msg = JSON.parse(raw.toString()) as BrowserMessage
         if (msg.type === 'config') hooks.updateConfig(msg.data)
+        else if (msg.type === 'preview') hooks.previewMidi(msg.data)
       } catch (error) {
         console.error('Bad message from browser:', error)
       }

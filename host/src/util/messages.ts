@@ -9,3 +9,4 @@ export interface BrowserState {
 export type BrowserMessage =
   | { type: 'state'; data: BrowserState }
   | { type: 'config'; data: Partial<Config> }
+  | { type: 'preview'; data: number[] }
