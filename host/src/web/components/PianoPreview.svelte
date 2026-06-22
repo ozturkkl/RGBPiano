@@ -1,6 +1,7 @@
 <script lang="ts">
   import { blendRGB, type RGB } from '../../util/colors.js'
   import { MAX_NOTE, MIDI_NOTE_OFF, MIDI_NOTE_ON, MIN_NOTE } from '../../util/constants.js'
+  import { ANIMATION_INTERVAL_MS, NoteEnvelopes } from '../../util/envelope.js'
   import { ledSpreadIntensity, noteToLedIndex } from '../../util/strip.js'
   import { app, sendPreview } from '../lib/host.svelte'
 
@@ -29,6 +30,19 @@
   let latchedNotes = $state<number[]>([])
   let dragging = $state(false)
   let keyboardEl = $state<HTMLDivElement>()
+  let envelopeFrame = $state(0)
+
+  const envelopes = new NoteEnvelopes()
+
+  $effect(() => {
+    const config = app.config
+    const id = setInterval(() => {
+      const wasAnimating = envelopes.isAnimating(config)
+      envelopes.tick(config)
+      if (wasAnimating || envelopes.isAnimating(config)) envelopeFrame++
+    }, ANIMATION_INTERVAL_MS)
+    return () => clearInterval(id)
+  })
 
   function cNote(octave: number): number {
     return (octave + 1) * 12
@@ -57,14 +71,16 @@
   }
 
   function noteIntensity(note: number): number {
+    envelopeFrame
     const config = app.config
     const ledIndex = noteToLedIndex(note, config)
     let max = 0
-    for (const activeNote of activeNotes) {
+    for (const [activeNote, envelope] of envelopes.values()) {
+      if (envelope <= 0) continue
       const center = noteToLedIndex(activeNote, config)
       max = Math.max(
         max,
-        ledSpreadIntensity(ledIndex, center, config.LED_SPREAD_COUNT, config.LED_SPREAD_TAPER),
+        ledSpreadIntensity(ledIndex, center, config.LED_SPREAD_COUNT, config.LED_SPREAD_TAPER, envelope),
       )
     }
     return max
@@ -157,20 +173,26 @@
   function noteOn(note: number): void {
     if (!inRange(note) || isActive(note)) return
     activeNotes = [...activeNotes, note]
+    envelopes.noteOn(note, 1, app.config)
+    envelopeFrame++
     sendPreview([MIDI_NOTE_ON, note, 127])
   }
 
   function noteOff(note: number): void {
     if (!isActive(note)) return
     activeNotes = activeNotes.filter((n) => n !== note)
+    envelopes.noteOff(note, app.config)
+    envelopeFrame++
     sendPreview([MIDI_NOTE_OFF, note, 0])
   }
 
   function releaseAll(): void {
     if (activeNotes.length === 0) return
     for (const note of activeNotes) sendPreview([MIDI_NOTE_OFF, note, 0])
+    for (const note of activeNotes) envelopes.noteOff(note, app.config)
     activeNotes = []
     latchedNotes = []
+    envelopeFrame++
   }
 
   function releaseHeld(): void {
@@ -288,7 +310,7 @@
     >
       {#each keySlots() as slot (slot.note)}
         <div
-          class="absolute inset-y-0 transition-[opacity,background-color] duration-100"
+          class="absolute inset-y-0"
           class:z-10={slot.black}
           style:left="{slot.left}%"
           style:width="{slot.width}%"
@@ -300,7 +322,7 @@
 
     <div class="keys relative min-h-0 flex-1">
       <div
-        class="piano-glow pointer-events-none absolute inset-0 z-10 transition-[background] duration-100"
+        class="piano-glow pointer-events-none absolute inset-0 z-10"
         style:background={pianoGlowStyle()}
         aria-hidden="true"
       ></div>
@@ -311,7 +333,7 @@
           <button
             type="button"
             data-note={note}
-            class="h-full min-w-0 flex-1 border-r border-black/10 transition-colors duration-75 last:border-r-0"
+            class="h-full min-w-0 flex-1 border-r border-black/10 last:border-r-0"
             class:rounded-bl-lg={i === 0}
             class:rounded-br-lg={i === WHITE_COUNT - 1}
             style:background={keyColor(note, false)}
@@ -330,7 +352,7 @@
           <button
             type="button"
             data-note={note}
-            class="black-key absolute top-0 z-20 h-[62%] rounded-b-sm transition-[background-color,box-shadow] duration-75"
+            class="black-key absolute top-0 z-20 h-[62%] rounded-b-sm"
             class:pressed={isActive(note)}
             style:left="calc(100% / {WHITE_COUNT} * {whiteIndex + 0.62})"
             style:width="calc(100% / {WHITE_COUNT} * 0.58)"

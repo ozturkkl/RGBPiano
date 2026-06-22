@@ -4,6 +4,7 @@ import { MidiManager } from './midi.js'
 import { PiClient } from './pi-client.js'
 import { startServer } from './server.js'
 import { throttleWithTrailing } from './util/throttle.js'
+import { ANIMATION_INTERVAL_MS } from './util/envelope.js'
 
 // Coalesce bursts of MIDI/config changes into one frame so a chord is a single send.
 const FRAME_INTERVAL_MS = 1
@@ -13,6 +14,20 @@ const pi = new PiClient()
 const midi = new MidiManager()
 
 const sendFrame = throttleWithTrailing(() => pi.send(leds.toFrame()), FRAME_INTERVAL_MS)
+
+let animationTimer: ReturnType<typeof setInterval> | null = null
+
+function ensureAnimationLoop(): void {
+  if (animationTimer) return
+  animationTimer = setInterval(() => {
+    const animating = leds.tick()
+    sendFrame()
+    if (!animating) {
+      clearInterval(animationTimer!)
+      animationTimer = null
+    }
+  }, ANIMATION_INTERVAL_MS)
+}
 
 const server = await startServer(
   {
@@ -25,6 +40,7 @@ const server = await startServer(
     previewMidi: (message) => {
       leds.handleMidi(message)
       sendFrame()
+      ensureAnimationLoop()
     },
   },
   { dev: process.env.NODE_ENV === 'development' },
@@ -36,6 +52,7 @@ await midi.init()
 midi.onMessage((message) => {
   leds.handleMidi(message)
   sendFrame()
+  ensureAnimationLoop()
 })
 midi.onStateChange(() => server.broadcast())
 
@@ -46,6 +63,7 @@ onConfigUpdated((changed) => {
   pi.setHost(getConfig().PI_HOST)
   if (changed.MIDI_INPUT !== undefined) midi.select(getConfig().MIDI_INPUT)
   sendFrame()
+  if (leds.isAnimating()) ensureAnimationLoop()
   server.broadcast()
 }, true)
 

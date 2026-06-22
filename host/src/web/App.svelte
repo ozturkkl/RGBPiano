@@ -264,8 +264,7 @@
             max="100"
             class="range range-primary"
             value={app.config.LED_SPREAD_TAPER * 100}
-            oninput={(e) =>
-              updateConfig({ LED_SPREAD_TAPER: e.currentTarget.valueAsNumber / 100 })}
+            oninput={(e) => updateConfig({ LED_SPREAD_TAPER: e.currentTarget.valueAsNumber / 100 })}
           />
         </label>
 
@@ -277,6 +276,68 @@
             onchange={(e) => updateConfig({ CONSTANT_VELOCITY: e.currentTarget.checked })}
           />
           <span class="label-text">Constant velocity</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card card-border bg-base-200/70">
+      <div class="card-body gap-4 p-5">
+        <h2 class="text-xs font-semibold tracking-widest text-base-content/50 uppercase">
+          Note animation
+        </h2>
+
+        <label class="form-control">
+          <div class="label py-0">
+            <span class="label-text">Attack</span>
+            <span class="label-text-alt font-semibold text-primary tabular-nums">
+              {app.config.NOTE_ATTACK_MS} ms
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="2000"
+            step="10"
+            class="range range-primary"
+            value={app.config.NOTE_ATTACK_MS}
+            oninput={(e) => updateConfig({ NOTE_ATTACK_MS: e.currentTarget.valueAsNumber })}
+          />
+        </label>
+
+        <label class="form-control">
+          <div class="label py-0">
+            <span class="label-text">Release</span>
+            <span class="label-text-alt font-semibold text-primary tabular-nums">
+              {app.config.NOTE_RELEASE_MS} ms
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="2000"
+            step="10"
+            class="range range-primary"
+            value={app.config.NOTE_RELEASE_MS}
+            oninput={(e) => updateConfig({ NOTE_RELEASE_MS: e.currentTarget.valueAsNumber })}
+          />
+        </label>
+
+        <label class="form-control">
+          <div class="label py-0">
+            <span class="label-text">Min length</span>
+            <span class="label-text-alt font-semibold text-primary tabular-nums">
+              {app.config.NOTE_MIN_LENGTH_MS} ms
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="2000"
+            step="10"
+            class="range range-primary"
+            value={app.config.NOTE_MIN_LENGTH_MS}
+            oninput={(e) => updateConfig({ NOTE_MIN_LENGTH_MS: e.currentTarget.valueAsNumber })}
+          />
         </label>
       </div>
     </section>

@@ -11,6 +11,12 @@ export interface Config {
   NOTE_PRESS_COLOR_RGB: RGB
   /** Ignore key velocity and always light at full intensity. */
   CONSTANT_VELOCITY: boolean
+  /** Milliseconds to ramp note lighting up on press. 0 = instant. */
+  NOTE_ATTACK_MS: number
+  /** Milliseconds to ramp note lighting down on release. 0 = instant. */
+  NOTE_RELEASE_MS: number
+  /** Minimum ms from press before release can start. 0 = release immediately. */
+  NOTE_MIN_LENGTH_MS: number
   /** Flip the mapping so low notes are at the far end of the strip. */
   LED_INVERT: boolean
   /** Index of the last LED used (effectively the strip length). */
@@ -33,6 +39,9 @@ export const defaultConfig: Config = {
   BACKGROUND_COLOR_RGB: HSLToRGB(18, 100, 50),
   NOTE_PRESS_COLOR_RGB: HSLToRGB(18, 100, 50),
   CONSTANT_VELOCITY: true,
+  NOTE_ATTACK_MS: 50,
+  NOTE_RELEASE_MS: 150,
+  NOTE_MIN_LENGTH_MS: 0,
   LED_INVERT: true,
   LED_END_COUNT: 177,
   LED_START_COUNT: 0,
