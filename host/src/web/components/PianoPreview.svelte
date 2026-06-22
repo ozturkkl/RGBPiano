@@ -1,6 +1,7 @@
 <script lang="ts">
   import { blendRGB, type RGB } from '../../util/colors.js'
   import { MAX_NOTE, MIDI_NOTE_OFF, MIDI_NOTE_ON, MIN_NOTE } from '../../util/constants.js'
+  import { ledSpreadIntensity, noteToLedIndex } from '../../util/strip.js'
   import { app, sendPreview } from '../lib/host.svelte'
 
   const OCTAVES = 2
@@ -25,6 +26,7 @@
 
   let startOctave = $state(3)
   let activeNotes = $state<number[]>([])
+  let latchedNotes = $state<number[]>([])
   let dragging = $state(false)
   let keyboardEl = $state<HTMLDivElement>()
 
@@ -54,10 +56,25 @@
     return BACKGROUND_COLOR_RGB.map((c) => c * BACKGROUND_BRIGHTNESS) as RGB
   }
 
+  function noteIntensity(note: number): number {
+    const config = app.config
+    const ledIndex = noteToLedIndex(note, config)
+    let max = 0
+    for (const activeNote of activeNotes) {
+      const center = noteToLedIndex(activeNote, config)
+      max = Math.max(
+        max,
+        ledSpreadIntensity(ledIndex, center, config.LED_SPREAD_COUNT, config.LED_SPREAD_TAPER),
+      )
+    }
+    return max
+  }
+
   /** Match leds.ts: blend note into background, then scale by overall brightness. */
-  function stripColor(lit: boolean): RGB {
+  function stripColor(note: number): RGB {
     const bg = backgroundColor()
-    const color = lit ? blendRGB(app.config.NOTE_PRESS_COLOR_RGB, bg, 1) : bg
+    const intensity = noteIntensity(note)
+    const color = intensity > 0 ? blendRGB(app.config.NOTE_PRESS_COLOR_RGB, bg, intensity) : bg
     return color.map((c) => Math.round(c * app.config.BRIGHTNESS)) as RGB
   }
 
@@ -66,7 +83,7 @@
   }
 
   function keyColor(note: number, black: boolean): string {
-    const [r, g, b] = stripColor(isActive(note))
+    const [r, g, b] = stripColor(note)
     const factor = black ? 0.4 : 1
     const ambient = black ? AMBIENT_BLACK : AMBIENT_WHITE
     return `rgb(${lift(r * factor, ambient)}, ${lift(g * factor, ambient)}, ${lift(b * factor, ambient)})`
@@ -118,24 +135,23 @@
   }
 
   function ledSegmentOpacity(note: number): number {
-    return isActive(note) ? app.config.BRIGHTNESS : 0
+    return noteIntensity(note) * app.config.BRIGHTNESS
   }
 
   function pianoGlowStyle(): string {
-    if (activeNotes.length === 0) return 'none'
     const brightness = app.config.BRIGHTNESS
     if (brightness <= 0) return 'none'
     const slots = keySlots()
     const layers: string[] = []
-    for (const note of activeNotes) {
-      const slot = slots.find((s) => s.note === note)
-      if (!slot) continue
-      const [pr, pg, pb] = stripColor(true)
+    for (const slot of slots) {
+      const intensity = noteIntensity(slot.note)
+      if (intensity <= 0) continue
+      const [pr, pg, pb] = stripColor(slot.note)
       layers.push(
-        `radial-gradient(ellipse 75% 130% at ${slot.center}% 0%, rgba(${pr},${pg},${pb},${0.55 * brightness}) 0%, rgba(${pr},${pg},${pb},${0.22 * brightness}) 38%, transparent 72%)`,
+        `radial-gradient(ellipse 75% 130% at ${slot.center}% 0%, rgba(${pr},${pg},${pb},${0.55 * brightness * intensity}) 0%, rgba(${pr},${pg},${pb},${0.22 * brightness * intensity}) 38%, transparent 72%)`,
       )
     }
-    return layers.join(', ')
+    return layers.length > 0 ? layers.join(', ') : 'none'
   }
 
   function noteOn(note: number): void {
@@ -154,6 +170,24 @@
     if (activeNotes.length === 0) return
     for (const note of activeNotes) sendPreview([MIDI_NOTE_OFF, note, 0])
     activeNotes = []
+    latchedNotes = []
+  }
+
+  function releaseHeld(): void {
+    for (const note of activeNotes) {
+      if (!latchedNotes.includes(note)) noteOff(note)
+    }
+  }
+
+  function toggleLatch(note: number): void {
+    if (!inRange(note)) return
+    if (latchedNotes.includes(note)) {
+      latchedNotes = latchedNotes.filter((n) => n !== note)
+      noteOff(note)
+    } else {
+      latchedNotes = [...latchedNotes, note]
+      noteOn(note)
+    }
   }
 
   function shiftOctave(delta: number): void {
@@ -169,19 +203,26 @@
     return inRange(note) ? note : null
   }
 
-  /** While dragging, only the key under the pointer stays pressed. */
+  /** While dragging, only the key under the pointer stays pressed (latched keys stay on). */
   function setDragNote(note: number | null): void {
     for (const n of activeNotes) {
+      if (latchedNotes.includes(n)) continue
       if (note === null || n !== note) noteOff(n)
     }
     if (note !== null) noteOn(note)
   }
 
   function onKeyDown(note: number, e: PointerEvent): void {
+    if (e.button !== 0) return
     e.preventDefault()
     keyboardEl?.setPointerCapture(e.pointerId)
     dragging = true
     setDragNote(note)
+  }
+
+  function onKeyContextMenu(note: number, e: MouseEvent): void {
+    e.preventDefault()
+    toggleLatch(note)
   }
 
   function onKeyEnter(note: number): void {
@@ -190,7 +231,7 @@
 
   function onKeyboardUp(): void {
     dragging = false
-    releaseAll()
+    releaseHeld()
   }
 
   function onKeyboardMove(e: PointerEvent): void {
@@ -199,9 +240,12 @@
   }
 </script>
 
-<div class="rounded-box border border-base-300 bg-base-300/40 p-4">
-  <div class="mb-3 flex items-center justify-between gap-3">
-    <p class="text-xs font-medium tracking-wide text-base-content/50 uppercase">Keyboard preview</p>
+<section class="card card-border bg-base-200/70">
+  <div class="card-body gap-4 p-5">
+  <div class="flex items-center justify-between gap-3">
+    <h2 class="text-xs font-semibold tracking-widest text-base-content/50 uppercase">
+      Keyboard preview
+    </h2>
     <div class="flex items-center gap-1">
       <button
         type="button"
@@ -248,7 +292,7 @@
           class:z-10={slot.black}
           style:left="{slot.left}%"
           style:width="{slot.width}%"
-          style:background={rgbCss(stripColor(true))}
+          style:background={rgbCss(stripColor(slot.note))}
           style:opacity={ledSegmentOpacity(slot.note)}
         ></div>
       {/each}
@@ -274,6 +318,7 @@
             aria-label="Note {note}"
             onpointerdown={(e) => onKeyDown(note, e)}
             onpointerenter={() => onKeyEnter(note)}
+            oncontextmenu={(e) => onKeyContextMenu(note, e)}
           ></button>
         {/each}
       </div>
@@ -293,16 +338,18 @@
             aria-label="Note {note}"
             onpointerdown={(e) => onKeyDown(note, e)}
             onpointerenter={() => onKeyEnter(note)}
+            oncontextmenu={(e) => onKeyContextMenu(note, e)}
           ></button>
         {/each}
       {/each}
     </div>
   </div>
 
-  <p class="mt-2.5 text-center text-xs text-base-content/40">
-    Click or drag to test colors on the strip
+  <p class="text-center text-xs text-base-content/40">
+    Click or drag to test; right-click to latch a key
   </p>
-</div>
+  </div>
+</section>
 
 <style>
   .keyboard {

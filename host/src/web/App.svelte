@@ -237,6 +237,38 @@
           <span class="label-text">Invert direction</span>
         </label>
 
+        <label class="form-control">
+          <div class="label py-0">
+            <span class="label-text">LEDs per key</span>
+          </div>
+          <input
+            type="number"
+            min="1"
+            class="input input-bordered w-full"
+            value={app.config.LED_SPREAD_COUNT}
+            oninput={(e) =>
+              updateConfig({ LED_SPREAD_COUNT: Math.max(1, e.currentTarget.valueAsNumber) })}
+          />
+        </label>
+
+        <label class="form-control">
+          <div class="label py-0">
+            <span class="label-text">Adjacent LED taper</span>
+            <span class="label-text-alt font-semibold text-primary tabular-nums">
+              {pct(app.config.LED_SPREAD_TAPER)}
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            class="range range-primary"
+            value={app.config.LED_SPREAD_TAPER * 100}
+            oninput={(e) =>
+              updateConfig({ LED_SPREAD_TAPER: e.currentTarget.valueAsNumber / 100 })}
+          />
+        </label>
+
         <label class="label cursor-pointer justify-start gap-3 py-0">
           <input
             type="checkbox"

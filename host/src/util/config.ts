@@ -17,6 +17,10 @@ export interface Config {
   LED_END_COUNT: number
   /** Index of the first LED used. LEDs before this stay off. */
   LED_START_COUNT: number
+  /** LEDs lit per key press, centered on the note position. */
+  LED_SPREAD_COUNT: number
+  /** Brightness multiplier for each step away from center (0–1). Center is always full. */
+  LED_SPREAD_TAPER: number
   /** Name of the MIDI input port to read from, or 'None'. */
   MIDI_INPUT: string
   /** Hostname or IP of the Raspberry Pi running the LED server. */
@@ -32,6 +36,8 @@ export const defaultConfig: Config = {
   LED_INVERT: true,
   LED_END_COUNT: 177,
   LED_START_COUNT: 0,
+  LED_SPREAD_COUNT: 1,
+  LED_SPREAD_TAPER: 1,
   MIDI_INPUT: 'None',
   PI_HOST: 'raspberrypi.local',
 }
