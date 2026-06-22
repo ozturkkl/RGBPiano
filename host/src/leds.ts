@@ -31,7 +31,7 @@ export class LedFrame {
         changed.LED_SPREAD_TAPER !== undefined ||
         changed.NOTE_ATTACK_MS !== undefined ||
         changed.NOTE_RELEASE_MS !== undefined ||
-        changed.NOTE_MIN_LENGTH_MS !== undefined
+        changed.NOTE_RELEASE_HOLD_MS !== undefined
       ) {
         this.rebuild()
       }

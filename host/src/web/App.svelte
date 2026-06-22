@@ -324,9 +324,9 @@
 
         <label class="form-control">
           <div class="label py-0">
-            <span class="label-text">Min length</span>
+            <span class="label-text">Release hold</span>
             <span class="label-text-alt font-semibold text-primary tabular-nums">
-              {app.config.NOTE_MIN_LENGTH_MS} ms
+              {app.config.NOTE_RELEASE_HOLD_MS} ms
             </span>
           </div>
           <input
@@ -335,8 +335,8 @@
             max="2000"
             step="10"
             class="range range-primary"
-            value={app.config.NOTE_MIN_LENGTH_MS}
-            oninput={(e) => updateConfig({ NOTE_MIN_LENGTH_MS: e.currentTarget.valueAsNumber })}
+            value={app.config.NOTE_RELEASE_HOLD_MS}
+            oninput={(e) => updateConfig({ NOTE_RELEASE_HOLD_MS: e.currentTarget.valueAsNumber })}
           />
         </label>
       </div>

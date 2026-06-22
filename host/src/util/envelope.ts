@@ -1,6 +1,6 @@
 import type { Config } from './config.js'
 
-export type EnvelopeConfig = Pick<Config, 'NOTE_ATTACK_MS' | 'NOTE_RELEASE_MS' | 'NOTE_MIN_LENGTH_MS'>
+export type EnvelopeConfig = Pick<Config, 'NOTE_ATTACK_MS' | 'NOTE_RELEASE_MS' | 'NOTE_RELEASE_HOLD_MS'>
 
 /** Frame rate for note envelope animation (host strip + preview). */
 export const ANIMATION_FPS = 120
@@ -20,7 +20,7 @@ function isInstant(config: EnvelopeConfig): boolean {
   return (
     config.NOTE_ATTACK_MS === 0 &&
     config.NOTE_RELEASE_MS === 0 &&
-    config.NOTE_MIN_LENGTH_MS === 0
+    config.NOTE_RELEASE_HOLD_MS === 0
   )
 }
 
@@ -31,15 +31,13 @@ function rampProgress(elapsed: number, durationMs: number): number {
   return Math.min(1, elapsed / durationMs)
 }
 
-function releaseAllowedAt(state: NoteState, config: EnvelopeConfig): number {
+function releaseFadeAt(state: NoteState, config: EnvelopeConfig): number {
   if (state.pressed || state.releasedAt === undefined) return Infinity
-  return config.NOTE_MIN_LENGTH_MS > 0
-    ? state.noteOnTime + config.NOTE_MIN_LENGTH_MS
-    : state.releasedAt
+  return state.releasedAt + config.NOTE_RELEASE_HOLD_MS
 }
 
 function canRelease(state: NoteState, config: EnvelopeConfig, now: number): boolean {
-  return !state.pressed && state.releasedAt !== undefined && now >= releaseAllowedAt(state, config)
+  return !state.pressed && state.releasedAt !== undefined && now >= releaseFadeAt(state, config)
 }
 
 function attackValue(state: NoteState, config: EnvelopeConfig, at: number): number {
@@ -51,11 +49,16 @@ function attackValue(state: NoteState, config: EnvelopeConfig, at: number): numb
 
 function latchRelease(state: NoteState, config: EnvelopeConfig): void {
   if (state.phase === 'release') return
-  const t0 = releaseAllowedAt(state, config)
-  const releaseStartValue = attackValue(state, config, t0)
+  const t0 = releaseFadeAt(state, config)
+  const releaseStartValue = holdValue(state, config, t0)
   state.phase = 'release'
   state.phaseStartTime = t0
   state.phaseStartValue = releaseStartValue
+}
+
+function holdValue(state: NoteState, config: EnvelopeConfig, now: number): number {
+  const attack = attackValue(state, config, now)
+  return attack < state.target - ENVELOPE_EPS ? attack : state.target
 }
 
 function releaseValue(state: NoteState, config: EnvelopeConfig, at: number): number {
@@ -66,7 +69,10 @@ function releaseValue(state: NoteState, config: EnvelopeConfig, at: number): num
 }
 
 function valueAt(state: NoteState, config: EnvelopeConfig, now: number): number {
-  if (!canRelease(state, config, now)) return attackValue(state, config, now)
+  if (state.pressed) return attackValue(state, config, now)
+  if (state.releasedAt !== undefined && !canRelease(state, config, now)) {
+    return holdValue(state, config, now)
+  }
   if (config.NOTE_RELEASE_MS <= 0) return 0
   return releaseValue(state, config, now)
 }
