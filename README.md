@@ -1,7 +1,7 @@
 # RGBPiano
 
-Light up a WS2812 LED strip behind your piano as you play. MIDI from your
-computer is mapped to LED frames on the host, then streamed over WiFi to a
+Lights up an addressible LED strip behind your piano as you play. MIDI from your
+computer is mapped to LED frames on the host, then streamed over WiFi using WebSocket to a
 Raspberry Pi Zero that drives the strip. A local Svelte UI covers colors,
 brightness, key mapping, and note envelopes.
 
