@@ -1,17 +1,42 @@
 # RGBPiano
 
-Light up a WS2812 LED strip mounted behind your piano when you play. MIDI from your
-computer is streamed over WiFi to a Raspberry Pi Zero that drives the strip.
+Light up a WS2812 LED strip behind your piano as you play. MIDI from your
+computer is mapped to LED frames on the host, then streamed over WiFi to a
+Raspberry Pi Zero that drives the strip. A local Svelte UI covers colors,
+brightness, key mapping, and note envelopes.
 
 Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visualizer).
 
-![led-piano](https://github.com/ozturkkl/RGBPiano/assets/51798197/996cd7ff-adf1-42fd-bbfb-e13fc2055af6)
+<p align="center">
+  <img src="demo/combined.jpg" alt="RGBPiano in use — WS2812 strip behind a digital piano, next to the config UI with MIDI input, Pi status, and a live keyboard preview" width="800" />
+</p>
 
-## Architecture
+## Features
+
+- **MIDI in** — pick any input port (piano or a virtual DAW port); the host
+  rebinds across hotplug and devices that sleep
+- **Note mapping** — 88-key range onto a configurable LED start/end, invert,
+  LEDs per key, and adjacent-key taper
+- **Color and velocity** — note color vs background glow, optional shared
+  color, velocity blend or constant intensity
+- **Envelopes** — attack, release, and release-hold, animated at 120 FPS on
+  the strip and the on-screen preview
+- **Keyboard preview** — click or drag to test; right-click latches a key;
+  preview MIDI is sent to the real strip
+- **Pi sink** — a tiny Python server blits finished frames; systemd install;
+  stale frames are dropped so the strip never lags
+- **Persist** — settings saved to `~/.rgbpiano/config.json`
+
+## Stack
+
+TypeScript · Node · Svelte 5 · Vite · Tailwind CSS · DaisyUI · JZZ · WebSocket
+· Python · rpi_ws281x · systemd · Raspberry Pi Zero · WS2812
+
+## How it is put together
 
 ```
   Piano ──USB/MIDI──▶  Host computer  ──WiFi (WebSocket)──▶  Raspberry Pi Zero  ──▶  WS2812 strip
-                       (Node + TS)                            (tiny Python driver)
+                       (Node + TypeScript)                    (tiny Python driver)
                        • reads MIDI
                        • computes LED frames
                        • serves config web UI
@@ -20,38 +45,19 @@ Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visu
 
 Two pieces:
 
-### `host/` — the brains (TypeScript / Node, cross-platform)
+**`host/`** is the brains. It runs on your computer (Linux / macOS / Windows):
+MIDI in, note → LED mapping, color and envelope math, the config UI on
+`http://localhost:3192`, and a binary frame stream to the Pi.
 
-Runs on your computer (Linux/macOS/Windows). Responsibilities:
+**`pi/`** is a deliberately dumb display sink. It receives a finished pixel
+frame and blits it to the strip via [`rpi_ws281x`](https://github.com/jgarff/rpi_ws281x).
+No MIDI logic, no color math. That keeps the Pi side ~100 lines and uses the
+Python that ships with Raspberry Pi OS.
 
-- Read MIDI from a selected input port (your piano, or a virtual DAW port).
-- Own **all** the interesting logic: note → LED position mapping, invert, start/end
-  range, velocity → color blending, background, brightness.
-- Compute the final per-LED RGB frame and stream it to the Pi.
-- Serve the Svelte config UI on `http://localhost` and persist config to disk.
-
-### `pi/` — the display sink (tiny Python script)
-
-Runs on the Pi Zero. Deliberately **dumb**: it receives a finished pixel frame and
-blits it to the strip via [`rpi_ws281x`](https://github.com/jgarff/rpi_ws281x). No MIDI
-logic, no color math — all of that lives on the host. This keeps the Pi side ~30 lines
-and uses the Python that ships with Raspberry Pi OS.
-
-### Why "dumb Pi"?
-
-By moving all LED logic to the host and streaming finished frames instead of raw MIDI,
-we get:
-
-- One typed source of truth for all behavior (testable on the host).
-- A trivially simple, robust Pi script.
-- No duplicated color/position logic across two runtimes.
-
-## Project layout
-
-```
-host/    Node + TypeScript + Svelte: MIDI, LED frames, config UI, Pi streaming
-pi/      Python LED driver + systemd unit for autostart
-```
+Moving all visual logic to the host means one typed source of truth (testable
+without the strip), a trivial Pi script, and no duplicated mapping across two
+runtimes. Chords are coalesced into a single frame; the Pi keeps only the
+newest frame if rendering falls behind.
 
 ## Getting started
 
@@ -65,8 +71,8 @@ npm install
 npm start          # builds the web UI, then runs the host
 ```
 
-Then open http://localhost:3192, pick your MIDI input, set the Pi address, and play.
-Config is saved to `~/.rgbpiano/config.json`.
+Then open http://localhost:3192, pick your MIDI input, set the Pi address, and
+play. Config is saved to `~/.rgbpiano/config.json`.
 
 For development with hot-reloading UI on the same port:
 
@@ -84,7 +90,7 @@ cd RGBPiano/pi
 ./install.sh       # idempotent: installs deps + a systemd service, starts on boot
 ```
 
-To update after pulling new code, just run `./install.sh` again. To remove
+To update after pulling new code, run `./install.sh` again. To remove
 everything (service + virtualenv):
 
 ```bash
@@ -113,5 +119,6 @@ The LED data pin defaults to GPIO 18 and the port to 3193. Override with the
 - Raspberry Pi Zero (W / 2 W) + microSD
 - WS2812 addressable RGB LED strip (better strip = better color)
 - 5V power supply sized for your LED count
+- Digital piano or MIDI controller with a USB/MIDI output
 - See [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visualizer) for
-  detailed wiring.
+  detailed wiring
