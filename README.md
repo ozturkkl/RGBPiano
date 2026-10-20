@@ -8,24 +8,24 @@ brightness, key mapping, and note envelopes.
 Inspired by [onlaj/Piano-LED-Visualizer](https://github.com/onlaj/Piano-LED-Visualizer).
 
 <p align="center">
-  <img src="demo/combined.jpg" alt="RGBPiano in use — WS2812 strip behind a digital piano, next to the config UI with MIDI input, Pi status, and a live keyboard preview" width="800" />
+  <img src="demo/combined.jpg" alt="RGBPiano in use - WS2812 strip behind a digital piano, next to the config UI with MIDI input, Pi status, and a live keyboard preview" width="800" />
 </p>
 
 ## Features
 
-- **MIDI in** — pick any input port (piano or a virtual DAW port); the host
+- **MIDI in** - pick any input port (piano or a virtual DAW port); the host
   rebinds across hotplug and devices that sleep
-- **Note mapping** — 88-key range onto a configurable LED start/end, invert,
+- **Note mapping** - 88-key range onto a configurable LED start/end, invert,
   LEDs per key, and adjacent-key taper
-- **Color and velocity** — note color vs background glow, optional shared
+- **Color and velocity** - note color vs background glow, optional shared
   color, velocity blend or constant intensity
-- **Envelopes** — attack, release, and release-hold, animated at 120 FPS on
+- **Envelopes** - attack, release, and release-hold, animated at 120 FPS on
   the strip and the on-screen preview
-- **Keyboard preview** — click or drag to test; right-click latches a key;
+- **Keyboard preview** - click or drag to test; right-click latches a key;
   preview MIDI is sent to the real strip
-- **Pi sink** — a tiny Python server blits finished frames; systemd install;
+- **Pi sink** - a tiny Python server blits finished frames; systemd install;
   stale frames are dropped so the strip never lags
-- **Persist** — settings saved to `~/.rgbpiano/config.json`
+- **Persist** - settings saved to `~/.rgbpiano/config.json`
 
 ## Stack
 
